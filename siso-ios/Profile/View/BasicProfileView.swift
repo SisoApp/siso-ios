@@ -25,18 +25,15 @@ struct BasicProfileView: View {
             .padding(.leading)
         
         TextField("이것은 닉네임입니다.", text: $nickname)
-            .textFieldStyle(.roundedBorder)
-            .padding(.horizontal)
-        
-        Text("내 성별")
-            .foregroundStyle(.gray)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 40)
+            .padding(.horizontal, 8)
+            .background(.gray.opacity(0.2))
+            .clipShape(.rect(cornerRadius: 12))
             .padding()
         
-        Text("매칭 성별")
-            .foregroundStyle(.gray)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+        RadioButtonGroup(title: "내 성별", options: ["여성", "남성"])
+        
+        RadioButtonGroup(title: "매칭 성별", options: ["여성", "남성"])
         
         Text("나이")
             .foregroundStyle(.gray)
