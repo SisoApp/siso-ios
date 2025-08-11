@@ -45,6 +45,20 @@ let network: Target =  .target(
     sources: ["siso-ios/Network/**"],
     dependencies: []
 )
+
+let matching: Target =  .target(
+    name: "matching",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).matching",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Matching/**"],
+    dependencies: []
+)
+// -------
+
+
 let test: Target = .target(
     name: "siso-iosTests",
     destinations: .iOS,
@@ -64,5 +78,6 @@ let project = Project(
         auth,
         test,
         network,
+        matching
     ]
 )
