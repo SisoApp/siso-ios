@@ -8,18 +8,10 @@
 import SwiftUI
 
 struct BasicProfileView: View {
-    @State private var progress: Float = 0.2
     @State private var nickname: String = ""
     
     var body: some View {
-        Text("내 정보 입력")
-            .font(.title3)
-            .bold()
-        
-        ProgressView(value: progress, total: 1.0)
-            .progressViewStyle(.linear)
-            .tint(.black)
-            .padding()
+        ProfileHeaderView(progress: 0.0)
         
         Text("기본 정보를 입력해주세요")
             .font(.title2)
