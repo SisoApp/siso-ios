@@ -11,7 +11,7 @@ struct BasicProfileView: View {
     @State private var nickname: String = ""
     
     var body: some View {
-        ProfileHeaderView(progress: 0.0)
+        ProfileHeaderView(progress: 1/7)
         
         Text("기본 정보를 입력해주세요")
             .font(.title2)
@@ -30,6 +30,8 @@ struct BasicProfileView: View {
             .background(.gray.opacity(0.2))
             .clipShape(.rect(cornerRadius: 12))
             .padding()
+        
+        // 라디오 버튼에서 선택한 값을 저장해야함
         
         RadioButtonGroup(title: "내 성별", options: ["여성", "남성"])
         
@@ -52,7 +54,7 @@ struct BasicProfileView: View {
         }
         .frame(height: 50)
         .frame(maxWidth: .infinity)
-        .background(.gray)
+        .background(.gray.opacity(0.2))
         .foregroundStyle(.black)
         .clipShape(.rect(cornerRadius: 20))
         .padding()
