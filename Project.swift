@@ -56,6 +56,17 @@ let matching: Target =  .target(
     sources: ["siso-ios/Matching/**"],
     dependencies: []
 )
+
+let profile: Target =  .target(
+    name: "profile",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).profile",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Profile/**"],
+    dependencies: []
+)
 // -------
 
 
@@ -78,6 +89,7 @@ let project = Project(
         auth,
         test,
         network,
-        matching
+        matching,
+        profile
     ]
 )
