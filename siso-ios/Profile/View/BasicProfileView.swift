@@ -11,13 +11,11 @@ struct BasicProfileView: View {
     @State private var nickname: String = ""
     
     var body: some View {
-        ProfileHeaderView(page: 1)
-        
-        Text("기본 정보를 입력해주세요")
-            .font(.title2)
-            .bold()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+        ProfileHeaderView(
+            page: 1,
+            title: "기본 정보를 입력해주세요",
+            subTitle: ""
+        )
         
         Text("닉네임")
             .foregroundStyle(.gray)

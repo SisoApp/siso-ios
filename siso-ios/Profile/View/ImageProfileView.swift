@@ -9,18 +9,11 @@ import SwiftUI
 
 struct ImageProfileView: View {
     var body: some View {
-        ProfileHeaderView(page: 3)
-        
-        Text("나를 표현하는 사진을 보여주세요")
-            .font(.title2)
-            .bold()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(EdgeInsets(top: 16, leading: 16, bottom: 4, trailing: 16))
-        
-        Text("최소 1개 이상 선택해주세요\n정보는 나중에 수정할 수 있어요")
-            .foregroundStyle(.gray)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
+        ProfileHeaderView(
+            page: 3,
+            title: "나를 표현하는 사진을 보여주세요",
+            subTitle: "최소 1개 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
+        )
         
         RoundedRectangle(cornerRadius: 24)
             .fill(.gray.opacity(0.2))

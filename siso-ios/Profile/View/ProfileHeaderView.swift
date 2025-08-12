@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ProfileHeaderView: View {
     let page: Int
+    let title: String
+    let subTitle: String
     let mainColor: Color = Color(red: 1.0, green: 0.843, blue: 0.0).opacity(0.4)
     let textColor: Color = .gray.opacity(0.5)
     let gray: Color = .gray.opacity(0.3)
@@ -64,9 +66,24 @@ struct ProfileHeaderView: View {
                 }
         }
         .padding()
+        
+        Text(title)
+            .font(.title2)
+            .bold()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(EdgeInsets(top: 16, leading: 16, bottom: 4, trailing: 16))
+        
+        Text(subTitle)
+            .foregroundStyle(.gray)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
     }
 }
 
 #Preview {
-    ProfileHeaderView(page: 1)
+    ProfileHeaderView(
+        page: 1,
+        title: "기본 정보를 입력해주세요",
+        subTitle: "최소 1개 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
+    )
 }
