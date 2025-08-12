@@ -29,11 +29,11 @@ struct HobbyProfileView: View {
         Button("계속하기") {
             
         }
-        .frame(height: 50)
+        .frame(height: 54)
         .frame(maxWidth: .infinity)
         .background(.gray.opacity(0.2))
         .foregroundStyle(.black)
-        .clipShape(.rect(cornerRadius: 20))
+        .clipShape(.rect(cornerRadius: 27))
         .padding()
     }
 }
