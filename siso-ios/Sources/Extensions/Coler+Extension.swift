@@ -1,101 +1,102 @@
-import SwiftUICore
+import SwiftUI
 
-public extension Color {
-    // MARK: PrimaryColor
-    static var primaryColor: Color {
-        Color("AccentColor")
-    }
-    
-    // MARK: Secondary Color
-    static var secondaryColorBlue: Color {
-        Color("SecondaryColorBlue")
-    }
-    
-    static var secondaryColorPurple: Color {
-        Color("SecondaryColorPurple")
-    }
-    
-    static var secondaryColorYellow: Color {
-        Color("SecondaryColorYellow")
-    }
-    
-    static var secondaryColorRed: Color {
-        Color("SecondaryColorRed")
-    }
-    
-    static var secondaryColorBlack: Color {
-        Color("SecondaryColorBlack")
-    }
-    
-    // MARK: Error 색상
-    static var errorColor: Color {
-        Color(hex: "FF0000")
-    }
-    
-    // MARK: Text, Icon, Line 기본 색상
-    static var black90: Color {
-        Color(hex: "111111")
-    }
-    
-    static var black80: Color {
-        Color(hex: "444444")
-    }
-    
-    static var black60: Color {
-        Color(hex: "666666")
-    }
-    
-    static var black50: Color {
-        Color(hex: "CCCCCC")
-    }
-    
-    static var black40: Color {
-        Color(hex: "EEEEEE")
-    }
-    
-    static var black30: Color {
-        Color(hex: "F8F8F8")
-    }
-    
-    //MARK: NavigationLink label 적용 시 다크모드/라이트모드에 맞게 색상 지원합니다.
-    static let textColor: Color = Color("textColor")
-}
+// Hex 코드로 Color를 쉽게 생성할 수 있도록 도와주는 생성자입니다.
+// 파일 내에서만 사용되도록 fileprivate으로 선언합니다.
+fileprivate extension Color {
+    init(hex: String) {
+        // # 기호 및 공백 제거
+        let scanner = Scanner(string: hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
+        var hexNumber: UInt64 = 0
 
-public extension Color {
-    // MARK: Segment List. 색상
-    // 배경
-    static func segmentBackground(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? Color(hex: "313131") : Color(hex: "EEEEEE")
-    }
-    // FOCUS 버튼 색상
-    static func segmentFocusButton(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? Color(hex: "555555") : Color(hex: "FFFFFF")
-    }
-    // 글자 색상
-    static var segmentTextStyle: Color {
-        Color(hex: "B7B7B7")
-    }
-}
-
-public extension Color {
-    
-    init(hex: String, opacity: Double = 1.0) {
-        let hexString = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hexString).scanHexInt64(&int)
-        
-        let r, g, b: Double
-        switch hexString.count {
-        case 6:
-            r = Double((int >> 16) & 0xFF) / 255.0
-            g = Double((int >> 8) & 0xFF) / 255.0
-            b = Double(int & 0xFF) / 255.0
-        default:
-            r = 0
-            g = 0
-            b = 0
+        // Hex 값을 스캔하여 UInt64로 변환
+        guard scanner.scanHexInt64(&hexNumber) else {
+            self.init(UIColor.clear) // 실패 시 투명색으로 초기화
+            return
         }
         
-        self.init(.sRGB, red: r, green: g, blue: b, opacity: opacity)
+        // 각 R, G, B 채널 값을 0-1 사이의 Double로 변환
+        let r = Double((hexNumber & 0xff0000) >> 16) / 255
+        let g = Double((hexNumber & 0x00ff00) >> 8) / 255
+        let b = Double(hexNumber & 0x0000ff) / 255
+        
+        self.init(red: r, green: g, blue: b)
+    }
+}
+
+// MARK: - siso Design System Colors
+public extension Color {
+    
+    /// siso 디자인 시스템의 색상을 모아놓은 네임스페이스입니다.
+    struct Siso {
+        
+        // MARK: - Primary Colors
+        public struct Primary {
+            /// #FFD666
+            public static let main = Color(hex: "#FFD666")
+            /// #FFE58F
+            public static let secondary = Color(hex: "#FFE58F")
+            
+            /// #FFFBFO
+            public static let _10 = Color(hex: "#FFFBF0")
+            /// #FFF1CC
+            public static let _20 = Color(hex: "#FFF1CC")
+            /// #FFE499
+            public static let _30 = Color(hex: "#FFE499")
+            /// #FFE499
+            public static let _40 = Color(hex: "#FFE499")
+            /// #FFC833
+            public static let _50 = Color(hex: "#FFC833")
+            /// #FFBB00
+            public static let _60 = Color(hex: "#FFBB00")
+            /// #CC9500
+            public static let _70 = Color(hex: "#CC9500")
+            /// #997000
+            public static let _80 = Color(hex: "#997000")
+            /// #664B00
+            public static let _90 = Color(hex: "#664B00")
+            /// #332500
+            public static let _100 = Color(hex: "#332500")
+        }
+        
+        // MARK: - Gray Scale Colors
+        public struct Gray {
+            /// #FFFFFF
+            public static let _0 = Color(hex: "#FFFFFF")
+            /// #FAFAFA
+            public static let _5 = Color(hex: "#FAFAFA")
+            /// #F5F5F5
+            public static let _10 = Color(hex: "#F5F5F5")
+            /// #F0F0F0
+            public static let _20 = Color(hex: "#F0F0F0")
+            /// #BFBFBF
+            public static let _40 = Color(hex: "#BFBFBF")
+            /// #8C8C8C
+            public static let _50 = Color(hex: "#8C8C8C")
+            /// #595959
+            public static let _60 = Color(hex: "#595959")
+            /// #434343
+            public static let _70 = Color(hex: "#434343")
+            /// #262626
+            public static let _80 = Color(hex: "#262626")
+            /// #1F1F1F
+            public static let _90 = Color(hex: "#1F1F1F")
+            /// #141414
+            public static let _95 = Color(hex: "#141414")
+            /// #000000
+            public static let _100 = Color(hex: "#000000")
+        }
+        
+        // MARK: - Semantic Colors
+        /// 상태나 의미를 나타내는 색상 그룹입니다.
+        public struct Semantic {
+            /// #FF4D4F (Error)
+            public static let error = Color(hex: "#FF4D4F")
+            /// #1890FF (Link)
+            public static let link = Color(hex: "#1890FF")
+            /// #52C41A (Success)
+            public static let success = Color(hex: "#52C41A")
+            /// #FAAD14 (Warning)
+            public static let warning = Color(hex: "#FAAD14")
+        }
     }
 }
