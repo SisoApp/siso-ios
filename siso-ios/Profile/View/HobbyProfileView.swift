@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HobbyProfileView: View {
+    private let viewModel: HobbyProfileViewModel = HobbyProfileViewModel()
+    
     var body: some View {
         ProfileHeaderView(progress: 2/7)
         
