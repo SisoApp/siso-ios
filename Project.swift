@@ -103,6 +103,17 @@ let profile: Target = .target(
     sources: ["siso-ios/Profile/**"],
     dependencies: []
 )
+
+let extensions: Target = .target(
+    name: "extensions",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).extensions",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Extension/**"],
+    dependencies: []
+)
 // -------
 
 let project = Project(
@@ -127,5 +138,6 @@ let project = Project(
         network,
         matching,
         profile,
+        extensions
     ]
 )
