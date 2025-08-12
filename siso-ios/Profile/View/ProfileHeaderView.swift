@@ -8,20 +8,65 @@
 import SwiftUI
 
 struct ProfileHeaderView: View {
-    let progress: Float
+    let page: Int
+    let mainColor: Color = Color(red: 1.0, green: 0.843, blue: 0.0).opacity(0.4)
+    let strokeColor: Color = Color(red: 1.0, green: 0.843, blue: 0.0).opacity(0.8)
+    let gray: Color = .gray.opacity(0.3)
     
     var body: some View {
         Text("내 정보 입력")
             .font(.title3)
             .bold()
         
-        ProgressView(value: progress, total: 1.0)
-            .progressViewStyle(.linear)
-            .tint(.black)
-            .padding()
+        HStack {
+            Circle()
+                .fill(page == 1 ? mainColor : gray)
+                .stroke(strokeColor)
+                .frame(width: 36)
+                .overlay {
+                    Text("1")
+                }
+                
+            RoundedRectangle(cornerRadius: 12)
+                .fill(gray)
+                .frame(height: 5)
+            
+            Circle()
+                .fill(page == 2 ? mainColor : gray)
+                .stroke(strokeColor)
+                .frame(width: 36)
+                .overlay {
+                    Text("2")
+                }
+            
+            RoundedRectangle(cornerRadius: 12)
+                .fill(gray)
+                .frame(height: 5)
+            
+            Circle()
+                .fill(page == 3 ? mainColor : gray)
+                .stroke(strokeColor)
+                .frame(width: 36)
+                .overlay {
+                    Text("3")
+                }
+            
+            RoundedRectangle(cornerRadius: 12)
+                .fill(gray)
+                .frame(height: 5)
+            
+            Circle()
+                .fill(page == 4 ? mainColor : gray)
+                .stroke(strokeColor)
+                .frame(width: 36)
+                .overlay {
+                    Text("4")
+                }
+        }
+        .padding()
     }
 }
 
 #Preview {
-    ProfileHeaderView(progress: 0.0)
+    ProfileHeaderView(page: 1)
 }

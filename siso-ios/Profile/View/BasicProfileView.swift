@@ -11,7 +11,7 @@ struct BasicProfileView: View {
     @State private var nickname: String = ""
     
     var body: some View {
-        ProfileHeaderView(progress: 1/7)
+        ProfileHeaderView(page: 1)
         
         Text("기본 정보를 입력해주세요")
             .font(.title2)
