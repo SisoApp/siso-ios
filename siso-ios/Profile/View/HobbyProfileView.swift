@@ -22,7 +22,7 @@ struct HobbyProfileView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
         
-        Spacer() // 버튼이 들어가야함
+        Spacer() // 버튼이 들어가야함(LazyHGrid?)
         
         Button("계속하기") {
             
