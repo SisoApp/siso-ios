@@ -29,7 +29,10 @@ let sisoApp: Target = .target(
             ],
             "LSApplicationQueriesSchemes": [
                 "kakaokompassauth",
-            ]
+            ],
+            "UIAppFonts": .array([
+                               .string("JejuMyeongjoOTF.otf"),
+                           ])
         ]
     ),
     sources: ["siso-ios/sources/**",],
@@ -104,16 +107,7 @@ let profile: Target = .target(
     dependencies: []
 )
 
-let extensions: Target = .target(
-    name: "extensions",
-    destinations: .iOS,
-    product: .staticLibrary,
-    bundleId: "\(bundleId).extensions",
-    deploymentTargets: .iOS("17.0"),
-    infoPlist: .default,
-    sources: ["siso-ios/Extension/**"],
-    dependencies: []
-)
+
 // -------
 
 let project = Project(
@@ -138,6 +132,5 @@ let project = Project(
         network,
         matching,
         profile,
-        extensions
     ]
 )
