@@ -38,7 +38,7 @@ struct RadioButtonGroup: View {
         Text(title)
             .foregroundStyle(.gray)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(EdgeInsets(top: 16, leading: 16, bottom: 4, trailing: 16))
+            .padding(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
         
         HStack {
             ForEach(options, id: \.self) { option in
@@ -46,7 +46,7 @@ struct RadioButtonGroup: View {
                     selected = option
                 }
             }
-            .padding(.horizontal)
+            .padding(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 0))
             
             Spacer()
         }

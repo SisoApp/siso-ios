@@ -109,7 +109,9 @@ let profile: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Profile/**"],
-    dependencies: []
+    dependencies: [
+        .target(name: "designSystem")
+    ]
 )
 
 let coordinator: Target = .target(

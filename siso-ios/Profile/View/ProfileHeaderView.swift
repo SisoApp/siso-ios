@@ -51,7 +51,7 @@ struct ProfileHeaderView: View {
             .frame(width: 36)
             .overlay {
                 Text(page.description)
-                    .foregroundStyle(page == 1 ? .black : textColor)
+                    .foregroundStyle(page == currentPage ? .black : .gray)
             }
     }
     
