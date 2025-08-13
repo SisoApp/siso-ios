@@ -42,7 +42,7 @@ let sisoApp: Target = .target(
         .target(name: "network"),
         .target(name: "matching"),
         .target(name: "profile"),
-        .target(name: "coordinator")
+        .target(name: "coordinator"),
         .target(name: "designSystem")
     ]
 )
@@ -159,7 +159,7 @@ let project = Project(
         network,
         matching,
         profile,
-        coordinator
+        coordinator,
         designSystem,
     ]
 )
