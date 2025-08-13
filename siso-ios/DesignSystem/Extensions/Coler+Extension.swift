@@ -97,5 +97,61 @@ public extension Color {
             /// #FAAD14 (Warning)
             public static let warning = Color(hex: "#FAAD14")
         }
+        
+        // MARK: - Red Colors
+        public struct Red {
+            public static let _10 = Color(hex: "#FFF1F0")
+            public static let _20 = Color(hex: "#FFCCC7")
+            public static let _30 = Color(hex: "#FFA39E")
+            public static let _40 = Color(hex: "#FF7875")
+            public static let _50 = Color(hex: "#FF4D4F")
+            public static let _60 = Color(hex: "#F5222D")
+            public static let _70 = Color(hex: "#CF1322")
+            public static let _80 = Color(hex: "#A8071A")
+            public static let _90 = Color(hex: "#820014")
+            public static let _100 = Color(hex: "#5C0011")
+        }
+        
+        // MARK: - Blue Colors
+        public struct Blue {
+            public static let _10 = Color(hex: "#E6F4FF")
+            public static let _20 = Color(hex: "#BAE0FF")
+            public static let _30 = Color(hex: "#91CAFF")
+            public static let _40 = Color(hex: "#69B1FF")
+            public static let _50 = Color(hex: "#4096FF")
+            public static let _60 = Color(hex: "#1677FF")
+            public static let _70 = Color(hex: "#0958D9")
+            public static let _80 = Color(hex: "#003EB3")
+            public static let _90 = Color(hex: "#002C8C")
+            public static let _100 = Color(hex: "#001D66")
+        }
+        
+        // MARK: - Orange Colors
+        public struct Orange {
+            public static let _10 = Color(hex: "#FFF7E6")
+            public static let _20 = Color(hex: "#FFE7BA")
+            public static let _30 = Color(hex: "#FFD591")
+            public static let _40 = Color(hex: "#FFC069")
+            public static let _50 = Color(hex: "#FFA940")
+            public static let _60 = Color(hex: "#FA8C16")
+            public static let _70 = Color(hex: "#D46B08")
+            public static let _80 = Color(hex: "#AD4E00")
+            public static let _90 = Color(hex: "#873800")
+            public static let _100 = Color(hex: "#612500")
+        }
+        
+        // MARK: - Green Colors
+        public struct Green {
+            public static let _10 = Color(hex: "#F6FFED")
+            public static let _20 = Color(hex: "#D9F7BE")
+            public static let _30 = Color(hex: "#B7EB8F")
+            public static let _40 = Color(hex: "#95DE64")
+            public static let _50 = Color(hex: "#73D13D")
+            public static let _60 = Color(hex: "#52C41A")
+            public static let _70 = Color(hex: "#389E0D")
+            public static let _80 = Color(hex: "#237804")
+            public static let _90 = Color(hex: "#135200")
+            public static let _100 = Color(hex: "#092B00")
+        }
     }
 }
