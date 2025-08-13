@@ -11,36 +11,36 @@ import KakaoSDKUser
 protocol LoginProtocol {
     func kakaoLogin() async
     func kakaoLogout() async
-    func AppleLogin() async
-    func AppleLogout() async
+    func appleLogin() async
+    func appleLogout() async
 }
 
 extension SocialLoginView {
     
     @MainActor
     class LoginViewModel: ObservableObject, LoginProtocol {
-        @Published var isKaKaoLogin: Bool = false
+        @Published var isLogined: Bool = false
         
         func kakaoLogin() async {
             if (UserApi.isKakaoTalkLoginAvailable()) {
-                self.isKaKaoLogin = await innerHavingKaKaoAppLogin()
+                self.isLogined = await innerHavingKaKaoAppLogin()
             } else {
-                self.isKaKaoLogin = await webviewKaKaoLogin()
+                self.isLogined = await webviewKaKaoLogin()
             }
         }
         
         func kakaoLogout() async {
             let success = await logoutKaKao()
             if success {
-                self.isKaKaoLogin = false
+                self.isLogined = false
             }
         }
         
-        func AppleLogin() async {
+        func appleLogin() async {
             
         }
         
-        func AppleLogout() async {
+        func appleLogout() async {
             
         }
     }
