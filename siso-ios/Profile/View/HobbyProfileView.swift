@@ -7,8 +7,14 @@
 
 import SwiftUI
 
-struct HobbyProfileView: View {
-    var body: some View {
+public struct HobbyProfileView: View {
+    public var delegate: ProfileCoordinatorDelegate?
+    
+    public init(delegate: ProfileCoordinatorDelegate) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         ProfileHeaderView(progress: 2/7)
         
         Text("나의 관심사를 선택해주세요")
@@ -34,8 +40,4 @@ struct HobbyProfileView: View {
         .clipShape(.rect(cornerRadius: 20))
         .padding()
     }
-}
-
-#Preview {
-    HobbyProfileView()
 }

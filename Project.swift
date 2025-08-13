@@ -40,6 +40,9 @@ let sisoApp: Target = .target(
     dependencies: [
         .target(name: "auth"),
         .target(name: "network"),
+        .target(name: "matching"),
+        .target(name: "profile"),
+        .target(name: "coordinator")
         .target(name: "designSystem")
     ]
 )
@@ -109,6 +112,18 @@ let profile: Target = .target(
     dependencies: []
 )
 
+let coordinator: Target = .target(
+    name: "coordinator",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).coordinator",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Coordinator/**"],
+    dependencies: [
+        .target(name: "profile")
+    ]
+)
 let designSystem: Target = .target(
     name: "designSystem",
     destinations: .iOS,
@@ -144,6 +159,7 @@ let project = Project(
         network,
         matching,
         profile,
+        coordinator
         designSystem,
     ]
 )
