@@ -1,7 +1,7 @@
 import ProjectDescription
 
 let bundleId = "io.tuist.siso-ios"
-let appName: Plist.Value = "시소" // 앱 이름
+let appName: Plist.Value = "시팅" // 앱 이름
 let appVersion: Plist.Value = "1.0.0" // 앱 배포 버젼
 
 let sisoApp: Target = .target(
@@ -35,11 +35,12 @@ let sisoApp: Target = .target(
                            ])
         ]
     ),
-    sources: ["siso-ios/sources/**",],
+    sources: ["siso-ios/Sources/**",],
     resources: ["siso-ios/Resources/**"],
     dependencies: [
         .target(name: "auth"),
-        .target(name: "network")
+        .target(name: "network"),
+        .target(name: "designSystem")
     ]
 )
 
@@ -70,7 +71,8 @@ let auth: Target = .target(
     dependencies: [
         .external(name: "KakaoSDKCommon"),
         .external(name: "KakaoSDKAuth"),
-        .external(name: "KakaoSDKUser")
+        .external(name: "KakaoSDKUser"),
+        .target(name: "designSystem")
     ]
 )
 
@@ -107,6 +109,16 @@ let profile: Target = .target(
     dependencies: []
 )
 
+let designSystem: Target = .target(
+    name: "designSystem",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).designSystem",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/DesignSystem/**"],
+    dependencies: []
+)
 
 // -------
 
@@ -132,5 +144,6 @@ let project = Project(
         network,
         matching,
         profile,
+        designSystem,
     ]
 )
