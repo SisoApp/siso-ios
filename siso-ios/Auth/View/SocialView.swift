@@ -10,8 +10,11 @@ import KakaoSDKCommon
 import KakaoSDKAuth
 
 public struct SocialView: View {
+    public var delegate: AuthCoordinatorDelegate?
     
-    public init() {
+    public init(delegate: AuthCoordinatorDelegate?) {
+        self.delegate = delegate
+        
         if let bundle = Bundle(identifier: "io.tuist.siso-ios.auth") {
             if let apiKey = bundle.infoDictionary?["KAKAO_API_KEY"] as? String {
                 KakaoSDK.initSDK(appKey: apiKey)
@@ -22,7 +25,7 @@ public struct SocialView: View {
     }
     
     public var body: some View {
-        SocialLoginView()
+        SocialLoginView(delegate: delegate)
             .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
                     _ = AuthController.handleOpenUrl(url: url)
@@ -32,5 +35,5 @@ public struct SocialView: View {
 }
 
 #Preview {
-    SocialLoginView()
+    SocialLoginView(delegate: nil)
 }

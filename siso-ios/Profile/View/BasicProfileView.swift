@@ -16,14 +16,6 @@ public struct BasicProfileView: View {
     }
     
     public var body: some View {
-        ProfileHeaderView(progress: 1/7)
-        
-        Text("기본 정보를 입력해주세요")
-            .font(.title2)
-            .bold()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-    var body: some View {
         ProfileHeaderView(
             page: 1,
             title: "기본 정보를 입력해주세요",
