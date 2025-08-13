@@ -6,13 +6,67 @@
 //
 
 import SwiftUI
+import designSystem
 
 struct WelcomeView: View {
+    @Environment(\.dismiss) var dismiss
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(alignment: .leading) {
+            Spacer()
+            Spacer()
+            Text("시팅 가입을 환영합니다\n내정보를 입력하면\n좋은 인연을 만날 확률이 높아져요")
+                .font(.system(size: 22))
+                .fontWeight(.semibold)
+                .lineSpacing(11)
+                .tracking(-0.22)
+                .padding()
+            Spacer()
+            Spacer()
+            Image("WelcomeVector")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .offset(y: 10)
+            Spacer()
+            allAcceptButton()
+                .padding()
+        }
+        .frame(maxWidth: .infinity)
+        .navigationTitle("내 정보 입력")
+        .navigationBarBackButtonHidden()
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Image(systemName: "chevron.backward")
+                    .foregroundStyle(Color.Siso.Gray._90)
+                    .onTapGesture {
+                        dismiss()
+                    }
+            }
+        }
+    }
+    
+    private func allAcceptButton() -> some View {
+        Button(action: {
+            // coordinator
+        }, label: {
+            Text("계속하기")
+                .frame(maxWidth: .infinity, maxHeight: 54)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+                .background(.yellow)
+                .clipShape(.rect(cornerRadius: 99))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 99)
+                        .stroke(lineWidth: 1)
+                        .foregroundStyle(.black)
+                }
+        })
     }
 }
 
 #Preview {
-    WelcomeView()
+    NavigationStack {
+        WelcomeView()
+    }
 }
