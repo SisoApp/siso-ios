@@ -6,7 +6,7 @@
 //
 
 public enum AuthPage: String, Identifiable, Hashable {
-    case login, agree1, agree2
+    case login, accept, welcome
     
     public var id: String { self.rawValue }
 }

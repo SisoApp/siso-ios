@@ -8,7 +8,7 @@
 import SwiftUI
 import designSystem
 
-struct AcceptanceView: View {
+public struct AcceptanceView: View {
     @State private var acceptGroup: (usingAccept: Bool, marketingAccept: Bool) = (false, false)
     @State private var nextPage: Bool = false
     @Environment(\.dismiss) var dismiss
@@ -16,8 +16,13 @@ struct AcceptanceView: View {
         case usingAccept
         case marketingAccept
     }
+    var delegate: AuthCoordinatorDelegate?
     
-    var body: some View {
+    public init(delegate: AuthCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         VStack(alignment: .leading) {
             Spacer()
             Text("시니어 소개팅에 어서오세요\n새로운 인연을 만나기 전\n동의가 필요해요.")
@@ -44,9 +49,6 @@ struct AcceptanceView: View {
         .navigationTitle("약관 동의")
         .navigationBarBackButtonHidden()
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(isPresented: $nextPage) {
-            WelcomeView()
-        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
@@ -95,7 +97,7 @@ struct AcceptanceView: View {
         let isActive: Bool = acceptGroup.usingAccept
         
         return Button(action: {
-            nextPage = true
+            delegate?.pushAuth(.welcome)
         }, label: {
             Text("모두 동의")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -116,6 +118,6 @@ struct AcceptanceView: View {
 
 #Preview {
     NavigationStack {
-        AcceptanceView()
+        AcceptanceView(delegate: nil)
     }
 }

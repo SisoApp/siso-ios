@@ -25,7 +25,7 @@ public struct SocialView: View {
     }
     
     public var body: some View {
-        SocialLoginView()
+        SocialLoginView(delegate: delegate)
             .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
                     _ = AuthController.handleOpenUrl(url: url)
@@ -35,5 +35,5 @@ public struct SocialView: View {
 }
 
 #Preview {
-    SocialLoginView()
+    SocialLoginView(delegate: nil)
 }

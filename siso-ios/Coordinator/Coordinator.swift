@@ -51,8 +51,10 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         switch page {
         case .login:
             SocialView(delegate: self)
-        default:
-            SocialView(delegate: self)
+        case .accept:
+            AcceptanceView(delegate: self)
+        case .welcome:
+            WelcomeView(delegate: self)
         }
     }
     
@@ -83,7 +85,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     // Flow
     public func changeAuthToProfile() {
-        path = NavigationPath()
         pushProfile(.basic)
     }
     

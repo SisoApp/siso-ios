@@ -8,9 +8,15 @@
 import SwiftUI
 import designSystem
 
-struct WelcomeView: View {
+public struct WelcomeView: View {
     @Environment(\.dismiss) var dismiss
-    var body: some View {
+    var delegate: AuthCoordinatorDelegate?
+    
+    public init(delegate: AuthCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         VStack(alignment: .leading) {
             Spacer()
             Spacer()
@@ -47,7 +53,7 @@ struct WelcomeView: View {
     
     private func allAcceptButton() -> some View {
         Button(action: {
-            // coordinator
+            delegate?.changeAuthToProfile()
         }, label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -67,6 +73,6 @@ struct WelcomeView: View {
 
 #Preview {
     NavigationStack {
-        WelcomeView()
+        WelcomeView(delegate: nil)
     }
 }

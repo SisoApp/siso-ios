@@ -12,6 +12,11 @@ import designSystem
 
 public struct SocialLoginView: View {
     @StateObject private var vm: SocialLoginView.LoginViewModel = .init()
+    var delegate: AuthCoordinatorDelegate?
+    
+    public init(delegate: AuthCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
     
     public var body: some View {
         NavigationStack {
@@ -21,7 +26,7 @@ public struct SocialLoginView: View {
                     .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()
                 
-                Image("vector")
+                Image("Vector")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .offset(x: 18.2)
@@ -43,7 +48,13 @@ public struct SocialLoginView: View {
                     loginButton(title: "카카오로 계속하기", color: .yellow) {
                         Task {
                             await vm.kakaoLogin()
+                            
+                            if vm.isLogined {
+                                print("야호")
+                                delegate?.pushAuth(.accept)
+                            }
                         }
+                        
                     }
                     loginButton(title: "애플로 계속하기", color: .white) {
                         // Apple Login
@@ -53,9 +64,6 @@ public struct SocialLoginView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .navigationDestination(isPresented: $vm.isLogined) {
-                    AcceptanceView()
-                }
             }
         }
     }
@@ -76,5 +84,5 @@ public struct SocialLoginView: View {
 }
 
 #Preview {
-    SocialLoginView()
+    SocialLoginView(delegate: nil)
 }
