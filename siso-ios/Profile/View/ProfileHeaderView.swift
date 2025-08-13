@@ -18,17 +18,11 @@ struct ProfileHeaderView: View {
     var body: some View {
         HStack {
             circleView(page: 1)
-                
             lineView()
-            
             circleView(page: 2)
-            
             lineView()
-            
             circleView(page: 3)
-            
             lineView()
-            
             circleView(page: 4)
         }
         .padding()

@@ -9,6 +9,10 @@ import SwiftUI
 
 public struct BasicProfileView: View {
     @State private var nickname: String = ""
+    @State private var age: String = ""
+    @State private var sex: String = ""
+    @State private var targetSex: String = ""
+    
     public var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -23,14 +27,12 @@ public struct BasicProfileView: View {
                 subTitle: ""
             )
             
-            textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.")
-            
-            textFieldView(field: "나이", placeholder: "나이를 입력해주세요.")
+            textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $nickname)
+            textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $age)
             
             // 라디오 버튼에서 선택한 값을 저장해야함
             
             RadioButtonGroup(title: "내 성별", options: ["여성", "남성"])
-            
             RadioButtonGroup(title: "매칭 성별", options: ["동성", "이성"])
             
             Spacer()
@@ -50,14 +52,14 @@ public struct BasicProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
     
-    private func textFieldView(field: String, placeholder: String) -> some View {
+    private func textFieldView(field: String, placeholder: String, binding: Binding<String>) -> some View {
         return VStack {
             Text(field)
                 .foregroundStyle(.gray)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading)
             
-            TextField(placeholder, text: $nickname)
+            TextField(placeholder, text: binding)
                 .frame(height: 48)
                 .padding(.horizontal, 8)
                 .background(.gray.opacity(0.2))
