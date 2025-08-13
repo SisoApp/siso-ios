@@ -16,7 +16,7 @@ public struct ImageProfileView: View {
     
     public var body: some View {
         ProfileHeaderView(
-            page: 3,
+            currentPage: 3,
             title: "나를 표현하는 사진을 보여주세요",
             subTitle: "최소 1개 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
         )

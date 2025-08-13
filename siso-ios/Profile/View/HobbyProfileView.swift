@@ -17,7 +17,7 @@ public struct HobbyProfileView: View {
     
     public var body: some View {
         ProfileHeaderView(
-            page: 2,
+            currentPage: 2,
             title: "나의 관심사를 선택해주세요",
             subTitle: "최소 3개 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
         )

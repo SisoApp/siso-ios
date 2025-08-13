@@ -11,13 +11,13 @@ public struct BasicProfileView: View {
     @State private var nickname: String = ""
     public var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate) {
+    public init(delegate: ProfileCoordinatorDelegate?) {
         self.delegate = delegate
     }
     
     public var body: some View {
         ProfileHeaderView(
-            page: 1,
+            currentPage: 1,
             title: "기본 정보를 입력해주세요",
             subTitle: ""
         )
@@ -62,4 +62,8 @@ public struct BasicProfileView: View {
         .clipShape(.rect(cornerRadius: 27))
         .padding()
     }
+}
+
+#Preview {
+    BasicProfileView(delegate: nil)
 }

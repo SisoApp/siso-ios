@@ -17,7 +17,7 @@ public struct IntroduceProfileView: View {
     
     public var body: some View {
         ProfileHeaderView(
-            page: 4,
+            currentPage: 4,
             title: "간단한 자기소개를 작성해주세요",
             subTitle: "여러분의 진솔한 생각과 경험을 담아 \n상대방이 당신을 더 잘 이해할 수 있도록\n5자 이상, 50자 이하로 작성해주세요.\n정보는 나중에 수정할 수 있어요"
         )
