@@ -7,9 +7,22 @@
 
 import SwiftUI
 
-struct BasicProfileView: View {
+public struct BasicProfileView: View {
     @State private var nickname: String = ""
+    public var delegate: ProfileCoordinatorDelegate?
     
+    public init(delegate: ProfileCoordinatorDelegate) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
+        ProfileHeaderView(progress: 1/7)
+        
+        Text("기본 정보를 입력해주세요")
+            .font(.title2)
+            .bold()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
     var body: some View {
         ProfileHeaderView(
             page: 1,
@@ -48,7 +61,7 @@ struct BasicProfileView: View {
         Spacer()
         
         Button("계속하기") {
-            
+            delegate?.pushProfile(.hobby)
         }
         .frame(height: 54)
         .frame(maxWidth: .infinity)
@@ -57,8 +70,4 @@ struct BasicProfileView: View {
         .clipShape(.rect(cornerRadius: 27))
         .padding()
     }
-}
-
-#Preview {
-    BasicProfileView()
 }
