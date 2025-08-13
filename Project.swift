@@ -39,7 +39,10 @@ let sisoApp: Target = .target(
     resources: ["siso-ios/Resources/**"],
     dependencies: [
         .target(name: "auth"),
-        .target(name: "network")
+        .target(name: "network"),
+        .target(name: "matching"),
+        .target(name: "profile"),
+        .target(name: "coordinator")
     ]
 )
 
@@ -77,7 +80,7 @@ let auth: Target = .target(
 let network: Target = .target(
     name: "network",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).network",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -88,7 +91,7 @@ let network: Target = .target(
 let matching: Target = .target(
     name: "matching",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).matching",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -99,7 +102,7 @@ let matching: Target = .target(
 let profile: Target = .target(
     name: "profile",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).profile",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -107,7 +110,18 @@ let profile: Target = .target(
     dependencies: []
 )
 
-
+let coordinator: Target = .target(
+    name: "coordinator",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).coordinator",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Coordinator/**"],
+    dependencies: [
+        .target(name: "profile")
+    ]
+)
 // -------
 
 let project = Project(
@@ -132,5 +146,6 @@ let project = Project(
         network,
         matching,
         profile,
+        coordinator
     ]
 )
