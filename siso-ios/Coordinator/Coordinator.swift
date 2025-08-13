@@ -6,15 +6,57 @@
 //
 
 import SwiftUI
+
+import auth
 import profile
 
-public class Coordinator: ObservableObject, ProfileCoordinatorDelegate {
+public enum Flow: String, Identifiable, Hashable {
+    case auth, matching, profile
+    
+    public var id: String { self.rawValue }
+}
+
+public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
     @Published public var path: NavigationPath = NavigationPath()
+    
     @Published var profileSheet: ProfilesSheet?
+    @Published var authSheet: AuthSheet?
     
     public init() {}
     
+    // Comon
+    public func pop() {
+        path.removeLast()
+    }
+    
+    public func popToRoot() {
+        path.removeLast(path.count)
+    }
+    
     // Auth
+    public func pushAuth(_ page: AuthPage) {
+        path.append(page)
+    }
+    
+    public func presentAuth(sheet: AuthSheet) {
+        authSheet = sheet
+    }
+    
+    public func buildAuthView(_ page: AuthPage) -> AnyView {
+        AnyView(build(page))
+    }
+    
+    @ViewBuilder
+    public func build(_ page: AuthPage) -> some View {
+        switch page {
+        case .login:
+            SocialView(delegate: self)
+        case .accept:
+            AcceptanceView(delegate: self)
+        case .welcome:
+            WelcomeView(delegate: self)
+        }
+    }
     
     // Matching
     
@@ -25,14 +67,6 @@ public class Coordinator: ObservableObject, ProfileCoordinatorDelegate {
     
     public func presentProfile(sheet: ProfilesSheet) {
         self.profileSheet = sheet
-    }
-    
-    public func popProfile() {
-        path.removeLast()
-    }
-    
-    public func popToProfileRoot() {
-        path.removeLast(path.count)
     }
     
     public func buildProfileView(_ page: ProfilePage) -> AnyView {
@@ -47,5 +81,18 @@ public class Coordinator: ObservableObject, ProfileCoordinatorDelegate {
         case .hobby:
             HobbyProfileView(delegate: self)
         }
+    }
+    
+    // Flow
+    public func changeAuthToProfile() {
+        pushProfile(.basic)
+    }
+    
+    public func changeProfileToMatching() {
+        
+    }
+    
+    public func changeMatchingToAuth() {
+        
     }
 }

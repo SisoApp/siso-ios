@@ -121,6 +121,8 @@ let coordinator: Target = .target(
     infoPlist: .default,
     sources: ["siso-ios/Coordinator/**"],
     dependencies: [
+        .target(name: "auth"),
+        .target(name: "matching"),
         .target(name: "profile")
     ]
 )
