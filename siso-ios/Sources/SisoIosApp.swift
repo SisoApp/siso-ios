@@ -1,4 +1,6 @@
 import SwiftUI
+
+import auth
 import coordinator
 import profile
 
@@ -9,7 +11,10 @@ struct SisoIosApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.basic)
+                coordinator.build(.login)
+                    .navigationDestination(for: AuthPage.self, destination: { page in
+                        coordinator.build(page)
+                    })
                     .navigationDestination(for: ProfilePage.self) { page in
                         coordinator.build(page)
                     }
