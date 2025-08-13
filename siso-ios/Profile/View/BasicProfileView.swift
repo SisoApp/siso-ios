@@ -23,6 +23,12 @@ public struct BasicProfileView: View {
             .bold()
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
+    var body: some View {
+        ProfileHeaderView(
+            page: 1,
+            title: "기본 정보를 입력해주세요",
+            subTitle: ""
+        )
         
         Text("닉네임")
             .foregroundStyle(.gray)
@@ -57,11 +63,11 @@ public struct BasicProfileView: View {
         Button("계속하기") {
             delegate?.pushProfile(.hobby)
         }
-        .frame(height: 50)
+        .frame(height: 54)
         .frame(maxWidth: .infinity)
         .background(.gray.opacity(0.2))
         .foregroundStyle(.black)
-        .clipShape(.rect(cornerRadius: 20))
+        .clipShape(.rect(cornerRadius: 27))
         .padding()
     }
 }
