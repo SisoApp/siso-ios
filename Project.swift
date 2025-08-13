@@ -1,7 +1,7 @@
 import ProjectDescription
 
 let bundleId = "io.tuist.siso-ios"
-let appName: Plist.Value = "시소" // 앱 이름
+let appName: Plist.Value = "시팅" // 앱 이름
 let appVersion: Plist.Value = "1.0.0" // 앱 배포 버젼
 
 let sisoApp: Target = .target(
@@ -35,7 +35,7 @@ let sisoApp: Target = .target(
                            ])
         ]
     ),
-    sources: ["siso-ios/sources/**",],
+    sources: ["siso-ios/Sources/**",],
     resources: ["siso-ios/Resources/**"],
     dependencies: [
         .target(name: "auth"),
@@ -43,6 +43,7 @@ let sisoApp: Target = .target(
         .target(name: "matching"),
         .target(name: "profile"),
         .target(name: "coordinator")
+        .target(name: "designSystem")
     ]
 )
 
@@ -73,14 +74,15 @@ let auth: Target = .target(
     dependencies: [
         .external(name: "KakaoSDKCommon"),
         .external(name: "KakaoSDKAuth"),
-        .external(name: "KakaoSDKUser")
+        .external(name: "KakaoSDKUser"),
+        .target(name: "designSystem")
     ]
 )
 
 let network: Target = .target(
     name: "network",
     destinations: .iOS,
-    product: .framework,
+    product: .staticLibrary,
     bundleId: "\(bundleId).network",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -91,7 +93,7 @@ let network: Target = .target(
 let matching: Target = .target(
     name: "matching",
     destinations: .iOS,
-    product: .framework,
+    product: .staticLibrary,
     bundleId: "\(bundleId).matching",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -102,7 +104,7 @@ let matching: Target = .target(
 let profile: Target = .target(
     name: "profile",
     destinations: .iOS,
-    product: .framework,
+    product: .staticLibrary,
     bundleId: "\(bundleId).profile",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -122,6 +124,17 @@ let coordinator: Target = .target(
         .target(name: "profile")
     ]
 )
+let designSystem: Target = .target(
+    name: "designSystem",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).designSystem",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/DesignSystem/**"],
+    dependencies: []
+)
+
 // -------
 
 let project = Project(
@@ -147,5 +160,6 @@ let project = Project(
         matching,
         profile,
         coordinator
+        designSystem,
     ]
 )
