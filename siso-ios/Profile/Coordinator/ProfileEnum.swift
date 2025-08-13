@@ -6,7 +6,7 @@
 //
 
 public enum ProfilePage: String, Identifiable, Hashable {
-    case basic, hobby
+    case basic, hobby, image, introduce
     
     public var id: String { self.rawValue }
 }

@@ -24,7 +24,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     public init() {}
     
-    // Comon
+    // Common
     public func pop() {
         path.removeLast()
     }
@@ -80,6 +80,10 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             BasicProfileView(delegate: self)
         case .hobby:
             HobbyProfileView(delegate: self)
+        case .image:
+            ImageProfileView(delegate: self)
+        case .introduce:
+            IntroduceProfileView(delegate: self)
         }
     }
     

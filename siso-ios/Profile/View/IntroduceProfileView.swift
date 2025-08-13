@@ -7,10 +7,15 @@
 
 import SwiftUI
 
-struct IntroduceProfileView: View {
+public struct IntroduceProfileView: View {
     @State private var text: String = ""
+    var delegate: ProfileCoordinatorDelegate?
     
-    var body: some View {
+    public init(delegate: ProfileCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         ProfileHeaderView(
             page: 4,
             title: "간단한 자기소개를 작성해주세요",
@@ -49,5 +54,5 @@ struct IntroduceProfileView: View {
 }
 
 #Preview {
-    IntroduceProfileView()
+    IntroduceProfileView(delegate: nil)
 }

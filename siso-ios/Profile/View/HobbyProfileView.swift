@@ -25,7 +25,7 @@ public struct HobbyProfileView: View {
         Spacer()
         
         Button("계속하기") {
-            
+            delegate?.pushProfile(.image)
         }
         .frame(height: 54)
         .frame(maxWidth: .infinity)

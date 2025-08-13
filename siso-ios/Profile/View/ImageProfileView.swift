@@ -7,8 +7,14 @@
 
 import SwiftUI
 
-struct ImageProfileView: View {
-    var body: some View {
+public struct ImageProfileView: View {
+    var delegate: ProfileCoordinatorDelegate?
+    
+    public init(delegate: ProfileCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         ProfileHeaderView(
             page: 3,
             title: "나를 표현하는 사진을 보여주세요",
@@ -30,7 +36,7 @@ struct ImageProfileView: View {
         Spacer()
         
         Button("사진 추가하기") {
-            
+            delegate?.pushProfile(.introduce)
         }
         .frame(height: 54)
         .frame(maxWidth: .infinity)
@@ -42,5 +48,5 @@ struct ImageProfileView: View {
 }
 
 #Preview {
-    ImageProfileView()
+    ImageProfileView(delegate: nil)
 }
