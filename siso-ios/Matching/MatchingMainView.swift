@@ -3,12 +3,15 @@ import SwiftUI
 // --- 1. 데이터 모델 정의 (이전과 동일) ---
 
 enum ListItemType {
-    case user(Profile)
+    case user(Profile) // 삭제 예정
     case announcement(String)
     case advertisement(Ad)
 }
 
-struct Profile { let name, location, tags: String }
+struct Profile {
+    let name, location, tags: String
+}
+
 struct Ad { let title, imageName: String }
 
 struct ListItem: Identifiable {
@@ -19,9 +22,9 @@ struct ListItem: Identifiable {
 
 // --- 2. 메인 뷰 구현 ---
 
-struct MatchingShortsView: View { // 뷰 이름을 MatchingShortsView로 변경
+struct MatchingView: View { // 뷰 이름을 MatchingShortsView로 변경
     // 뷰가 아니라, 뷰를 그리기 위한 '데이터'의 배열
-    let items: [ListItem] = [
+    @State var items: [ListItem] = [
         .init(type: .announcement("서버 점검이 9/1에 있습니다.")),
         .init(type: .user(Profile(name: "김철수", location: "서울 강남구", tags: "#코딩 #독서 #개발"))),
         .init(type: .advertisement(Ad(title: "요가 클래스 특별 할인! 건강한 라이프 시작!", imageName: "figure.yoga"))),
@@ -33,35 +36,45 @@ struct MatchingShortsView: View { // 뷰 이름을 MatchingShortsView로 변경
     ]
     
     var body: some View {
-        // TabView를 사용하여 각 아이템을 개별 페이지처럼 만듭니다.
-        TabView {
-            // ForEach를 사용하여 각 ListItem에 대한 뷰를 생성합니다.
-            ForEach(items) { item in
-                // 각 아이템 타입에 따라 적절한 뷰를 반환
-                Group { // Group을 사용하여 뷰 계층을 깔끔하게 유지
-                    switch item.type {
-                    case .user(let profile):
-                        // 이 뷰가 화면 전체를 채우도록 설정
-                        DataDrivenCardFullPageView(profile: profile)
-                    case .announcement(let text):
-                        DataDrivenAnnouncementFullPageView(text: text)
-                    case .advertisement(let ad):
-                        DataDrivenAdvertisementFullPageView(ad: ad)
+        // 동적 데이터 처리를 위해서 LazyVStack으로 처리
+        GeometryReader { geometry in
+            VStack {
+                ScrollView {
+                    LazyVStack(spacing: 0){
+                        ForEach(items) { item in
+                           makeView(for: item, geometry: geometry)
+                        }
                     }
+                   
+                    .scrollTargetLayout()
                 }
-                // 각 페이지 뷰가 안전 영역을 무시하고 전체 화면을 채우도록 합니다.
-//                .ignoresSafeArea()
-                // .tag(item.id) // Optional: 특정 페이지로 이동할 때 사용될 수 있는 태그
+                .scrollTargetBehavior(.paging)
+                .border(.green)
+            }
+            
+            Button("ADD") {
+                items.append(ListItem.init(type: .user(Profile.init(name: "호날두", location: "마데이라섬", tags: "발롱도르 축신"))))
             }
         }
-        // TabView 스타일을 페이지네이션으로 설정
-        .tabViewStyle(.page(indexDisplayMode: .never)) 
         .ignoresSafeArea()
     }
 }
 
-
-// --- 3. 각 아이템 타입에 해당하는 '전체 화면' 뷰들 ---
+@ViewBuilder
+private func makeView(for item: ListItem, geometry: GeometryProxy) -> some View {
+    Group {
+        switch item.type {
+                    case .user(let profile):
+                        DataDrivenCardFullPageView(profile: profile)
+                    case .announcement(let announcement):
+                        // 다른 뷰들도 모두 전체 화면으로 만들어야 일관성이 있습니다.
+                        DataDrivenAnnouncementFullPageView(text: announcement)
+                    case .advertisement(let ad):
+                        DataDrivenAdvertisementFullPageView(ad: ad)
+                    }
+    }
+    .frame(width: geometry.size.width, height: geometry.size.height)
+}
 
 // DataDrivenCardView를 전체 화면용으로 변경 (배경을 채움)
 struct DataDrivenCardFullPageView: View {
@@ -123,7 +136,7 @@ struct DataDrivenCardFullPageView: View {
                 .padding(.bottom, 50) // 하단 안전 영역 고려
             }
             .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // 콘텐츠가 ZStack 내에서 가득 차도록
+           
         }
     }
 }
@@ -201,7 +214,7 @@ struct DataDrivenAdvertisementFullPageView: View {
 // Preview Provider
 struct MatchingShortsVerticalView_Previews: PreviewProvider {
     static var previews: some View {
-        DataDrivenCardFullPageView(profile: .init(name: "이재용", location: "인천 남구", tags: "축구, 야구") )
-        MatchingShortsView()
+        //DataDrivenCardFullPageView(profile: .init(name: "이재용", location: "인천 남구", tags: "축구, 야구") )
+        MatchingView()
     }
 }

@@ -1,5 +1,4 @@
 import SwiftUI
-
 // Hex 코드로 Color를 쉽게 생성할 수 있도록 도와주는 생성자입니다.
 // 파일 내에서만 사용되도록 fileprivate으로 선언합니다.
 fileprivate extension Color {
