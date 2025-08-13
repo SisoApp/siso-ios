@@ -36,14 +36,16 @@ final class CardViewModel: ObservableObject {
     let nickname: String
     let age: Int
     var isOnline: Bool
+    let interestTags: [String]
     let profileImages: [URL]
     let voiceSample: URL?
     let introduction: String
     
-    init(nickname: String, age: Int, isOnline: Bool, profileImages: [URL], voiceSample: URL?, introduction: String) {
+    init(nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String) {
         self.nickname = nickname
         self.age = age
         self.isOnline = isOnline
+        self.interestTags = interestTags
         self.profileImages = profileImages
         self.voiceSample = voiceSample
         self.introduction = introduction

@@ -33,6 +33,14 @@ struct MatchingCardView: View {
                     .frame(width: 100)
                 
             }
+            
+            Group {
+                ForEach(cardViewModel.interestTags, id: \.self) { interest in
+                    Text("#\(interest)")
+                        
+                }
+            }
+            Text()
         }
     }
 }
@@ -42,5 +50,7 @@ struct MatchingCardView: View {
 
 #Preview {
     let sampleUser = User.init(socailLogin: "카카오", phoneNumber: "01083316520", isOnline: true, isNotificationSubscribed: true, refreshtoken: "available", isBlock: false, isDeleted: false, createdAt: "20250813", updatedAt: "20250813")
-    MatchingCardView(cardViewModel: <#CardViewModel#>, data: sampleUser)
+    
+    let cardViewModel = CardViewModel(nickname: "호날두", age: 38, isOnline: true, interestTags: ["축구", "요리", "날강두"], profileImages: [], voiceSample: nil, introduction: "너는 나를 존중해야한다 나는 5번의 발롱도르..")
+    MatchingCardView(cardViewModel: cardViewModel, data: sampleUser)
 }
