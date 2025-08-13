@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import designSystem
 
 struct AcceptanceView: View {
     @State private var acceptGroup: (usingAccept: Bool, marketingAccept: Bool) = (false, false)
+    @State private var nextPage: Bool = false
     @Environment(\.dismiss) var dismiss
     enum Accept {
         case usingAccept
@@ -39,8 +41,12 @@ struct AcceptanceView: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .navigationTitle("회원가입/로그인")
+        .navigationTitle("약관 동의")
         .navigationBarBackButtonHidden()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $nextPage) {
+            WelcomeView()
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
@@ -59,19 +65,29 @@ struct AcceptanceView: View {
                 .lineSpacing(9)
                 .tracking(-0.54)
             Spacer()
-            Circle()
-                .foregroundStyle(isClicked ? .yellow : .gray)
-                .frame(width: 24, height: 24)
-                .onTapGesture {
-                    withAnimation(.smooth) {
-                        switch path {
-                            case .usingAccept:
-                                self.acceptGroup.usingAccept.toggle()
-                            case .marketingAccept:
-                                self.acceptGroup.marketingAccept.toggle()
-                        }
+            Group {
+                if isClicked {
+                    Image(systemName: "checkmark.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(.black, .yellow)
+                }else {
+                    Circle()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.Siso.Gray._40)
+                }
+            }
+            .onTapGesture {
+                withAnimation(.smooth) {
+                    switch path {
+                        case .usingAccept:
+                            self.acceptGroup.usingAccept.toggle()
+                        case .marketingAccept:
+                            self.acceptGroup.marketingAccept.toggle()
                     }
                 }
+            }
         }
     }
     
@@ -79,7 +95,7 @@ struct AcceptanceView: View {
         let isActive: Bool = acceptGroup.usingAccept
         
         return Button(action: {
-            print("hello~")
+            nextPage = true
         }, label: {
             Text("모두 동의")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -99,5 +115,7 @@ struct AcceptanceView: View {
 }
 
 #Preview {
-    AcceptanceView()
+    NavigationStack {
+        AcceptanceView()
+    }
 }
