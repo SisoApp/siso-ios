@@ -71,7 +71,7 @@ public struct BasicProfileView: View {
             
             ZStack {
                 RoundedRectangle(cornerRadius: 27)
-                    .fill(.gray.opacity(0.2))
+                    .fill(Color.Siso.Gray._20)
                     .frame(height: 54)
                 
                 HStack {
