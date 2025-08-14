@@ -11,7 +11,7 @@ struct SisoIosApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.basic)
+                coordinator.build(.login)
                     .navigationDestination(for: AuthPage.self, destination: { page in
                         coordinator.build(page)
                     })
