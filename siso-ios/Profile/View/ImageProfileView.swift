@@ -9,6 +9,7 @@ import SwiftUI
 import designSystem
 
 public struct ImageProfileView: View {
+    @State private var images: [Image] = []
     var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -54,15 +55,7 @@ public struct ImageProfileView: View {
             
             Spacer()
             
-            Button("사진 추가하기") {
-                delegate?.pushProfile(.introduce)
-            }
-            .frame(height: 54)
-            .frame(maxWidth: .infinity)
-            .background(.gray.opacity(0.2))
-            .foregroundStyle(.black)
-            .clipShape(.rect(cornerRadius: 27))
-            .padding()
+            nextButton()
         }
         .navigationTitle("내 정보 입력")
         .navigationBarBackButtonHidden()
@@ -76,6 +69,29 @@ public struct ImageProfileView: View {
                     }
             }
         }
+    }
+    
+    private func nextButton() -> some View {
+        let isActive: Bool = images.count > 0
+        
+        return Button {
+            delegate?.pushProfile(.image)
+        } label: {
+            Text(isActive ? "계속하기" : "사진 추가하기")
+                .frame(maxWidth: .infinity, maxHeight: 54)
+                .foregroundStyle(.black)
+                .background(Color.Siso.Primary.main)
+                .clipShape(.rect(cornerRadius: 27))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 27)
+                        .stroke(
+                            Color.Siso.Primary._80,
+                            lineWidth: 1
+                        )
+                }
+                .animation(.smooth, value: isActive)
+        }
+        .padding()
     }
 }
 
