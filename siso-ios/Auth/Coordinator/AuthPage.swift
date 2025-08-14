@@ -10,9 +10,3 @@ public enum AuthPage: String, Identifiable, Hashable {
     
     public var id: String { self.rawValue }
 }
-
-public enum AuthSheet: String, Identifiable, Hashable {
-    case auth
-
-    public var id: String { self.rawValue }
-}

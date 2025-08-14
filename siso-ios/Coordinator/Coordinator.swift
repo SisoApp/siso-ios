@@ -10,17 +10,23 @@ import SwiftUI
 import auth
 import profile
 
-public enum Flow: String, Identifiable, Hashable {
-    case auth, matching, profile
+public enum Sheet: String, Identifiable {
+    case temp
+    
+    public var id: String { self.rawValue }
+}
+
+public enum FullScreenCover: String, Identifiable, Hashable {
+    case imageHelper
     
     public var id: String { self.rawValue }
 }
 
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
+    @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
-    
-    @Published var profileSheet: ProfilesSheet?
-    @Published var authSheet: AuthSheet?
+    @Published public var sheet: Sheet?
+    @Published public var fullScreenCover: FullScreenCover?
     
     public init() {}
     
@@ -33,13 +39,25 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.removeLast(path.count)
     }
     
-    // Auth
-    public func pushAuth(_ page: AuthPage) {
-        path.append(page)
+    @ViewBuilder
+    public func build(sheet: Sheet) -> some View {
+        switch sheet {
+        default:
+            EmptyView()
+        }
     }
     
-    public func presentAuth(sheet: AuthSheet) {
-        authSheet = sheet
+    @ViewBuilder
+    public func build(fullScreenCover: FullScreenCover) -> some View {
+        switch fullScreenCover {
+        case .imageHelper:
+            EmptyView()
+        }
+    }
+    
+    // Auth Page
+    public func pushAuth(_ page: AuthPage) {
+        path.append(page)
     }
     
     public func buildAuthView(_ page: AuthPage) -> AnyView {
@@ -58,15 +76,11 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         }
     }
     
-    // Matching
+    // Matching Page
     
-    // Profile
+    // Profile Page
     public func pushProfile(_ page: ProfilePage) {
         path.append(page)
-    }
-    
-    public func presentProfile(sheet: ProfilesSheet) {
-        self.profileSheet = sheet
     }
     
     public func buildProfileView(_ page: ProfilePage) -> AnyView {
@@ -89,7 +103,12 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     // Flow
     public func changeAuthToProfile() {
-        pushProfile(.basic)
+        stackID = UUID()
+        path = NavigationPath()
+        
+        withAnimation(.easeInOut(duration: 0.35)) { [weak self] in
+            self?.pushProfile(.basic)
+        }
     }
     
     public func changeProfileToMatching() {
