@@ -16,11 +16,15 @@ public enum Flow: String, Identifiable, Hashable {
     public var id: String { self.rawValue }
 }
 
+public enum Sheet: String, Identifiable, Hashable {
+    case imageHelper
+    
+    public var id: String { self.rawValue }
+}
+
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
     @Published public var path: NavigationPath = NavigationPath()
-    
-    @Published var profileSheet: ProfilesSheet?
-    @Published var authSheet: AuthSheet?
+    @Published var sheet: Sheet?
     
     public init() {}
     
@@ -36,10 +40,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     // Auth
     public func pushAuth(_ page: AuthPage) {
         path.append(page)
-    }
-    
-    public func presentAuth(sheet: AuthSheet) {
-        authSheet = sheet
     }
     
     public func buildAuthView(_ page: AuthPage) -> AnyView {
@@ -65,10 +65,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.append(page)
     }
     
-    public func presentProfile(sheet: ProfilesSheet) {
-        self.profileSheet = sheet
-    }
-    
     public func buildProfileView(_ page: ProfilePage) -> AnyView {
         AnyView(build(page))
     }
@@ -82,6 +78,14 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             HobbyProfileView(delegate: self)
         }
     }
+    
+    // Sheet
+//    public func build(_ sheet: Sheet) -> some View {
+//        switch sheet {
+//        case .imageHelper:
+//            
+//        }
+//    }
     
     // Flow
     public func changeAuthToProfile() {
