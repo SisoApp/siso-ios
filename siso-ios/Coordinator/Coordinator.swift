@@ -23,6 +23,7 @@ public enum FullScreenCover: String, Identifiable, Hashable {
 }
 
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
+    @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var sheet: Sheet?
     @Published public var fullScreenCover: FullScreenCover?
@@ -101,7 +102,12 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     // Flow
     public func changeAuthToProfile() {
-        pushProfile(.basic)
+        stackID = UUID()
+        path = NavigationPath()
+        
+        withAnimation(.easeInOut(duration: 0.35)) { [weak self] in
+            self?.pushProfile(.basic)
+        }
     }
     
     public func changeProfileToMatching() {

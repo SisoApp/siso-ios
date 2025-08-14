@@ -25,6 +25,7 @@ struct SisoIosApp: App {
                         coordinator.build(fullScreenCover: cover)
                     }
             }
+            .id(coordinator.stackID)
             .environmentObject(coordinator)
         }
     }
