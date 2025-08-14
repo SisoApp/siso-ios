@@ -10,13 +10,13 @@ import SwiftUI
 import auth
 import profile
 
-public enum Flow: String, Identifiable, Hashable {
-    case auth, matching, profile
+public enum Sheet: String, Identifiable {
+    case temp
     
     public var id: String { self.rawValue }
 }
 
-public enum Sheet: String, Identifiable, Hashable {
+public enum FullScreenCover: String, Identifiable, Hashable {
     case imageHelper
     
     public var id: String { self.rawValue }
@@ -24,7 +24,8 @@ public enum Sheet: String, Identifiable, Hashable {
 
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
     @Published public var path: NavigationPath = NavigationPath()
-    @Published var sheet: Sheet?
+    @Published public var sheet: Sheet?
+    @Published public var fullScreenCover: FullScreenCover?
     
     public init() {}
     
@@ -37,7 +38,26 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.removeLast(path.count)
     }
     
-    // Auth
+    @ViewBuilder
+    public func build(sheet: Sheet) -> some View {
+        switch sheet {
+        default:
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    public func build(fullScreenCover: FullScreenCover) -> some View {
+        switch fullScreenCover {
+        case .imageHelper:
+            EmptyView()
+        default:
+            EmptyView()
+            
+        }
+    }
+    
+    // Auth Page
     public func pushAuth(_ page: AuthPage) {
         path.append(page)
     }
@@ -58,9 +78,9 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         }
     }
     
-    // Matching
+    // Matching Page
     
-    // Profile
+    // Profile Page
     public func pushProfile(_ page: ProfilePage) {
         path.append(page)
     }
@@ -78,14 +98,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             HobbyProfileView(delegate: self)
         }
     }
-    
-    // Sheet
-//    public func build(_ sheet: Sheet) -> some View {
-//        switch sheet {
-//        case .imageHelper:
-//            
-//        }
-//    }
     
     // Flow
     public func changeAuthToProfile() {
