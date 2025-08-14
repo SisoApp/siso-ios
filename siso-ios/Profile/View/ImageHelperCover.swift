@@ -81,6 +81,7 @@ public struct ImageHelperCover: View {
         
         func skipButton() -> some View {
             return Button {
+                delegate?.dismissProfileCover()
                 delegate?.pushProfile(.introduce)
             } label: {
                 Text("건너뛰기")
