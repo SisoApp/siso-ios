@@ -42,15 +42,7 @@ public struct IntroduceProfileView: View {
             
             Spacer()
             
-            Button("완료하기") {
-                
-            }
-            .frame(height: 54)
-            .frame(maxWidth: .infinity)
-            .background(.gray.opacity(0.2))
-            .foregroundStyle(.black)
-            .clipShape(.rect(cornerRadius: 27))
-            .padding()
+            nextButton()
         }
         .navigationTitle("내 정보 입력")
         .navigationBarBackButtonHidden()
@@ -64,6 +56,32 @@ public struct IntroduceProfileView: View {
                     }
             }
         }
+    }
+    
+    private func nextButton() -> some View {
+        let isActive: Bool = true
+        
+        return Button {
+            delegate?.pushProfile(.image)
+        } label: {
+            Text("계속하기")
+                .frame(maxWidth: .infinity, maxHeight: 54)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
+                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
+                .clipShape(.rect(cornerRadius: 27))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 27)
+                        .stroke(
+                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
+                            lineWidth: 1
+                        )
+                }
+                .animation(.smooth, value: isActive)
+        }
+        .disabled(!isActive)
+        .padding()
     }
 }
 

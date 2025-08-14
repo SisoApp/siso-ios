@@ -79,6 +79,8 @@ public struct ImageProfileView: View {
         } label: {
             Text(isActive ? "계속하기" : "사진 추가하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
                 .foregroundStyle(.black)
                 .background(Color.Siso.Primary.main)
                 .clipShape(.rect(cornerRadius: 27))

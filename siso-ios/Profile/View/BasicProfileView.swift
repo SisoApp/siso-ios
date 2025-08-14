@@ -137,6 +137,8 @@ public struct BasicProfileView: View {
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 27))
