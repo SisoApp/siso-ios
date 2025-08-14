@@ -75,7 +75,11 @@ public struct ImageProfileView: View {
         let isActive: Bool = images.count > 0
         
         return Button {
-            delegate?.pushProfile(.image)
+            if isActive {
+                delegate?.pushProfile(.introduce)
+            } else {
+                delegate?.presentProfile(cover: .imageHelper)
+            }
         } label: {
             Text(isActive ? "계속하기" : "사진 추가하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)

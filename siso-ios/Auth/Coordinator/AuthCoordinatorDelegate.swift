@@ -11,6 +11,5 @@ public protocol AuthCoordinatorDelegate {
     func pushAuth(_ page: AuthPage)
     func pop()
     func popToRoot()
-    func buildAuthView(_ page: AuthPage) -> AnyView
     func changeAuthToProfile()
 }

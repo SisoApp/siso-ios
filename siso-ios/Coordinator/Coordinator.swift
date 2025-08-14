@@ -10,23 +10,10 @@ import SwiftUI
 import auth
 import profile
 
-public enum Sheet: String, Identifiable {
-    case temp
-    
-    public var id: String { self.rawValue }
-}
-
-public enum FullScreenCover: String, Identifiable, Hashable {
-    case imageHelper
-    
-    public var id: String { self.rawValue }
-}
-
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
-    @Published public var sheet: Sheet?
-    @Published public var fullScreenCover: FullScreenCover?
+    @Published public var profileCover: ProfileFullScreenCover?
     
     public init() {}
     
@@ -39,29 +26,9 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.removeLast(path.count)
     }
     
-    @ViewBuilder
-    public func build(sheet: Sheet) -> some View {
-        switch sheet {
-        default:
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
-    public func build(fullScreenCover: FullScreenCover) -> some View {
-        switch fullScreenCover {
-        case .imageHelper:
-            EmptyView()
-        }
-    }
-    
     // Auth Page
     public func pushAuth(_ page: AuthPage) {
         path.append(page)
-    }
-    
-    public func buildAuthView(_ page: AuthPage) -> AnyView {
-        AnyView(build(page))
     }
     
     @ViewBuilder
@@ -83,8 +50,12 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.append(page)
     }
     
-    public func buildProfileView(_ page: ProfilePage) -> AnyView {
-        AnyView(build(page))
+    public func presentProfile(cover: ProfileFullScreenCover) {
+        profileCover = cover
+    }
+    
+    public func dismissProfileCover() {
+        profileCover = nil
     }
     
     @ViewBuilder
@@ -98,6 +69,14 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             ImageProfileView(delegate: self)
         case .introduce:
             IntroduceProfileView(delegate: self)
+        }
+    }
+    
+    @ViewBuilder
+    public func build(fullScreenCover: ProfileFullScreenCover) -> some View {
+        switch fullScreenCover {
+        case .imageHelper:
+            ImageHelperCover(delegate: self)
         }
     }
     

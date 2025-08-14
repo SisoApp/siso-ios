@@ -11,6 +11,7 @@ public protocol ProfileCoordinatorDelegate {
     func pushProfile(_ page: ProfilePage)
     func pop()
     func popToRoot()
-    func buildProfileView(_ page: ProfilePage) -> AnyView
+    func presentProfile(cover: ProfileFullScreenCover)
+    func dismissProfileCover()
     func changeProfileToMatching()
 }
