@@ -11,9 +11,6 @@ struct ProfileHeaderView: View {
     let currentPage: Int
     let title: String
     let subTitle: String
-    let mainColor: Color = Color(red: 1.0, green: 0.843, blue: 0.0).opacity(0.4)
-    let textColor: Color = .gray.opacity(0.5)
-    let gray: Color = .gray.opacity(0.3)
     
     var body: some View {
         HStack {
@@ -34,24 +31,24 @@ struct ProfileHeaderView: View {
             .padding(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
         
         Text(subTitle)
-            .foregroundStyle(.gray)
+            .foregroundStyle(Color.Siso.Gray._60)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
     }
     
     private func circleView(page: Int) -> some View {
         return Circle()
-            .fill(page == currentPage ? .yellow : gray)
+            .fill(page == currentPage ? .yellow : .Siso.Gray._30)
             .frame(width: 36)
             .overlay {
                 Text(page.description)
-                    .foregroundStyle(page == currentPage ? .black : .gray)
+                    .foregroundStyle(page == currentPage ? .black : .Siso.Gray._50)
             }
     }
     
     private func lineView() -> some View {
         return RoundedRectangle(cornerRadius: 12)
-            .fill(gray)
+            .fill(Color.Siso.Gray._30)
             .frame(height: 5)
     }
 }

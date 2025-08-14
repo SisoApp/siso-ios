@@ -68,6 +68,8 @@ public extension Color {
             public static let _10 = Color(hex: "#F5F5F5")
             /// #F0F0F0
             public static let _20 = Color(hex: "#F0F0F0")
+            /// #D9D9D9
+            public static let _30 = Color(hex: "#D9D9D9")
             /// #BFBFBF
             public static let _40 = Color(hex: "#BFBFBF")
             /// #8C8C8C
