@@ -26,17 +26,7 @@ public struct InterestProfileView: View {
                 subTitle: "최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요\n정보는 나중에 수정할 수 있어요"
             )
             
-            ScrollView {
-                VStack {
-                    HStack {
-                        interestButton("음악감상")
-                        interestButton("서예")
-                        interestButton("등산")
-                        Spacer()
-                    }
-                }
-            }
-            .padding()
+            interestButtonScrollView()
             
             nextButton()
         }
@@ -73,7 +63,29 @@ public struct InterestProfileView: View {
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._20)
                 .clipShape(.rect(cornerRadius: 24))
         }
-
+    }
+    
+    private func interestButtonScrollView() -> some View {
+        return ScrollView {
+            VStack(spacing: 12) {
+                ForEach(InterestType.allCases, id: \.self) { type in
+                    Text(type.id)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                    
+                    ForEach(viewModel.chucked(type, into: 3), id: \.self) { chunk in
+                        HStack {
+                            ForEach(chunk, id: \.self) { item in
+                                interestButton(item)
+                            }
+                            Spacer()
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
     }
     
     private func nextButton() -> some View {
