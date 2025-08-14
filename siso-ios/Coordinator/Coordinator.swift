@@ -52,9 +52,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         switch fullScreenCover {
         case .imageHelper:
             EmptyView()
-        default:
-            EmptyView()
-            
         }
     }
     
