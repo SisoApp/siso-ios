@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct ImageHelperCover: View {
+public struct ImageHelperSheet: View {
     public var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -15,19 +15,9 @@ public struct ImageHelperCover: View {
     }
     
     public var body: some View {
-        ZStack {
-            Color.black.opacity(0.5)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    delegate?.dismissProfileCover()
-                }
-            
-            VStack {
-                Spacer()
-                bottomSheet()
-            }
-        }
-        .ignoresSafeArea()
+        bottomSheet()
+            .presentationDetents([.height(498)])
+            .presentationCornerRadius(24)
     }
     
     private func bottomSheet() -> some View {
@@ -81,7 +71,7 @@ public struct ImageHelperCover: View {
         
         func skipButton() -> some View {
             return Button {
-                delegate?.dismissProfileCover()
+                delegate?.dismissProfileSheet()
                 delegate?.pushProfile(.introduce)
             } label: {
                 Text("건너뛰기")
@@ -104,7 +94,7 @@ public struct ImageHelperCover: View {
                     .frame(width: 24, height: 24)
                     .bold()
                     .onTapGesture {
-                        delegate?.dismissProfileCover()
+                        delegate?.dismissProfileSheet()
                     }
             }
             .padding(EdgeInsets(top: 38, leading: 16, bottom: 0, trailing: 16))
@@ -127,7 +117,7 @@ public struct ImageHelperCover: View {
                 galleryButton()
                 skipButton()
             }
-            .padding(EdgeInsets(top: 32, leading: 16, bottom: 43, trailing: 16))
+            .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
         }
         .background(.white)
         .clipShape(.rect(cornerRadius: 12))
@@ -135,5 +125,5 @@ public struct ImageHelperCover: View {
 }
 
 #Preview {
-    ImageHelperCover(delegate: nil)
+    ImageHelperSheet(delegate: nil)
 }

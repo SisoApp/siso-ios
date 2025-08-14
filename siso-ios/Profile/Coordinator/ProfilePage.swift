@@ -11,7 +11,7 @@ public enum ProfilePage: String, Identifiable, Hashable {
     public var id: String { self.rawValue }
 }
 
-public enum ProfileFullScreenCover: String, Identifiable, Hashable {
+public enum ProfileSheet: String, Identifiable, Hashable {
     case imageHelper
     
     public var id: String { self.rawValue }

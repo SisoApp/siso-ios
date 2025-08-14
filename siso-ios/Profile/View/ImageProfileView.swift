@@ -78,7 +78,7 @@ public struct ImageProfileView: View {
             if isActive {
                 delegate?.pushProfile(.introduce)
             } else {
-                delegate?.presentProfile(cover: .imageHelper)
+                delegate?.presentProfile(sheet: .imageHelper)
             }
         } label: {
             Text(isActive ? "계속하기" : "사진 추가하기")

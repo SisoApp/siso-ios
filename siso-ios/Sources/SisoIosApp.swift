@@ -18,8 +18,8 @@ struct SisoIosApp: App {
                     .navigationDestination(for: ProfilePage.self) { page in
                         coordinator.build(page)
                     }
-                    .fullScreenCover(item: $coordinator.profileCover) { cover in
-                        coordinator.build(fullScreenCover: cover)
+                    .sheet(item: $coordinator.profileSheet) { sheet in
+                        coordinator.build(sheet: sheet)
                     }
             }
             .id(coordinator.stackID)

@@ -13,7 +13,7 @@ import profile
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
-    @Published public var profileCover: ProfileFullScreenCover?
+    @Published public var profileSheet: ProfileSheet?
     
     public init() {}
     
@@ -50,12 +50,12 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.append(page)
     }
     
-    public func presentProfile(cover: ProfileFullScreenCover) {
-        profileCover = cover
+    public func presentProfile(sheet: ProfileSheet) {
+        profileSheet = sheet
     }
     
-    public func dismissProfileCover() {
-        profileCover = nil
+    public func dismissProfileSheet() {
+        profileSheet = nil
     }
     
     @ViewBuilder
@@ -73,10 +73,10 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     @ViewBuilder
-    public func build(fullScreenCover: ProfileFullScreenCover) -> some View {
-        switch fullScreenCover {
+    public func build(sheet: ProfileSheet) -> some View {
+        switch sheet {
         case .imageHelper:
-            ImageHelperCover(delegate: self)
+            ImageHelperSheet(delegate: self)
         }
     }
     
