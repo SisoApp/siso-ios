@@ -78,8 +78,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         switch page {
         case .basic:
             BasicProfileView(delegate: self)
-        case .hobby:
-            HobbyProfileView(delegate: self)
+        case .interest:
+            InterestProfileView(delegate: self)
         case .image:
             ImageProfileView(delegate: self)
         case .introduce:

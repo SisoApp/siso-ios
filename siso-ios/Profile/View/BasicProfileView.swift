@@ -133,7 +133,7 @@ public struct BasicProfileView: View {
     
     private func nextButton() -> some View {
         return Button {
-            delegate?.pushProfile(.hobby)
+            delegate?.pushProfile(.interest)
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)

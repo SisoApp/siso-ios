@@ -8,13 +8,11 @@
 import SwiftUI
 import designSystem
 
-public struct HobbyProfileView: View {
-    public var delegate: ProfileCoordinatorDelegate?
-    private let viewModel: HobbyProfileViewModel = HobbyProfileViewModel()
+public struct InterestProfileView: View {
+    @State private var interests: [String] = []
     
-    private var isActive: Bool {
-        return true
-    }
+    public var delegate: ProfileCoordinatorDelegate?
+    private let viewModel: InterestProfileViewModel = InterestProfileViewModel()
     
     public init(delegate: ProfileCoordinatorDelegate?) {
         self.delegate = delegate
@@ -29,8 +27,16 @@ public struct HobbyProfileView: View {
             )
             
             ScrollView {
-                
+                VStack {
+                    HStack {
+                        interestButton("음악감상")
+                        interestButton("서예")
+                        interestButton("등산")
+                        Spacer()
+                    }
+                }
             }
+            .padding()
             
             nextButton()
         }
@@ -48,7 +54,31 @@ public struct HobbyProfileView: View {
         }
     }
     
+    private func interestButton(_ title: String) -> some View {
+        let isActive: Bool = interests.contains(title)
+        
+        return Button {
+            if isActive {
+                guard let index = interests.firstIndex(of: title) else { return }
+                interests.remove(at: index)
+            } else {
+                interests.append(title)
+            }
+        } label: {
+            Text(title)
+                .padding(EdgeInsets(top: 8, leading: 24, bottom: 8, trailing: 24))
+                .frame(height: 48)
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._90)
+                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._20)
+                .clipShape(.rect(cornerRadius: 24))
+        }
+
+    }
+    
     private func nextButton() -> some View {
+        let isActive: Bool = interests.count > 2
+        
         return Button {
             delegate?.pushProfile(.image)
         } label: {
@@ -73,6 +103,6 @@ public struct HobbyProfileView: View {
 
 #Preview {
     NavigationStack {
-        HobbyProfileView(delegate: nil)
+        InterestProfileView(delegate: nil)
     }
 }
