@@ -15,11 +15,11 @@ struct ProfileHeaderView: View {
     var body: some View {
         HStack {
             circleView(page: 1)
-            lineView()
+            lineView(page: 2)
             circleView(page: 2)
-            lineView()
+            lineView(page: 3)
             circleView(page: 3)
-            lineView()
+            lineView(page: 4)
             circleView(page: 4)
         }
         .padding()
@@ -38,17 +38,17 @@ struct ProfileHeaderView: View {
     
     private func circleView(page: Int) -> some View {
         return Circle()
-            .fill(page == currentPage ? .yellow : .Siso.Gray._30)
+            .fill(page <= currentPage ? Color.Siso.Primary.main : .Siso.Gray._30)
             .frame(width: 36)
             .overlay {
                 Text(page.description)
-                    .foregroundStyle(page == currentPage ? .black : .Siso.Gray._50)
+                    .foregroundStyle(page <= currentPage ? .black : .Siso.Gray._50)
             }
     }
     
-    private func lineView() -> some View {
+    private func lineView(page: Int) -> some View {
         return RoundedRectangle(cornerRadius: 12)
-            .fill(Color.Siso.Gray._30)
+            .fill(page <= currentPage ? Color.Siso.Primary.main :  Color.Siso.Gray._30)
             .frame(height: 5)
     }
 }
