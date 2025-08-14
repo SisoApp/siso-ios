@@ -49,7 +49,8 @@ struct ProfileHeaderView: View {
     private func lineView(page: Int) -> some View {
         return RoundedRectangle(cornerRadius: 12)
             .fill(page <= currentPage ? Color.Siso.Primary.main :  Color.Siso.Gray._30)
-            .frame(height: 5)
+            .frame(height: 4)
+            .padding(.horizontal, 6)
     }
 }
 
