@@ -19,7 +19,7 @@ struct ProfileHeaderView: View {
     }
     
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             circleView(page: 1)
             lineView(page: 2)
             circleView(page: 2)
@@ -27,6 +27,8 @@ struct ProfileHeaderView: View {
             circleView(page: 3)
             lineView(page: 4)
             circleView(page: 4)
+            lineView(page: 5)
+            circleView(page: 5)
         }
         .padding()
         
@@ -59,7 +61,7 @@ struct ProfileHeaderView: View {
         return RoundedRectangle(cornerRadius: 12)
             .fill(page <= currentPage ? Color.Siso.Primary.main :  Color.Siso.Gray._30)
             .frame(height: 4)
-            .padding(.horizontal, 6)
+            .padding(.horizontal, 4.5)
     }
 }
 
