@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 public struct ImageHelperSheet: View {
+    @State private var selectedImages: [PhotosPickerItem] = []
+    
     public var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -49,9 +52,10 @@ public struct ImageHelperSheet: View {
         }
         
         func galleryButton() -> some View {
-            return Button {
-                
-            } label: {
+            return PhotosPicker(
+                selection: $selectedImages,
+                maxSelectionCount: 5
+            ) {
                 Text("앨범에서 가져오기")
                     .frame(maxWidth: .infinity, maxHeight: 54)
                     .font(.system(size: 18))
@@ -66,7 +70,7 @@ public struct ImageHelperSheet: View {
                                 lineWidth: 1
                             )
                     }
-            }
+                }
         }
         
         func skipButton() -> some View {
