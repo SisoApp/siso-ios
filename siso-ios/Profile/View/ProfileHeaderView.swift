@@ -10,7 +10,13 @@ import SwiftUI
 struct ProfileHeaderView: View {
     let currentPage: Int
     let title: String
-    let subTitle: String
+    let subTitle: String?
+    
+    init(currentPage: Int, title: String, subTitle: String? = nil) {
+        self.currentPage = currentPage
+        self.title = title
+        self.subTitle = subTitle
+    }
     
     var body: some View {
         HStack {
@@ -30,10 +36,13 @@ struct ProfileHeaderView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
         
-        Text(subTitle)
-            .foregroundStyle(Color.Siso.Gray._60)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
+        if let subTitle = subTitle {
+            Text(subTitle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(Color.Siso.Gray._60)
+                .lineSpacing(9)
+                .padding(.horizontal)
+        }
     }
     
     private func circleView(page: Int) -> some View {

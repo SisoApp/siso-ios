@@ -27,8 +27,7 @@ public struct BasicProfileView: View {
         VStack {
             ProfileHeaderView(
                 currentPage: 1,
-                title: "기본 정보를 입력해주세요",
-                subTitle: ""
+                title: "기본 정보를 입력해주세요"
             )
             
             textFieldView(
@@ -101,8 +100,12 @@ public struct BasicProfileView: View {
             
             if let subTitle = subTitle {
                 Text(subTitle)
-                    .foregroundStyle(Color.Siso.Gray._50)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(Color.Siso.Gray._50)
+                    .font(.system(size: 18))
+                    .lineSpacing(5)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
             HStack(spacing: 32) {

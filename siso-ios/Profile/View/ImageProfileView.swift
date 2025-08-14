@@ -21,7 +21,7 @@ public struct ImageProfileView: View {
             ProfileHeaderView(
                 currentPage: 3,
                 title: "나를 표현하는 사진을 보여주세요",
-                subTitle: "최소 1개 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
+                subTitle: "최소 1장 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
             )
             
             ZStack {
