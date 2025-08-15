@@ -32,7 +32,9 @@ let sisoApp: Target = .target(
             ],
             "UIAppFonts": .array([
                                .string("JejuMyeongjoOTF.otf"),
-                           ])
+                           ]),
+            "NSCameraUsageDescription": "프로필 사진을 촬영하기 위해 카메라 접근이 필요합니다.",
+            "NSPhotoLibraryUsageDescription": "사진을 업로드하기 위해 갤러리 접근이 필요합니다."
         ]
     ),
     sources: ["siso-ios/Sources/**",],

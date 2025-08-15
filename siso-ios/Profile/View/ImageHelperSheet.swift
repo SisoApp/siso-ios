@@ -9,15 +9,17 @@ import SwiftUI
 import PhotosUI
 
 public struct ImageHelperSheet: View {
+    @ObservedObject private var userProfile: UserProfile
     @State private var selectedImages: [PhotosPickerItem] = []
-    @State private var cameraImage: UIImage?
     
     public var delegate: ProfileCoordinatorDelegate?
-    public var completion: (([UIImage]) -> Void)
+    public var completion: ([UIImage]) -> Void
     
     public init(delegate: ProfileCoordinatorDelegate?,
+                userProfile: UserProfile,
                 completion: @escaping (([UIImage]) -> Void)) {
         self.delegate = delegate
+        self.userProfile = userProfile
         self.completion = completion
     }
     
@@ -26,16 +28,16 @@ public struct ImageHelperSheet: View {
             .presentationDetents([.height(498)])
             .presentationCornerRadius(24)
             .onChange(of: selectedImages) { _, items in
+                delegate?.dismissProfileSheet()
+                
                 Task {
-                    var images: [UIImage] = []
-                    
                     for item in items {
                         if let data: Data = try? await item.loadTransferable(type: Data.self),
                            let image: UIImage = UIImage(data: data) {
-                            images.append(image)
+                            await MainActor.run {
+                                userProfile.profileImageUrl.append(image)
+                            }
                         }
-                        
-                        completion(images)
                     }
                 }
             }
@@ -50,7 +52,7 @@ public struct ImageHelperSheet: View {
         
         func cameraButton() -> some View {
             return Button {
-                delegate?.presentProfile(sheet: .cameraPicker($cameraImage))
+                delegate?.presentProfile(sheet: .cameraSheet)
             } label: {
                 Text("카메라로 사진찍기")
                     .frame(maxWidth: .infinity, maxHeight: 54)
@@ -147,7 +149,7 @@ public struct ImageHelperSheet: View {
 }
 
 #Preview {
-    ImageHelperSheet(delegate: nil) { images in
+    ImageHelperSheet(delegate: nil, userProfile: .empty) { images in
         
     }
 }

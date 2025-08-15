@@ -8,19 +8,20 @@
 import SwiftUI
 
 public struct BasicProfileView: View {
-    @State private var nickname: String = ""
-    @State private var age: String = ""
-    @State private var sex: String = ""
-    @State private var targetSex: String = ""
+    @ObservedObject private var userProfile: UserProfile
     
     public var delegate: ProfileCoordinatorDelegate?
     
     private var isActive: Bool {
-        return !nickname.isEmpty && !age.isEmpty && !sex.isEmpty && !targetSex.isEmpty
+        return !userProfile.nickname.isEmpty &&
+                !userProfile.age.isEmpty &&
+                !userProfile.sex.isEmpty &&
+                !userProfile.targetSex.isEmpty
     }
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -33,23 +34,28 @@ public struct BasicProfileView: View {
             textFieldView(
                 field: "닉네임",
                 placeholder: "이것은 닉네임입니다.",
-                binding: $nickname
+                binding: $userProfile.nickname
             )
             
             textFieldView(
                 field: "나이",
                 placeholder: "나이를 입력해주세요.",
-                binding: $age
+                binding: $userProfile.age
             )
             
             // 라디오 버튼에서 선택한 값을 저장해야함
             
-            RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
+            RadioButtonView(
+                title: "내 성별",
+                options: ["여성", "남성"],
+                binding: $userProfile.sex
+            )
+            
             RadioButtonView(
                 title: "매칭 성별",
                 subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
                 options: ["동성", "이성"],
-                binding: $targetSex
+                binding: $userProfile.targetSex
             )
             
             Spacer()
@@ -165,6 +171,6 @@ public struct BasicProfileView: View {
 
 #Preview {
     NavigationStack {
-        BasicProfileView(delegate: nil)
+        BasicProfileView(delegate: nil, userProfile: .empty)
     }
 }

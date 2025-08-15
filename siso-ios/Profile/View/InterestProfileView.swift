@@ -9,13 +9,15 @@ import SwiftUI
 import designSystem
 
 public struct InterestProfileView: View {
-    @State private var interests: [String] = []
+    @ObservedObject private var userProfile: UserProfile
     
     public var delegate: ProfileCoordinatorDelegate?
     private let viewModel: InterestProfileViewModel = InterestProfileViewModel()
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?,
+                userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -45,14 +47,14 @@ public struct InterestProfileView: View {
     }
     
     private func interestButton(_ title: String) -> some View {
-        let isActive: Bool = interests.contains(title)
+        let isActive: Bool = userProfile.interests.contains(title)
         
         return Button {
             if isActive {
-                guard let index = interests.firstIndex(of: title) else { return }
-                interests.remove(at: index)
+                guard let index = userProfile.interests.firstIndex(of: title) else { return }
+                userProfile.interests.remove(at: index)
             } else {
-                interests.append(title)
+                userProfile.interests.append(title)
             }
         } label: {
             Text(title)
@@ -91,7 +93,7 @@ public struct InterestProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = interests.count > 2
+        let isActive: Bool = userProfile.interests.count > 2
         
         return Button {
             delegate?.pushProfile(.image)
@@ -119,6 +121,6 @@ public struct InterestProfileView: View {
 
 #Preview {
     NavigationStack {
-        InterestProfileView(delegate: nil)
+        InterestProfileView(delegate: nil, userProfile: .empty)
     }
 }

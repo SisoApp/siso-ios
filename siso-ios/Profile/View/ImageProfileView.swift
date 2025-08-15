@@ -9,13 +9,15 @@ import SwiftUI
 import designSystem
 
 public struct ImageProfileView: View {
-    @State private var selectedImages: [UIImage] = []
+    @ObservedObject private var userProfile: UserProfile
     
-    var delegate: ProfileCoordinatorDelegate?
+    weak var delegate: ProfileCoordinatorDelegate?
     private let maxCount: Int = 5
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?,
+                userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -27,7 +29,6 @@ public struct ImageProfileView: View {
             )
             
             mainImageView()
-            
             subImageView()
             
             Spacer()
@@ -50,11 +51,11 @@ public struct ImageProfileView: View {
     
     private func mainImageView() -> some View {
         let index: Int = 0
-        let isExist: Bool = selectedImages.count > index
+        let isExist: Bool = userProfile.profileImageUrl.count > index
         
         return Group {
             if isExist {
-                Image(uiImage: selectedImages[index])
+                Image(uiImage: userProfile.profileImageUrl[index])
                     .resizable()
                     .scaledToFill()      // 비율 무시, 꽉 채움
                     .frame(height: 206)
@@ -78,15 +79,16 @@ public struct ImageProfileView: View {
     
     private func subImageView() -> some View {
         return GeometryReader { geo in
-            let width =  (UIScreen.main.bounds.width - (8 * 3 + 16 * 2)) / 4
+            let width =  (geo.size.width - (8 * 3 + 16 * 2)) / 4
             
             HStack(spacing: 8) {
                 ForEach(1...4, id: \.self) { index in
-                    let isExist: Bool = selectedImages.count > index
+                    let isExist: Bool =
+                    userProfile.profileImageUrl.count > index
                     
                     Group {
                         if isExist {
-                            Image(uiImage: selectedImages[index])
+                            Image(uiImage: userProfile.profileImageUrl[index])
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: width, height: width)
@@ -108,7 +110,7 @@ public struct ImageProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = selectedImages.count > 0
+        let isActive: Bool = userProfile.profileImageUrl.count > 0
         
         return Button {
             if isActive {
@@ -116,8 +118,9 @@ public struct ImageProfileView: View {
             } else {
                 delegate?.presentProfile(sheet: .imageHelper({ images in
                     delegate?.dismissProfileSheet()
-                    self.selectedImages = images
+                    self.userProfile.profileImageUrl = images
                 }))
+                
             }
         } label: {
             Text(isActive ? "계속하기" : "사진 추가하기")
@@ -142,6 +145,6 @@ public struct ImageProfileView: View {
 
 #Preview {
     NavigationStack {
-        ImageProfileView(delegate: nil)
+        ImageProfileView(delegate: nil, userProfile: .empty)
     }
 }

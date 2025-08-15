@@ -6,7 +6,18 @@ import profile
 
 @main
 struct SisoIosApp: App {
-    @StateObject var coordinator: Coordinator = Coordinator()
+    @StateObject var userProfile: UserProfile
+    @StateObject private var coordinator: Coordinator
+    
+    init() {
+        let userProfile: UserProfile = UserProfile(
+            nickname: "", age: "", sex: "", targetSex: "",
+            profileImageUrl: [], interests: [], introduce: "", voice: ""
+        )
+        
+        self._userProfile = StateObject(wrappedValue: userProfile)
+        self._coordinator = StateObject(wrappedValue: Coordinator(userProfile: userProfile))
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -23,7 +34,6 @@ struct SisoIosApp: App {
                     }
             }
             .id(coordinator.stackID)
-            .environmentObject(coordinator)
         }
     }
 }

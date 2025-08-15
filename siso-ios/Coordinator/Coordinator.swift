@@ -15,7 +15,11 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
     
-    public init() {}
+    var userProfile: UserProfile
+    
+    public init(userProfile: UserProfile) {
+        self.userProfile = userProfile
+    }
     
     // Common
     public func pop() {
@@ -50,7 +54,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.append(page)
     }
     
-    public func presentProfile(sheet: profile.ProfileSheet) {
+    public func presentProfile(sheet: ProfileSheet) {
+        print("\(profileSheet) \(sheet)")
         profileSheet = sheet
     }
     
@@ -62,11 +67,11 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     public func build(_ page: ProfilePage) -> some View {
         switch page {
         case .basic:
-            BasicProfileView(delegate: self)
+            BasicProfileView(delegate: self, userProfile: userProfile)
         case .interest:
-            InterestProfileView(delegate: self)
+            InterestProfileView(delegate: self, userProfile: userProfile)
         case .image:
-            ImageProfileView(delegate: self)
+            ImageProfileView(delegate: self, userProfile: userProfile)
         case .introduce:
             IntroduceProfileView(delegate: self)
         }
@@ -76,9 +81,9 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     public func build(sheet: ProfileSheet) -> some View {
         switch sheet {
         case .imageHelper(let completion):
-            ImageHelperSheet(delegate: self, completion: completion)
-        case .cameraPicker(let selectedImage):
-            ImagePicker(selectedImage: selectedImage)
+            ImageHelperSheet(delegate: self, userProfile: userProfile, completion: completion)
+        case .cameraSheet:
+            ImagePicker(userProfile: userProfile)
         }
     }
     

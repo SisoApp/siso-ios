@@ -10,18 +10,19 @@ import UIKit
 
 public struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.presentationMode) var presentationMode
-    @Binding private var selectedImage: UIImage?
+    @ObservedObject private var userProfile: UserProfile
     
     var sourceType: UIImagePickerController.SourceType = .camera
     
-    public init(selectedImage: Binding<UIImage?>) {
-        self._selectedImage = selectedImage
+    public init(userProfile: UserProfile) {
+        self.userProfile = userProfile
     }
     
     public func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker: UIImagePickerController = UIImagePickerController()
         picker.sourceType = sourceType
         picker.delegate = context.coordinator
+        
         return picker
     }
     
@@ -40,9 +41,10 @@ public struct ImagePicker: UIViewControllerRepresentable {
             self.parent = parent
         }
         
-        public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        public func imagePickerController(_ picker: UIImagePickerController,
+                                            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
-                parent.selectedImage = image
+                parent.userProfile.profileImageUrl.append(image)
             }
             
             parent.presentationMode.wrappedValue.dismiss()
