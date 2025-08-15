@@ -73,6 +73,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             ImageProfileView(delegate: self, userProfile: userProfile)
         case .introduce:
             IntroduceProfileView(delegate: self, userProfile: userProfile)
+        case .record:
+            RecordProfileView(delegate: self, userProfile: userProfile)
         }
     }
     
