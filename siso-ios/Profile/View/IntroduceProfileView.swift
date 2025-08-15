@@ -8,7 +8,9 @@
 import SwiftUI
 
 public struct IntroduceProfileView: View {
-    @State private var text: String = ""
+    @State private var introduceText: String = ""
+    @FocusState private var isFocused: Bool
+    
     var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -23,22 +25,26 @@ public struct IntroduceProfileView: View {
                 subTitle: "여러분의 진솔한 생각과 경험을 담아 \n상대방이 당신을 더 잘 이해할 수 있도록\n5자 이상, 50자 이하로 작성해주세요.\n정보는 나중에 수정할 수 있어요"
             )
             
-            RoundedRectangle(cornerRadius: 24)
-                .fill(.gray.opacity(0.2))
-                .frame(height: 206)
-                .overlay {
-                    TextEditor(text: $text)
-                        .background(.clear)
-                        .scrollContentBackground(.hidden) // textEditor 배경색 지우기
-                        .frame(
-                            maxWidth: .infinity,
-                            maxHeight: .infinity,
-                            alignment: .top
-                        )
+            ZStack(alignment: .top) {
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.Siso.Gray._20)
+                    .frame(height: 206)
+                
+                if introduceText.isEmpty && !isFocused {
+                    Text("예시) 안녕하세요. 인생의 황혼기에 접어 들었지만 늘 새로운 경험과 사랑을 찾아 나아가고 있습니다.")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
                 }
-                .padding(.vertical, 32)
-                .padding(.horizontal)
+                
+                TextEditor(text: $introduceText)
+                    .focused($isFocused)
+                    .background(.clear)
+                    .scrollContentBackground(.hidden)
+                    .padding()
+            }
+            .padding(.horizontal)
             
             Spacer()
             
@@ -59,7 +65,7 @@ public struct IntroduceProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = true
+        let isActive: Bool = introduceText.count >= 5
         
         return Button {
             delegate?.pushProfile(.image)
