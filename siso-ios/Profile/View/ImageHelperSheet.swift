@@ -12,10 +12,10 @@ public struct ImageHelperSheet: View {
     @State private var selectedImages: [PhotosPickerItem] = []
     
     public var delegate: ProfileCoordinatorDelegate?
-    public var completion: (([Image]) -> Void)
+    public var completion: (([UIImage]) -> Void)
     
     public init(delegate: ProfileCoordinatorDelegate?,
-                completion: @escaping (([Image]) -> Void)) {
+                completion: @escaping (([UIImage]) -> Void)) {
         self.delegate = delegate
         self.completion = completion
     }
@@ -26,10 +26,11 @@ public struct ImageHelperSheet: View {
             .presentationCornerRadius(24)
             .onChange(of: selectedImages) { _, items in
                 Task {
-                    var images: [Image] = []
+                    var images: [UIImage] = []
                     
                     for item in items {
-                        if let image = try? await item.loadTransferable(type: Image.self) {
+                        if let data: Data = try? await item.loadTransferable(type: Data.self),
+                           let image: UIImage = UIImage(data: data) {
                             images.append(image)
                         }
                         

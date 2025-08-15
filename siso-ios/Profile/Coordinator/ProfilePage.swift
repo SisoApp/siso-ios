@@ -13,7 +13,7 @@ public enum ProfilePage: String, Identifiable, Hashable {
 }
 
 public enum ProfileSheet: Identifiable, Hashable {
-    case imageHelper(([Image]) -> Void)
+    case imageHelper(([UIImage]) -> Void)
     
     public var id: String {
         switch self {
