@@ -24,56 +24,52 @@ struct ListItem: Identifiable {
 
 struct MatchingView: View { // 뷰 이름을 MatchingShortsView로 변경
     // 뷰가 아니라, 뷰를 그리기 위한 '데이터'의 배열
-    @State var items: [ListItem] = [
-        .init(type: .announcement("서버 점검이 9/1에 있습니다.")),
-        .init(type: .user(Profile(name: "김철수", location: "서울 강남구", tags: "#코딩 #독서 #개발"))),
-        .init(type: .advertisement(Ad(title: "요가 클래스 특별 할인! 건강한 라이프 시작!", imageName: "figure.yoga"))),
-        .init(type: .user(Profile(name: "이영희", location: "부산 해운대구", tags: "#여행 #맛집탐방 #사진"))),
-        .init(type: .user(Profile(name: "박지성", location: "런던", tags: "#축구 #운동 #은퇴"))),
-        .init(type: .advertisement(Ad(title: "새로운 아이폰 15 출시! 사전 예약하세요.", imageName: "iphone.gen3"))),
-        .init(type: .user(Profile(name: "최수정", location: "제주도", tags: "#바다 #카페 #힐링"))),
-        .init(type: .announcement("앱 업데이트가 곧 진행됩니다. 새로운 기능 기대해주세요!"))
-    ]
+    @StateObject private var viewModel: MatchingViewModel = .sample
     
     var body: some View {
         // 동적 데이터 처리를 위해서 LazyVStack으로 처리
-        GeometryReader { geometry in
-            VStack {
-                ScrollView {
-                    LazyVStack(spacing: 0){
-                        ForEach(items) { item in
-                           makeView(for: item, geometry: geometry)
+        ZStack {
+            GeometryReader { geometry in
+                VStack {
+                    ScrollView {
+                        LazyVStack(spacing: 0){
+                            ForEach(viewModel.cards) { item in
+                                makeView(for: item, geometry: geometry)
+                            }
                         }
+                        
+                        .scrollTargetLayout()
                     }
-                   
-                    .scrollTargetLayout()
+                    .scrollTargetBehavior(.paging)
+                    .border(.green)
                 }
-                .scrollTargetBehavior(.paging)
-                .border(.green)
+                
+                
             }
-            
+            .ignoresSafeArea()
             Button("ADD") {
-                items.append(ListItem.init(type: .user(Profile.init(name: "호날두", location: "마데이라섬", tags: "발롱도르 축신"))))
+                viewModel.cards.append(CardViewModel(nickname: "호날두",
+                                                     age: 40,
+                                                     isOnline: true,
+                                                     interestTags: ["드리블", "슈팅", "헤딩"],
+                                                     profileImages: [],
+                                                     voiceSample: nil,
+                                                     introduction: "안녕하세요 호날두입니다",
+                                                     location: "서울 용산"
+                                                    ))
             }
         }
-        .ignoresSafeArea()
+        
+        
+        
     }
 }
 
 @ViewBuilder
-private func makeView(for item: ListItem, geometry: GeometryProxy) -> some View {
-    Group {
-        switch item.type {
-                    case .user(let profile):
-                        DataDrivenCardFullPageView(profile: profile)
-                    case .announcement(let announcement):
-                        // 다른 뷰들도 모두 전체 화면으로 만들어야 일관성이 있습니다.
-                        DataDrivenAnnouncementFullPageView(text: announcement)
-                    case .advertisement(let ad):
-                        DataDrivenAdvertisementFullPageView(ad: ad)
-                    }
-    }
-    .frame(width: geometry.size.width, height: geometry.size.height)
+private func makeView(for cardViewModel: CardViewModel, geometry: GeometryProxy) -> some View {
+    // 카드 뷰 생성 뷰빌더
+    MatchingCardView(cardViewModel: cardViewModel )
+        .frame(width: geometry.size.width, height: geometry.size.height)
 }
 
 // DataDrivenCardView를 전체 화면용으로 변경 (배경을 채움)
@@ -136,7 +132,7 @@ struct DataDrivenCardFullPageView: View {
                 .padding(.bottom, 50) // 하단 안전 영역 고려
             }
             .padding()
-           
+            
         }
     }
 }

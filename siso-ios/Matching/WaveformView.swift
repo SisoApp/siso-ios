@@ -21,9 +21,7 @@ struct WaveformView: View {
         TimelineView(.animation(minimumInterval: 0.016)) { timeline in
             HStack(spacing: 4) {
                 ForEach(0..<count, id: \.self) { index in
-                    // --- 오류 해결 부분 ---
-                    // 로직을 ForEach 내부, View를 반환하기 전에 계산합니다.
-                    // 이렇게 하면 각 반복마다 heightRatio가 계산되고 바로 View에서 사용됩니다.
+                    
                     let heightRatio: CGFloat = {
                         if isPlaying {
                             let now = timeline.date.timeIntervalSinceReferenceDate
@@ -31,7 +29,7 @@ struct WaveformView: View {
                             let sinValue = sin(now * factor.speed + factor.offset)
                             return (sinValue + 1) / 2
                         } else {
-                            return 0.01
+                            return 0.1
                         }
                     }() // 클로저를 정의하고 바로 실행하여 값을 할당
 
