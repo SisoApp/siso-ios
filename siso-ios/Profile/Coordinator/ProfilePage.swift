@@ -10,9 +10,3 @@ public enum ProfilePage: String, Identifiable, Hashable {
     
     public var id: String { self.rawValue }
 }
-
-public enum ProfilesSheet: String, Identifiable, Hashable {
-    case imageHelper
-
-    public var id: String { self.rawValue }
-}
