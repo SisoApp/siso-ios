@@ -103,7 +103,6 @@ public struct ImageHelperSheet: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.Siso.Gray._50)
             }
-
         }
         
         return VStack(spacing: 0) {

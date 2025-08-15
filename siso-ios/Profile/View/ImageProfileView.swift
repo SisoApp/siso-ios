@@ -63,7 +63,7 @@ public struct ImageProfileView: View {
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
             } else {
-                Image("Camera")
+                Image("camera")
                     .resizable()
                     .frame(width: 48, height: 48)
                     .scaledToFit()
@@ -96,7 +96,7 @@ public struct ImageProfileView: View {
                                 .clipped()
                                 .clipShape(.rect(cornerRadius: 12))
                         } else {
-                            Image("Camera")
+                            Image("camera")
                                 .frame(width: width, height: width)
                                 .background(Color.Siso.Gray._20)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))

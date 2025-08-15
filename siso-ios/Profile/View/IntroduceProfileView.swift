@@ -69,7 +69,7 @@ public struct IntroduceProfileView: View {
         let isActive: Bool = userProfile.introduce.count >= 5
         
         return Button {
-            //delegate?.pushProfile(.image)
+            delegate?.pushProfile(.record)
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
