@@ -55,7 +55,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     public func presentProfile(sheet: ProfileSheet) {
-        print("\(profileSheet) \(sheet)")
         profileSheet = sheet
     }
     
@@ -73,7 +72,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .image:
             ImageProfileView(delegate: self, userProfile: userProfile)
         case .introduce:
-            IntroduceProfileView(delegate: self)
+            IntroduceProfileView(delegate: self, userProfile: userProfile)
         }
     }
     

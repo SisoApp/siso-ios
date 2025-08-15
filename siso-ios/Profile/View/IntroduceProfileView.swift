@@ -8,13 +8,14 @@
 import SwiftUI
 
 public struct IntroduceProfileView: View {
-    @State private var introduceText: String = ""
+    @ObservedObject private var userProfile: UserProfile
     @FocusState private var isFocused: Bool
     
     var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -30,7 +31,7 @@ public struct IntroduceProfileView: View {
                     .fill(Color.Siso.Gray._20)
                     .frame(height: 206)
                 
-                if introduceText.isEmpty && !isFocused {
+                if userProfile.introduce.isEmpty && !isFocused {
                     Text("예시) 안녕하세요. 인생의 황혼기에 접어 들었지만 늘 새로운 경험과 사랑을 찾아 나아가고 있습니다.")
                         .font(.system(size: 18))
                         .foregroundStyle(Color.Siso.Gray._50)
@@ -38,7 +39,7 @@ public struct IntroduceProfileView: View {
                         .padding()
                 }
                 
-                TextEditor(text: $introduceText)
+                TextEditor(text: $userProfile.introduce)
                     .focused($isFocused)
                     .background(.clear)
                     .scrollContentBackground(.hidden)
@@ -65,10 +66,10 @@ public struct IntroduceProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = introduceText.count >= 5
+        let isActive: Bool = userProfile.introduce.count >= 5
         
         return Button {
-            delegate?.pushProfile(.image)
+            //delegate?.pushProfile(.image)
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -93,6 +94,6 @@ public struct IntroduceProfileView: View {
 
 #Preview {
     NavigationStack {
-        IntroduceProfileView(delegate: nil)
+        IntroduceProfileView(delegate: nil, userProfile: .empty)
     }
 }
