@@ -4,6 +4,7 @@
 //
 //  Created by 멘태 on 8/13/25.
 //
+import SwiftUI
 
 public enum ProfilePage: String, Identifiable, Hashable {
     case basic, interest, image, introduce
@@ -11,8 +12,21 @@ public enum ProfilePage: String, Identifiable, Hashable {
     public var id: String { self.rawValue }
 }
 
-public enum ProfileSheet: String, Identifiable, Hashable {
-    case imageHelper
+public enum ProfileSheet: Identifiable, Hashable {
+    case imageHelper(([Image]) -> Void)
     
-    public var id: String { self.rawValue }
+    public var id: String {
+        switch self {
+        case .imageHelper:
+            return "imageHelper"
+        }
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id) // 클로저는 해싱 불가, id로 대체
+    }
+    
+    public static func ==(lhs: ProfileSheet, rhs: ProfileSheet) -> Bool {
+        lhs.id == rhs.id
+    }
 }

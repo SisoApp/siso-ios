@@ -24,7 +24,7 @@ public struct BasicProfileView: View {
     }
     
     public var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             ProfileHeaderView(
                 currentPage: 1,
                 title: "기본 정보를 입력해주세요"
@@ -86,13 +86,13 @@ public struct BasicProfileView: View {
                 }
             }
         }
-        .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
+        .padding(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
     }
     
     private func RadioButtonView(title: String, subTitle: String? = nil, options: [String], binding: Binding<String>) -> some View {
-        return VStack {
+        return VStack(spacing: 0) {
             Text(title)
-                .padding(.bottom, 4)
+                .padding(.top, 16)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._50)
@@ -100,6 +100,7 @@ public struct BasicProfileView: View {
             
             if let subTitle = subTitle {
                 Text(subTitle)
+                    .padding(.top, 6)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundStyle(Color.Siso.Gray._50)
                     .font(.system(size: 18))
@@ -108,12 +109,13 @@ public struct BasicProfileView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             
-            HStack(spacing: 32) {
+            HStack(spacing: 0) {
                 ForEach(options, id: \.self) { option in
                     let isSelect: Bool = binding.wrappedValue == option
                     
-                    HStack {
+                    HStack(spacing: 0) {
                         Text(option)
+                            .padding(.trailing, 2)
                             .font(.system(size: 20))
                             .fontWeight(.semibold)
                         
@@ -122,7 +124,9 @@ public struct BasicProfileView: View {
                             .frame(width: 20, height: 20)
                             .bold()
                             .foregroundStyle(isSelect ? .black : .gray)
+                            .padding(.trailing, 24)
                     }
+                    .padding(.top, 12)
                     .onTapGesture {
                         binding.wrappedValue = option
                     }

@@ -12,15 +12,31 @@ public struct ImageHelperSheet: View {
     @State private var selectedImages: [PhotosPickerItem] = []
     
     public var delegate: ProfileCoordinatorDelegate?
+    public var completion: (([Image]) -> Void)
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?,
+                completion: @escaping (([Image]) -> Void)) {
         self.delegate = delegate
+        self.completion = completion
     }
     
     public var body: some View {
         bottomSheet()
             .presentationDetents([.height(498)])
             .presentationCornerRadius(24)
+            .onChange(of: selectedImages) { _, items in
+                Task {
+                    var images: [Image] = []
+                    
+                    for item in items {
+                        if let image = try? await item.loadTransferable(type: Image.self) {
+                            images.append(image)
+                        }
+                        
+                        completion(images)
+                    }
+                }
+            }
     }
     
     private func bottomSheet() -> some View {
@@ -129,5 +145,7 @@ public struct ImageHelperSheet: View {
 }
 
 #Preview {
-    ImageHelperSheet(delegate: nil)
+    ImageHelperSheet(delegate: nil) { images in
+        
+    }
 }

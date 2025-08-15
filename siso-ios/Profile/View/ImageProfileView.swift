@@ -9,7 +9,8 @@ import SwiftUI
 import designSystem
 
 public struct ImageProfileView: View {
-    @State private var images: [Image] = []
+    @State private var selectedImages: [Image] = []
+    
     var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -26,7 +27,7 @@ public struct ImageProfileView: View {
             
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(.gray.opacity(0.2))
+                    .fill(Color.Siso.Gray._20)
                 
                 VStack {
                     Image("Camera")
@@ -40,17 +41,19 @@ public struct ImageProfileView: View {
                 }
             }
             .frame(height: 206)
-            .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            .padding(EdgeInsets(top: 36, leading: 16, bottom: 0, trailing: 16))
             
             HStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(.gray.opacity(0.2))
+                    .fill(Color.Siso.Gray._20)
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(.gray.opacity(0.2))
+                    .fill(Color.Siso.Gray._20)
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(.gray.opacity(0.2))
+                    .fill(Color.Siso.Gray._20)
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.Siso.Gray._20)
             }
-            .frame(height: 106)
+            .frame(height: 72)
             .padding(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
             
             Spacer()
@@ -72,13 +75,16 @@ public struct ImageProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = images.count > 0
+        let isActive: Bool = selectedImages.count > 0
         
         return Button {
             if isActive {
                 delegate?.pushProfile(.introduce)
             } else {
-                delegate?.presentProfile(sheet: .imageHelper)
+                delegate?.presentProfile(sheet: .imageHelper({ images in
+                    self.selectedImages = images
+                    print(images)
+                }))
             }
         } label: {
             Text(isActive ? "계속하기" : "사진 추가하기")

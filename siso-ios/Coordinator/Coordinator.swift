@@ -50,7 +50,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.append(page)
     }
     
-    public func presentProfile(sheet: ProfileSheet) {
+    public func presentProfile(sheet: profile.ProfileSheet) {
         profileSheet = sheet
     }
     
@@ -75,8 +75,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     @ViewBuilder
     public func build(sheet: ProfileSheet) -> some View {
         switch sheet {
-        case .imageHelper:
-            ImageHelperSheet(delegate: self)
+        case .imageHelper(let completion):
+            ImageHelperSheet(delegate: self, completion: completion)
         }
     }
     

@@ -19,7 +19,7 @@ public struct InterestProfileView: View {
     }
     
     public var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             ProfileHeaderView(
                 currentPage: 2,
                 title: "나의 관심사를 선택해주세요",
@@ -73,6 +73,7 @@ public struct InterestProfileView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.Siso.Gray._50)
+                        .padding(.top, 12)
                     
                     ForEach(viewModel.chucked(type, into: 3), id: \.self) { chunk in
                         HStack {
@@ -84,7 +85,8 @@ public struct InterestProfileView: View {
                     }
                 }
             }
-            .padding()
+            .padding(.top, 12)
+            .padding(.horizontal)
         }
     }
     
@@ -111,7 +113,7 @@ public struct InterestProfileView: View {
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
-        .padding()
+        .padding(.horizontal)
     }
 }
 

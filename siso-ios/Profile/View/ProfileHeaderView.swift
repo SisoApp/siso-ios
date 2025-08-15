@@ -19,31 +19,33 @@ struct ProfileHeaderView: View {
     }
     
     var body: some View {
-        HStack(spacing: 0) {
-            circleView(page: 1)
-            lineView(page: 2)
-            circleView(page: 2)
-            lineView(page: 3)
-            circleView(page: 3)
-            lineView(page: 4)
-            circleView(page: 4)
-            lineView(page: 5)
-            circleView(page: 5)
-        }
-        .padding()
-        
-        Text(title)
-            .font(.title2)
-            .bold()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
-        
-        if let subTitle = subTitle {
-            Text(subTitle)
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                circleView(page: 1)
+                lineView(page: 2)
+                circleView(page: 2)
+                lineView(page: 3)
+                circleView(page: 3)
+                lineView(page: 4)
+                circleView(page: 4)
+                lineView(page: 5)
+                circleView(page: 5)
+            }
+            .padding()
+            
+            Text(title)
+                .font(.title2)
+                .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundStyle(Color.Siso.Gray._60)
-                .lineSpacing(9)
-                .padding(.horizontal)
+                .padding(EdgeInsets(top: 24, leading: 16, bottom: 8, trailing: 16))
+            
+            if let subTitle = subTitle {
+                Text(subTitle)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(Color.Siso.Gray._60)
+                    .lineSpacing(9)
+                    .padding(.horizontal)
+            }
         }
     }
     
