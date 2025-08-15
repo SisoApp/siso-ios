@@ -77,6 +77,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         switch sheet {
         case .imageHelper(let completion):
             ImageHelperSheet(delegate: self, completion: completion)
+        case .cameraPicker(let selectedImage):
+            ImagePicker(selectedImage: selectedImage)
         }
     }
     

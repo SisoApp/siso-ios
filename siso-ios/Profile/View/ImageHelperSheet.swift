@@ -10,6 +10,7 @@ import PhotosUI
 
 public struct ImageHelperSheet: View {
     @State private var selectedImages: [PhotosPickerItem] = []
+    @State private var cameraImage: UIImage?
     
     public var delegate: ProfileCoordinatorDelegate?
     public var completion: (([UIImage]) -> Void)
@@ -49,7 +50,7 @@ public struct ImageHelperSheet: View {
         
         func cameraButton() -> some View {
             return Button {
-                
+                delegate?.presentProfile(sheet: .cameraPicker($cameraImage))
             } label: {
                 Text("카메라로 사진찍기")
                     .frame(maxWidth: .infinity, maxHeight: 54)

@@ -14,11 +14,14 @@ public enum ProfilePage: String, Identifiable, Hashable {
 
 public enum ProfileSheet: Identifiable, Hashable {
     case imageHelper(([UIImage]) -> Void)
+    case cameraPicker(Binding<UIImage?>)
     
     public var id: String {
         switch self {
         case .imageHelper:
             return "imageHelper"
+        case .cameraPicker:
+            return "cameraPicker"
         }
     }
     
