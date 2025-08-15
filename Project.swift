@@ -75,7 +75,8 @@ let auth: Target = .target(
         .external(name: "KakaoSDKCommon"),
         .external(name: "KakaoSDKAuth"),
         .external(name: "KakaoSDKUser"),
-        .target(name: "designSystem")
+        .target(name: "designSystem"),
+        .target(name: "network")
     ]
 )
 
@@ -87,7 +88,9 @@ let network: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Network/**"],
-    dependencies: []
+    dependencies: [
+        .external(name: "Alamofire")
+    ]
 )
 
 let matching: Target = .target(

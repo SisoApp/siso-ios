@@ -2,7 +2,7 @@ import SwiftUI
 
 // Hex 코드로 Color를 쉽게 생성할 수 있도록 도와주는 생성자입니다.
 // 파일 내에서만 사용되도록 fileprivate으로 선언합니다.
-fileprivate extension Color {
+public extension Color {
     init(hex: String) {
         // # 기호 및 공백 제거
         let scanner = Scanner(string: hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
