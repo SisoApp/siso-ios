@@ -9,6 +9,8 @@ import SwiftUI
 
 public struct BasicProfileView: View {
     @ObservedObject private var userProfile: UserProfile
+    @FocusState private var nicknameFocus: Bool
+    @FocusState private var ageFocus: Bool
     
     public var delegate: ProfileCoordinatorDelegate?
     
@@ -32,11 +34,13 @@ public struct BasicProfileView: View {
             )
             
             textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $userProfile.nickname)
+                .focused($nicknameFocus)
                 .onChange(of: userProfile.nickname) { _, newValue in
                     userProfile.nickname = String(newValue.prefix(20))
                 }
             
             textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $userProfile.age)
+                .focused($ageFocus)
                 .keyboardType(.numberPad)
                 .onChange(of: userProfile.age) { _, newValue in
                     let filtered: String = newValue.filter { "0123456790".contains($0) }
@@ -62,6 +66,10 @@ public struct BasicProfileView: View {
         .navigationTitle("내 정보 입력")
         .navigationBarBackButtonHidden()
         .navigationBarTitleDisplayMode(.inline)
+        .onTapGesture {
+            nicknameFocus = false
+            ageFocus = false
+        }
     }
     
     private func textFieldView(field: String, placeholder: String, binding: Binding<String>) -> some View {
