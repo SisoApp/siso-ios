@@ -75,6 +75,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             IntroduceProfileView(delegate: self, userProfile: userProfile)
         case .record:
             RecordProfileView(delegate: self, userProfile: userProfile)
+        case .complete:
+            CompleteProfileView(delegate: self)
         }
     }
     

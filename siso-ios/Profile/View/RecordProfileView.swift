@@ -180,7 +180,7 @@ public struct RecordProfileView: View {
     private func nextButton() -> some View {
         let isActive: Bool = timerManager.status == .done
         return Button {
-            //delegate?.pushProfile(<#T##page: ProfilePage##ProfilePage#>)
+            delegate?.pushProfile(.complete)
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
