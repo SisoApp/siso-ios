@@ -11,12 +11,15 @@ import Combine
 
 public struct RecordProfileView: View {
     @ObservedObject private var userProfile: UserProfile
-    @StateObject private var viewModel: RecordProfileViewModel = RecordProfileViewModel()
+    @StateObject private var viewModel: RecordProfileViewModel
+    
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
+        self._viewModel = StateObject(wrappedValue: RecordProfileViewModel(userProfile: userProfile)
+        )
     }
     
     public var body: some View {

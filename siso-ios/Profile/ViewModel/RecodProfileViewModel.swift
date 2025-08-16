@@ -14,6 +14,7 @@ enum RecordStatus {
 }
 
 class RecordProfileViewModel: NSObject, ObservableObject {
+    @ObservedObject private var userProfile: UserProfile
     @Published var isRecoding: Bool = false
     @Published var isPlaying: Bool = false
     @Published var status: RecordStatus = .pending
@@ -48,6 +49,10 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     
     var nextButtonIsActive: Bool {
         return status == .waiting || status == .playing
+    }
+    
+    init(userProfile: UserProfile) {
+        self.userProfile = userProfile
     }
     
     func startTimer() {
@@ -100,6 +105,7 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         recoder?.stop()
         isRecoding = false
         status = .waiting
+        userProfile.voice = true
     }
     
     func startPlaying() {

@@ -16,8 +16,7 @@ public class UserProfile: ObservableObject {
         targetSex: "",
         profileImageUrl: [],
         interests: [],
-        introduce: "",
-        voice: ""
+        introduce: ""
     )
     
     @Published var nickname: String // 닉네임
@@ -27,10 +26,10 @@ public class UserProfile: ObservableObject {
     @Published var profileImageUrl: [UIImage] // 프로필 사진
     @Published var interests: [String] // 관심사
     @Published var introduce: String // 자기소개
-    @Published var voice: String // 목소리
+    @Published var voice: Bool // 목소리
     
     public init(nickname: String, age: String, sex: String, targetSex: String,
-         profileImageUrl: [UIImage], interests: [String], introduce: String, voice: String) {
+         profileImageUrl: [UIImage], interests: [String], introduce: String) {
         self.nickname = nickname
         self.age = age
         self.sex = sex
@@ -38,6 +37,6 @@ public class UserProfile: ObservableObject {
         self.profileImageUrl = profileImageUrl
         self.interests = interests
         self.introduce = introduce
-        self.voice = voice
+        self.voice = false
     }
 }
