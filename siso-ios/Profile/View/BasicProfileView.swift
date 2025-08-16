@@ -31,25 +31,22 @@ public struct BasicProfileView: View {
                 title: "기본 정보를 입력해주세요"
             )
             
-            textFieldView(
-                field: "닉네임",
-                placeholder: "이것은 닉네임입니다.",
-                binding: $userProfile.nickname
-            )
+            textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $userProfile.nickname)
+                .onChange(of: userProfile.nickname) { _, newValue in
+                    userProfile.nickname = String(newValue.prefix(20))
+                }
             
-            textFieldView(
-                field: "나이",
-                placeholder: "나이를 입력해주세요.",
-                binding: $userProfile.age
-            )
+            textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $userProfile.age)
+                .keyboardType(.numberPad)
+                .onChange(of: userProfile.age) { _, newValue in
+                    let filtered: String = newValue.filter { "0123456790".contains($0) }
+                    userProfile.age = String(filtered.prefix(2))
+                }
+                
             
             // 라디오 버튼에서 선택한 값을 저장해야함
             
-            RadioButtonView(
-                title: "내 성별",
-                options: ["여성", "남성"],
-                binding: $userProfile.sex
-            )
+            RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $userProfile.sex)
             
             RadioButtonView(
                 title: "매칭 성별",
