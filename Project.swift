@@ -101,7 +101,9 @@ let matching: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Matching/**"],
-    dependencies: []
+    dependencies: [
+        .target(name: "model")
+    ]
 )
 
 let profile: Target = .target(
@@ -140,6 +142,17 @@ let designSystem: Target = .target(
     dependencies: []
 )
 
+let model: Target = .target(
+    name: "model",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).model",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Model/**"],
+    dependencies: []
+)
+
 // -------
 
 let project = Project(
@@ -166,5 +179,6 @@ let project = Project(
         profile,
         coordinator,
         designSystem,
+        model
     ]
 )
