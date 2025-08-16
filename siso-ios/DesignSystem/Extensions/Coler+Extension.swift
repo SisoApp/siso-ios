@@ -42,7 +42,7 @@ public extension Color {
             /// #FFE499
             public static let _30 = Color(hex: "#FFE499")
             /// #FFE499
-            public static let _40 = Color(hex: "#FFE499")
+            public static let _40 = Color(hex: "#FFD666")
             /// #FFC833
             public static let _50 = Color(hex: "#FFC833")
             /// #FFBB00
