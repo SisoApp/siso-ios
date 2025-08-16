@@ -47,7 +47,6 @@ public struct RecordProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @StateObject private var timerManager: TimerManager = TimerManager()
     weak var delegate: ProfileCoordinatorDelegate?
-    private var isActive: Bool = true
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
@@ -139,6 +138,8 @@ public struct RecordProfileView: View {
     }
     
     private func recordButton() -> some View {
+        let isActive: Bool = timerManager.status == .pending
+        
         return Button {
             timerManager.startRecording()
         } label: {
@@ -177,6 +178,7 @@ public struct RecordProfileView: View {
     }
     
     private func nextButton() -> some View {
+        let isActive: Bool = timerManager.status == .done
         return Button {
             //delegate?.pushProfile(<#T##page: ProfilePage##ProfilePage#>)
         } label: {
@@ -208,19 +210,17 @@ public struct RecordProfileView: View {
                 .frame(maxWidth: .infinity, maxHeight: 54)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
+                .foregroundStyle(.black)
+                .background(Color.Siso.Primary.main)
                 .clipShape(.rect(cornerRadius: 27))
                 .overlay {
                     RoundedRectangle(cornerRadius: 27)
                         .stroke(
-                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
+                            Color.Siso.Primary._80,
                             lineWidth: 1
                         )
                 }
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
         .padding(.horizontal)
         .padding(.bottom, 40)
     }
