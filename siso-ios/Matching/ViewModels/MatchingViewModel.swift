@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 /*
  매칭 화면에 뿌려져야 하는 것
  상대방 매칭 카드 뷰
@@ -107,39 +108,6 @@ extension MatchingViewModel {
     }
 }
 
-final class CardViewModel: ObservableObject, Identifiable {
-    let uuid: UUID = UUID()
-    let nickname: String
-    let age: Int
-    var isOnline: Bool
-    let interestTags: [String]
-    let profileImages: [URL]
-    let voiceSample: URL?
-    let introduction: String
-    let location: String
-    
-    init(nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String, location: String) {
-        self.nickname = nickname
-        self.age = age
-        self.isOnline = isOnline
-        self.interestTags = interestTags
-        self.profileImages = profileImages
-        self.voiceSample = voiceSample
-        self.introduction = introduction
-        self.location = location
-    }
-    
-    func call() {
-        // 호감 표시로 대체할까?
-        // 화면 전환이 가능해야 한다.
-        print("call button tapped")
-        
-    }
-    
-    
-    
-    
-}
 
 
 
