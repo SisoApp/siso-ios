@@ -41,6 +41,8 @@ public struct IntroduceProfileView: View {
                 
                 TextEditor(text: $userProfile.introduce)
                     .focused($isFocused)
+                    .font(.system(size: 18))
+                    .tint(.gray)
                     .background(.clear)
                     .scrollContentBackground(.hidden)
                     .padding()
