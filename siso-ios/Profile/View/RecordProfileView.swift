@@ -9,43 +9,9 @@ import SwiftUI
 import designSystem
 import Combine
 
-enum RecordStatus {
-    case pending, onGoing, done
-}
-
-class TimerManager: ObservableObject {
-    @Published var second: Int = 0
-    @Published var status: RecordStatus = .pending
-    
-    var timer: Timer.TimerPublisher?
-    var cancellable: Cancellable?
-    
-    func startRecording() {
-        status = .onGoing
-        second = 0
-        timer = Timer.publish(every: 1.0, on: .main, in: .common)
-        cancellable = timer?.autoconnect().sink { [weak self] _ in
-            guard let self = self else { return }
-            
-            if self.second < 20 {
-                self.second += 1
-            } else {
-                self.completeRecording()
-            }
-        }
-    }
-    
-    func completeRecording() {
-        status = .done
-        cancellable?.cancel()
-        timer = nil
-        cancellable = nil
-    }
-}
-
 public struct RecordProfileView: View {
     @ObservedObject private var userProfile: UserProfile
-    @StateObject private var timerManager: TimerManager = TimerManager()
+    @StateObject private var viewModel: RecordProfileViewModel = RecordProfileViewModel()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -61,7 +27,7 @@ public struct RecordProfileView: View {
                 subTitle: "직접 전하는 목소리는 신뢰를 더해줍니다\n상대방이 회원님을 더 깊이 이해하고 좋은 인상을 받을 수 있도록, 간단한 인삿말을 20초 내로 녹음하여 나를 알려주세요"
             )
             
-            Image(systemName: timerManager.status == .onGoing ? "pause" : "microphone")
+            Image(systemName: viewModel.symbolName)
                 .resizable()
                 .scaledToFit()
                 .fontWeight(.semibold)
@@ -73,17 +39,23 @@ public struct RecordProfileView: View {
                         .frame(width: 98, height: 98)
                         .foregroundStyle(Color.Siso.Red._50)
                         .symbolEffect(.bounce,
-                                      options: timerManager.status == .onGoing ? .repeat(.max).speed(0.6) : .default,
+                                      options: viewModel.status == .recording ? .repeat(.max).speed(0.6) : .default,
                                       value: true)
                         .onTapGesture {
-                            if timerManager.status == .onGoing {
-                                timerManager.completeRecording()
-                            }
-                        }
+                            switch viewModel.status {
+                            case .pending:
+                                break
+                            case .recording:
+                                viewModel.stopRecording()
+                            case .waiting:
+                                viewModel.startPlaying()
+                            case .playing:
+                                viewModel.stopPlaying()
+                            }                        }
                 )
                 .padding(.top, 156)
             
-            Text("00:\(String(format: "%02d", timerManager.second))")
+            Text("00:\(String(format: "%02d", viewModel.playTime))")
                 .font(.system(size: 22))
                 .fontWeight(.bold)
                 .padding(.top, 56)
@@ -91,12 +63,12 @@ public struct RecordProfileView: View {
             Spacer()
             
             Group {
-                switch timerManager.status {
+                switch viewModel.status {
                 case .pending:
                     pendingBottomView()
-                case .onGoing:
+                case .recording:
                     onGoingBottomView()
-                case .done:
+                case .waiting, .playing:
                     doneBottomView()
                 }
             }
@@ -138,10 +110,10 @@ public struct RecordProfileView: View {
     }
     
     private func recordButton() -> some View {
-        let isActive: Bool = timerManager.status == .pending
+        let isActive: Bool = viewModel.recordButtonIsActive
         
         return Button {
-            timerManager.startRecording()
+            viewModel.startRecoding()
         } label: {
             Text("녹음시작")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -165,7 +137,7 @@ public struct RecordProfileView: View {
     
     private func skipButton() -> some View {
         return Button {
-            
+            delegate?.pushProfile(.complete)
         } label: {
             Text("건너뛰기")
                 .font(.system(size: 18))
@@ -178,7 +150,8 @@ public struct RecordProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = timerManager.status == .done
+        let isActive: Bool = viewModel.nextButtonIsActive
+        
         return Button {
             delegate?.pushProfile(.complete)
         } label: {
@@ -204,7 +177,7 @@ public struct RecordProfileView: View {
     
     private func restartButton() -> some View {
         return Button {
-            timerManager.startRecording()
+            viewModel.startRecoding()
         } label: {
             Text("다시 녹음하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
