@@ -43,10 +43,6 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         }
     }
     
-    var symbolEffectIsActive: Bool {
-        return status == .recording || status == .playing
-    }
-    
     var recordButtonIsActive: Bool {
         return status == .pending
     }
