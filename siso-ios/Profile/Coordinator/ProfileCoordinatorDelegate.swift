@@ -7,10 +7,11 @@
 
 import SwiftUI
 
-public protocol ProfileCoordinatorDelegate {
+public protocol ProfileCoordinatorDelegate: AnyObject {
     func pushProfile(_ page: ProfilePage)
     func pop()
     func popToRoot()
-    func buildProfileView(_ page: ProfilePage) -> AnyView
+    func presentProfile(sheet: ProfileSheet)
+    func dismissProfileSheet()
     func changeProfileToMatching()
 }
