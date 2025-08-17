@@ -9,6 +9,7 @@ import SwiftUI
 
 import auth
 import profile
+import matching
 
 public enum Sheet: String, Identifiable {
     case temp
@@ -30,7 +31,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     public init() {}
     
-    // Comon
+    // Common
     public func pop() {
         path.removeLast()
     }
@@ -77,6 +78,23 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     // Matching Page
+    public func pushMatching(_ page: MatchingPage) {
+        path.append(page)
+    }
+    
+    public func buildMatchingView(_ page: MatchingPage) -> AnyView {
+        AnyView(build(page))
+    }
+    
+    @ViewBuilder
+    public func build(_ page: MatchingPage) -> some View {
+        switch page {
+        case .call:
+            MatchingContactingView(delegate: self)
+        case .chat:
+            EmptyView()
+        }
+    }
     
     // Profile Page
     public func pushProfile(_ page: ProfilePage) {
@@ -96,6 +114,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             HobbyProfileView(delegate: self)
         }
     }
+
     
     // Flow
     public func changeAuthToProfile() {

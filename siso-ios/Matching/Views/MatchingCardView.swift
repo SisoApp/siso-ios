@@ -9,6 +9,8 @@ struct MatchingCardView: View {
     
     @StateObject var cardViewModel: CardViewModel
     @State private var isPlaying = false
+    public var delegate: MatchingCoordinatorDelegate?
+    
     
     // MARK: - Main Body
     
@@ -270,6 +272,6 @@ struct MatchingCardView: View {
         introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
         location: "인천 미추홀구"
     )
-    MatchingCardView(cardViewModel: cardViewModel)
+    //MatchingCardView(cardViewModel: cardViewModel)
     
 }

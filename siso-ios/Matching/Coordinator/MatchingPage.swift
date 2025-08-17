@@ -8,5 +8,7 @@
 import Foundation
 
 public enum MatchingPage: String, Identifiable, Hashable {
+    case home, call, chat, popup
     
+    public var id: String {self.rawValue}
 }

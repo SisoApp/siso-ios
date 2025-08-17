@@ -27,6 +27,8 @@ import AVFoundation
  */
 
 final class MatchingViewModel: ObservableObject {
+    weak var delegate: MatchingCoordinatorDelegate?
+    
 
     @Published var cards: [CardViewModel] = []
     
