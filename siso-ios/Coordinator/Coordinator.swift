@@ -23,7 +23,27 @@ public enum FullScreenCover: String, Identifiable, Hashable {
     public var id: String { self.rawValue }
 }
 
-public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
+public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate {
+    public func pushToContactingView() {
+        <#code#>
+    }
+    
+    public func pushToCallingView() {
+        <#code#>
+    }
+    
+    public func pushToChatView() {
+        <#code#>
+    }
+    
+    public func pushCallInteruptPopup() {
+        <#code#>
+    }
+    
+    public func pushFullScreenProfileImageView() {
+        <#code#>
+    }
+    
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var sheet: Sheet?
@@ -89,8 +109,14 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     @ViewBuilder
     public func build(_ page: MatchingPage) -> some View {
         switch page {
+        case .home:
+            MatchingView(delegate: self)
+        case .beCalled:
+            MatchingCalledView()
         case .call:
-            MatchingContactingView(delegate: self)
+            MatchingContactingView()
+        case .popup:
+            AfterCallPopup()
         case .chat:
             EmptyView()
         }

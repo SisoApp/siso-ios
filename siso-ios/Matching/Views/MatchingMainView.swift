@@ -25,6 +25,7 @@ struct ListItem: Identifiable {
 struct MatchingView: View { // 뷰 이름을 MatchingShortsView로 변경
     // 뷰가 아니라, 뷰를 그리기 위한 '데이터'의 배열
     @StateObject private var viewModel: MatchingViewModel = .sample
+    public var delegate: MatchingCoordinatorDelegate?
     
     var body: some View {
         // 동적 데이터 처리를 위해서 LazyVStack으로 처리

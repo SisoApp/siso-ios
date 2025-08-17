@@ -9,11 +9,10 @@ import SwiftUI
 import AVFoundation
 
 
-final class CardViewModel: ObservableObject, Identifiable {
-    
+public class CardViewModel: ObservableObject, Identifiable  {
     weak var delegate: MatchingCoordinatorDelegate?
     
-    let uuid: UUID = UUID()
+    public let uuid: UUID = UUID()
     var nickname: String = ""
     var age: Int = 0
     var isOnline: Bool = true
