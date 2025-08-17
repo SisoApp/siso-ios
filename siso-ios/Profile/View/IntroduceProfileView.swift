@@ -20,39 +20,52 @@ public struct IntroduceProfileView: View {
     
     public var body: some View {
         VStack {
-            ProfileHeaderView(
-                currentPage: 4,
-                title: "간단한 자기소개를 작성해주세요",
-                subTitle: "여러분의 진솔한 생각과 경험을 담아 \n상대방이 당신을 더 잘 이해할 수 있도록\n5자 이상, 50자 이하로 작성해주세요.\n정보는 나중에 수정할 수 있어요"
-            )
-            
-            ZStack(alignment: .top) {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.Siso.Gray._20)
-                    .frame(height: 206)
-                
-                if userProfile.introduce.isEmpty && !isFocused {
-                    Text("예시) 안녕하세요. 인생의 황혼기에 접어 들었지만 늘 새로운 경험과 사랑을 찾아 나아가고 있습니다.")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Color.Siso.Gray._50)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
+            ScrollView {
+                VStack {
+                    ProfileHeaderView(
+                        currentPage: 4,
+                        title: "간단한 자기소개를 작성해주세요",
+                        subTitle: "여러분의 진솔한 생각과 경험을 담아 \n상대방이 당신을 더 잘 이해할 수 있도록\n5자 이상, 50자 이하로 작성해주세요.\n정보는 나중에 수정할 수 있어요"
+                    )
+                    
+                    ZStack(alignment: .top) {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color.Siso.Gray._20)
+                            .frame(height: 206)
+                        
+                        if userProfile.introduce.isEmpty && !isFocused {
+                            Text("예시) 안녕하세요. 인생의 황혼기에 접어 들었지만 늘 새로운 경험과 사랑을 찾아 나아가고 있습니다.")
+                                .font(.system(size: 18))
+                                .foregroundStyle(Color.Siso.Gray._50)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
+                        }
+                        
+                        TextEditor(text: $userProfile.introduce)
+                            .focused($isFocused)
+                            .font(.system(size: 18))
+                            .tint(.gray)
+                            .background(.clear)
+                            .scrollContentBackground(.hidden)
+                            .padding()
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) {
+                                    Spacer()
+                                    Button("완료") {
+                                        isFocused = false
+                                    }
+                                    .foregroundStyle(.black)
+                                }
+                            }
+                    }
+                    .padding(.horizontal)
                 }
-                
-                TextEditor(text: $userProfile.introduce)
-                    .focused($isFocused)
-                    .font(.system(size: 18))
-                    .tint(.gray)
-                    .background(.clear)
-                    .scrollContentBackground(.hidden)
-                    .padding()
             }
-            .padding(.horizontal)
-            
-            Spacer()
             
             nextButton()
+            skipButton()
         }
+        .scrollDisabled(!isFocused)
         .navigationTitle("내 정보 입력")
         .navigationBarBackButtonHidden()
         .navigationBarTitleDisplayMode(.inline)
@@ -74,7 +87,7 @@ public struct IntroduceProfileView: View {
             delegate?.pushProfile(.record)
         } label: {
             Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
@@ -89,8 +102,22 @@ public struct IntroduceProfileView: View {
                 }
                 .animation(.smooth, value: isActive)
         }
+        .frame(height: 54)
         .disabled(!isActive)
-        .padding()
+        .padding(.horizontal)
+    }
+    
+    private func skipButton() -> some View {
+        return Button {
+            delegate?.pushProfile(.complete)
+        } label: {
+            Text("건너뛰기")
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .top)
+        }
+        .padding(8)
     }
 }
 

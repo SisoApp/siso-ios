@@ -21,55 +21,73 @@ public struct BasicProfileView: View {
                 !userProfile.targetSex.isEmpty
     }
     
+    private var isScroll: Bool {
+        return nicknameFocus || ageFocus
+    }
+    
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
     }
     
     public var body: some View {
-        VStack(spacing: 0) {
-            ProfileHeaderView(
-                currentPage: 1,
-                title: "기본 정보를 입력해주세요"
-            )
-            
-            textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $userProfile.nickname)
-                .focused($nicknameFocus)
-                .onChange(of: userProfile.nickname) { _, newValue in
-                    userProfile.nickname = String(newValue.prefix(20))
+        VStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    ProfileHeaderView(
+                        currentPage: 1,
+                        title: "기본 정보를 입력해주세요"
+                    )
+                    
+                    textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $userProfile.nickname)
+                        .focused($nicknameFocus)
+                        .submitLabel(.done)
+                        .onChange(of: userProfile.nickname) { _, newValue in
+                            userProfile.nickname = String(newValue.prefix(20))
+                        }
+                        .onSubmit {
+                            nicknameFocus = false
+                            ageFocus = true
+                        }
+                    
+                    textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $userProfile.age)
+                        .focused($ageFocus)
+                        .keyboardType(.numbersAndPunctuation)
+                        .submitLabel(.done)
+                        .onChange(of: userProfile.age) { _, newValue in
+                            let filtered: String = newValue.filter { "0123456790".contains($0) }
+                            userProfile.age = String(filtered.prefix(2))
+                        }
+                        .onSubmit {
+                            hideKeyboard()
+                        }
+                    
+                    
+                    // 라디오 버튼에서 선택한 값을 저장해야함
+                    
+                    RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $userProfile.sex)
+                    
+                    RadioButtonView(
+                        title: "매칭 성별",
+                        subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
+                        options: ["동성", "이성"],
+                        binding: $userProfile.targetSex
+                    )
+                    
+                    
                 }
-            
-            textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $userProfile.age)
-                .focused($ageFocus)
-                .keyboardType(.numberPad)
-                .onChange(of: userProfile.age) { _, newValue in
-                    let filtered: String = newValue.filter { "0123456790".contains($0) }
-                    userProfile.age = String(filtered.prefix(2))
+                .onTapGesture {
+                    nicknameFocus = false
+                    ageFocus = false
                 }
-                
-            
-            // 라디오 버튼에서 선택한 값을 저장해야함
-            
-            RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $userProfile.sex)
-            
-            RadioButtonView(
-                title: "매칭 성별",
-                subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
-                options: ["동성", "이성"],
-                binding: $userProfile.targetSex
-            )
-            
-            Spacer()
-            
-            nextButton()
+            }
         }
+        .scrollDisabled(!isScroll)
         .navigationTitle("내 정보 입력")
         .navigationBarBackButtonHidden()
         .navigationBarTitleDisplayMode(.inline)
-        .onTapGesture {
-            nicknameFocus = false
-            ageFocus = false
-        }
+        
+        nextButton()
     }
     
     private func textFieldView(field: String, placeholder: String, binding: Binding<String>) -> some View {
@@ -154,7 +172,7 @@ public struct BasicProfileView: View {
             delegate?.pushProfile(.interest)
         } label: {
             Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
@@ -170,7 +188,14 @@ public struct BasicProfileView: View {
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
-        .padding()
+        .frame(height: 54)
+        .padding(.horizontal)
+        .padding(.bottom, 8)
+    }
+    
+    private func hideKeyboard() {
+        nicknameFocus = false
+        ageFocus = false
     }
 }
 

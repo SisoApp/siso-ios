@@ -29,8 +29,8 @@ public struct InterestProfileView: View {
             )
             
             interestButtonScrollView()
-            
             nextButton()
+            skipButton()
         }
         .navigationTitle("내 정보 입력")
         .navigationBarBackButtonHidden()
@@ -116,6 +116,19 @@ public struct InterestProfileView: View {
         }
         .disabled(!isActive)
         .padding(.horizontal)
+    }
+    
+    private func skipButton() -> some View {
+        return Button {
+            delegate?.pushProfile(.image)
+        } label: {
+            Text("건너뛰기")
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .top)
+        }
+        .padding(8)
     }
 }
 
