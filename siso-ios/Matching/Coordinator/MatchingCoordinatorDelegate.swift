@@ -8,14 +8,16 @@
 import SwiftUI
 
 public protocol MatchingCoordinatorDelegate: AnyObject {
+    /// 메인 뷰로 이동하고 그때까지 쌓인 스택 해제 
+    func popToMainView()
     /// 전화하기 버튼 선택 -> ContactingView로 진행
-    func pushToContactingView()
+    func pushContactingView()
     
     /// ContactingView에서 전화 연결됨
-    func pushToCallingView()
+    func pushCallingView()
     
     /// 메시지 보내기 버튼 선택
-    func pushToChatView()
+    func pushChatView()
     
     /// 매칭중 전화 걸려오는 경우
     func pushCallInteruptPopup()

@@ -7,9 +7,13 @@
 
 import SwiftUI
 
-struct AfterCallPopup: View {
-    @StateObject var cardViewModel: CardViewModel
-    var body: some View {
+public struct AfterCallPopup: View {
+    @ObservedObject var cardViewModel: CardViewModel
+    
+    public init(cardViewModel: CardViewModel){
+        self._cardViewModel = ObservedObject.init(wrappedValue: cardViewModel)
+    }
+    public var body: some View {
         
         VStack {
             profileImageAnimatedView

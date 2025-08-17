@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-struct MatchingDimmedView1: View {
-    var body: some View {
+public struct MatchingDimmedView1: View {
+    public init(){}
+    public var body: some View {
         VStack {
             Spacer()
             Image (systemName: "arrow.up")
@@ -18,8 +19,9 @@ struct MatchingDimmedView1: View {
     }
 }
 
-struct MatchingDimmedView2: View {
-    var body: some View {
+public struct MatchingDimmedView2: View {
+    public init(){}
+    public var body: some View {
         VStack {
             Spacer()
             Image (systemName: "waveform")
@@ -29,8 +31,9 @@ struct MatchingDimmedView2: View {
     }
 }
 
-struct MatchingDimmedView3: View {
-    var body: some View {
+public struct MatchingDimmedView3: View {
+    public init(){}
+    public var body: some View {
         VStack {
             Spacer()
             Image (systemName: "arrow.up")

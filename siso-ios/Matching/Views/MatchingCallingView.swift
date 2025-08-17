@@ -7,10 +7,14 @@
 
 import SwiftUI
 
-struct MatchingCallingView: View {
-    @StateObject var cardViewModel: CardViewModel
-    @StateObject var callManager: CallManager
-    var body: some View {
+public struct MatchingCallingView: View {
+    @ObservedObject var cardViewModel: CardViewModel
+    
+    public init(cardViewModel: CardViewModel, callManager: CallManager) {
+        self._cardViewModel = .init(wrappedValue: cardViewModel)
+    }
+    
+    public var body: some View {
         VStack {
             profileImageView
             
@@ -18,9 +22,9 @@ struct MatchingCallingView: View {
             
             locationInfoSection
             
-            interestTagsSection
-            
             introductionSection
+            
+            CountdownView()
             
             actionButtonsSection
         }
@@ -116,7 +120,7 @@ struct MatchingCallingView: View {
     private var actionButtonsSection: some View {
         HStack {
             Button {
-                callManager.quitCall()
+                CallManager.shared.quitCall()
             } label: {
                 
                 RoundedRectangle(cornerRadius: 24)
@@ -137,7 +141,7 @@ struct MatchingCallingView: View {
             Spacer()
             
             Button {
-                callManager.isMuteMode.toggle()
+                CallManager.shared.isMuteMode.toggle()
             } label: {
                 
                 RoundedRectangle(cornerRadius: 24)
@@ -158,7 +162,7 @@ struct MatchingCallingView: View {
             }
             
             Button {
-                callManager.isSpeakerMode.toggle()
+                CallManager.shared.isSpeakerMode.toggle()
             } label: {
                 
                 RoundedRectangle(cornerRadius: 24)
@@ -166,7 +170,7 @@ struct MatchingCallingView: View {
                     .foregroundStyle(Color.Siso.Blue._50)
                     .overlay {
                         VStack {
-                            Image(systemName: "phone.fill")
+                            Image("speakericon")
                                 .resizable()
                                 .frame(width: 40, height: 40)
                                 .foregroundStyle(.white)

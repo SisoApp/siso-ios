@@ -6,20 +6,27 @@
 //
 
 import SwiftUI
-
+import Foundation
 import auth
 import profile
 import matching
 
-public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
+public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate {
+    
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
+    @Published public var matchingSheet: MatchingSheet?
     
     var userProfile: UserProfile
     
-    public init(userProfile: UserProfile) {
+    var matchingViewModel: MatchingViewModel
+    
+    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel) {
         self.userProfile = userProfile
+        self.matchingViewModel = matchingViewModel
+        self.matchingViewModel.delegate = self
+        CallManager.shared.delegate = self
     }
     
     // Common
@@ -59,17 +66,58 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     @ViewBuilder
     public func build(_ page: MatchingPage) -> some View {
+        
+        
         switch page {
         case .home:
-            MatchingView(delegate: self)
+            MatchingMainView(viewModel: matchingViewModel, delegate: self)
         case .beCalled:
-            MatchingCalledView()
-        case .call:
-            MatchingContactingView()
-        case .popup:
-            AfterCallPopup()
+            if let nowWatching = matchingViewModel.nowWatching {
+                MatchingCalledView(cardViewModel: nowWatching)
+            }
         case .chat:
             EmptyView()
+        case .contacting:
+            if let nowWatching = matchingViewModel.nowWatching {
+                MatchingContactingView(cardViewModel: nowWatching)
+            }
+        case .calling:
+            if let nowWatching = matchingViewModel.nowWatching {
+                MatchingCallingView(cardViewModel: nowWatching, callManager: CallManager())
+            }
+            
+        }
+    }
+    public func popToMainView() {
+        print("poptoMain")
+    }
+    
+    public func pushContactingView() {
+        print("contactingView로 진행합니다")
+        path.append(MatchingPage.contacting)
+    }
+    
+    public func pushCallingView() { // 전화중 (이야기중)
+        path.append(MatchingPage.calling)
+    }
+    
+    public func pushChatView() { // 채팅 하기 누른경우
+        path.append(MatchingPage.chat)
+    }
+    
+    public func pushCallInteruptPopup() { 
+        matchingSheet = .afterCallPopup
+    }
+    
+    public func pushFullScreenProfileImageView() {
+        print("작성예정")
+    }
+  
+    @ViewBuilder
+    public func build(_ sheet: MatchingSheet) -> some View {
+        switch sheet {
+        case .afterCallPopup:
+            AfterCallPopup(cardViewModel: matchingViewModel.cards[0])
         }
     }
     

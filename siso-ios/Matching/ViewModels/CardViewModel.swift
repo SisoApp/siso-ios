@@ -8,9 +8,19 @@
 import SwiftUI
 import AVFoundation
 
+public protocol HomeCardDelegate: AnyObject {
+    func cardViewModelDidRequestCall(on viewModel: CardViewModel)
+}
+
 
 public class CardViewModel: ObservableObject, Identifiable  {
     weak var delegate: MatchingCoordinatorDelegate?
+    
+    public weak var homeCardDelegate: HomeCardDelegate?
+    
+    public init(delegate: MatchingCoordinatorDelegate? = nil) {
+        self.delegate = delegate
+    }
     
     public let uuid: UUID = UUID()
     var nickname: String = ""
@@ -37,18 +47,25 @@ public class CardViewModel: ObservableObject, Identifiable  {
     
     func call() { // 화면전환 필요함
         print("call button tapped")
-        delegate?.pushToCallingView()
+        print(delegate == nil)
+        delegate?.pushContactingView()
+        homeCardDelegate?.cardViewModelDidRequestCall(on: self)
         
     }
     
     func chat() {
         print("chat button tapped")
-        delegate?.pushToChatView()
+        delegate?.pushChatView()
         
     }
-
     
-    
+    func callMade() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            print("call made")
+            CallManager.shared.startCall()
+        }
+        
+    }
     
     
 }
