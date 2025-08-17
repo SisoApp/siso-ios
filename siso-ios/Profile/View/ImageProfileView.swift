@@ -81,8 +81,11 @@ public struct ImageProfileView: View {
                             .background(Color.Siso.Gray._20)
                             .clipShape(.rect(cornerRadius: 14))
                             .clipped()
+                            .offset(y: -9)
                             .overlay {
-                                Circle().stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                Circle()
+                                    .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                    .offset(y: -9)
                             }
                     }
                 } else {
@@ -131,8 +134,11 @@ public struct ImageProfileView: View {
                                         .background(Color.Siso.Gray._20)
                                         .clipShape(.rect(cornerRadius: 14))
                                         .clipped()
+                                        .offset(y: -9)
                                         .overlay {
-                                            Circle().stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                            Circle()
+                                                .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                                .offset(y: -9)
                                         }
                                 }
                             } else {
