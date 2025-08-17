@@ -51,6 +51,10 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         return status == .waiting || status == .playing
     }
     
+    var restartButtonIsActive: Bool {
+        return status == .waiting
+    }
+    
     init(userProfile: UserProfile) {
         self.userProfile = userProfile
     }

@@ -109,7 +109,7 @@ public struct IntroduceProfileView: View {
     
     private func skipButton() -> some View {
         return Button {
-            delegate?.pushProfile(.complete)
+            delegate?.pushProfile(.record)
         } label: {
             Text("건너뛰기")
                 .font(.system(size: 18))

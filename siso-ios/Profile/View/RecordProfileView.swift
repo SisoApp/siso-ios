@@ -69,9 +69,7 @@ public struct RecordProfileView: View {
                 switch viewModel.status {
                 case .pending:
                     pendingBottomView()
-                case .recording:
-                    onGoingBottomView()
-                case .waiting, .playing:
+                case .recording, .waiting, .playing:
                     doneBottomView()
                 }
             }
@@ -97,14 +95,6 @@ public struct RecordProfileView: View {
         }
     }
     
-    private func onGoingBottomView() -> some View {
-        return VStack{
-            nextButton()
-                .padding(.bottom, 48) // 40(padding) + 8(spacing)
-            Spacer().frame(height: 54)
-        }
-    }
-    
     private func doneBottomView() -> some View {
         return VStack {
             nextButton()
@@ -119,7 +109,7 @@ public struct RecordProfileView: View {
             viewModel.startRecoding()
         } label: {
             Text("녹음시작")
-                .frame(maxWidth: .infinity, maxHeight: 54)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
@@ -135,6 +125,7 @@ public struct RecordProfileView: View {
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
+        .frame(height: 54)
         .padding(.horizontal)
     }
     
@@ -149,7 +140,8 @@ public struct RecordProfileView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .frame(height: 54)
-        .padding(.bottom, 40)
+        .padding(.horizontal)
+        .padding(.bottom)
     }
     
     private func nextButton() -> some View {
@@ -159,7 +151,7 @@ public struct RecordProfileView: View {
             delegate?.pushProfile(.complete)
         } label: {
             Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
@@ -175,19 +167,22 @@ public struct RecordProfileView: View {
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
+        .frame(height: 54)
         .padding(.horizontal)
     }
     
     private func restartButton() -> some View {
+        let isActive: Bool = viewModel.restartButtonIsActive
+        
         return Button {
             viewModel.startRecoding()
         } label: {
             Text("다시 녹음하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
+                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
+                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 27))
                 .overlay {
                     RoundedRectangle(cornerRadius: 27)
@@ -197,8 +192,10 @@ public struct RecordProfileView: View {
                         )
                 }
         }
+        .disabled(isActive)
+        .frame(height: 54)
         .padding(.horizontal)
-        .padding(.bottom, 40)
+        .padding(.bottom)
     }
 }
 
