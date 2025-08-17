@@ -10,27 +10,18 @@ import SwiftUI
 import auth
 import profile
 
-public enum Sheet: String, Identifiable {
-    case temp
-    
-    public var id: String { self.rawValue }
-}
-
-public enum FullScreenCover: String, Identifiable, Hashable {
-    case imageHelper
-    
-    public var id: String { self.rawValue }
-}
-
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate {
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
-    @Published public var sheet: Sheet?
-    @Published public var fullScreenCover: FullScreenCover?
+    @Published public var profileSheet: ProfileSheet?
     
-    public init() {}
+    var userProfile: UserProfile
     
-    // Comon
+    public init(userProfile: UserProfile) {
+        self.userProfile = userProfile
+    }
+    
+    // Common
     public func pop() {
         path.removeLast()
     }
@@ -39,29 +30,9 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.removeLast(path.count)
     }
     
-    @ViewBuilder
-    public func build(sheet: Sheet) -> some View {
-        switch sheet {
-        default:
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
-    public func build(fullScreenCover: FullScreenCover) -> some View {
-        switch fullScreenCover {
-        case .imageHelper:
-            EmptyView()
-        }
-    }
-    
     // Auth Page
     public func pushAuth(_ page: AuthPage) {
         path.append(page)
-    }
-    
-    public func buildAuthView(_ page: AuthPage) -> AnyView {
-        AnyView(build(page))
     }
     
     @ViewBuilder
@@ -83,17 +54,39 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         path.append(page)
     }
     
-    public func buildProfileView(_ page: ProfilePage) -> AnyView {
-        AnyView(build(page))
+    public func presentProfile(sheet: ProfileSheet) {
+        profileSheet = sheet
+    }
+    
+    public func dismissProfileSheet() {
+        profileSheet = nil
     }
     
     @ViewBuilder
     public func build(_ page: ProfilePage) -> some View {
         switch page {
         case .basic:
-            BasicProfileView(delegate: self)
-        case .hobby:
-            HobbyProfileView(delegate: self)
+            BasicProfileView(delegate: self, userProfile: userProfile)
+        case .interest:
+            InterestProfileView(delegate: self, userProfile: userProfile)
+        case .image:
+            ImageProfileView(delegate: self, userProfile: userProfile)
+        case .introduce:
+            IntroduceProfileView(delegate: self, userProfile: userProfile)
+        case .record:
+            RecordProfileView(delegate: self, userProfile: userProfile)
+        case .complete:
+            CompleteProfileView(delegate: self)
+        }
+    }
+    
+    @ViewBuilder
+    public func build(sheet: ProfileSheet) -> some View {
+        switch sheet {
+        case .imageHelper(let completion):
+            ImageHelperSheet(delegate: self, userProfile: userProfile, completion: completion)
+        case .cameraSheet:
+            ImagePicker(userProfile: userProfile)
         }
     }
     

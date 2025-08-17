@@ -32,7 +32,10 @@ let sisoApp: Target = .target(
             ],
             "UIAppFonts": .array([
                                .string("JejuMyeongjoOTF.otf"),
-                           ])
+                           ]),
+            "NSCameraUsageDescription": "프로필 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
+            "NSPhotoLibraryUsageDescription": "사진을 업로드하기 위해 갤러리 접근 권한이 필요합니다.",
+            "NSMicrophoneUsageDescription": "녹음을 위해 마이크 접근 권한이 필요합니다"
         ]
     ),
     sources: ["siso-ios/Sources/**",],
@@ -114,7 +117,9 @@ let profile: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Profile/**"],
-    dependencies: []
+    dependencies: [
+        .target(name: "designSystem")
+    ]
 )
 
 let coordinator: Target = .target(

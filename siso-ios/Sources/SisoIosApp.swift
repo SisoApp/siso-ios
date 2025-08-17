@@ -6,7 +6,18 @@ import profile
 
 @main
 struct SisoIosApp: App {
-    @StateObject var coordinator: Coordinator = Coordinator()
+    @StateObject var userProfile: UserProfile
+    @StateObject private var coordinator: Coordinator
+    
+    init() {
+        let userProfile: UserProfile = UserProfile(
+            nickname: "", age: "", sex: "", targetSex: "",
+            profileImageUrl: [], interests: [], introduce: ""
+        )
+        
+        self._userProfile = StateObject(wrappedValue: userProfile)
+        self._coordinator = StateObject(wrappedValue: Coordinator(userProfile: userProfile))
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -18,15 +29,11 @@ struct SisoIosApp: App {
                     .navigationDestination(for: ProfilePage.self) { page in
                         coordinator.build(page)
                     }
-                    .sheet(item: $coordinator.sheet) { sheet in
+                    .sheet(item: $coordinator.profileSheet) { sheet in
                         coordinator.build(sheet: sheet)
-                    }
-                    .fullScreenCover(item: $coordinator.fullScreenCover) { cover in
-                        coordinator.build(fullScreenCover: cover)
                     }
             }
             .id(coordinator.stackID)
-            .environmentObject(coordinator)
         }
     }
 }
