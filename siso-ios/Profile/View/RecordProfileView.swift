@@ -30,33 +30,22 @@ public struct RecordProfileView: View {
                 subTitle: "직접 전하는 목소리는 신뢰를 더해줍니다\n상대방이 회원님을 더 깊이 이해하고 좋은 인상을 받을 수 있도록, 간단한 인삿말을 20초 내로 녹음하여 나를 알려주세요"
             )
             
-            Image(systemName: viewModel.symbolName)
+            Image(viewModel.symbolName)
                 .resizable()
-                .scaledToFit()
-                .fontWeight(.semibold)
-                .frame(width: 40, height: 40)
-                .foregroundStyle(.white)
-                .background(
-                    Image(systemName: "circle.fill")
-                        .resizable()
-                        .frame(width: 98, height: 98)
-                        .foregroundStyle(Color.Siso.Red._50)
-                        .symbolEffect(.bounce,
-                                      options: viewModel.status == .recording ? .repeat(.max).speed(0.6) : .default,
-                                      value: true)
-                        .onTapGesture {
-                            switch viewModel.status {
-                            case .pending:
-                                break
-                            case .recording:
-                                viewModel.stopRecording()
-                            case .waiting:
-                                viewModel.startPlaying()
-                            case .playing:
-                                viewModel.stopPlaying()
-                            }                        }
-                )
-                .padding(.top, 156)
+                .frame(width: 98, height: 98)
+                .padding(.top, 98)
+                .onTapGesture {
+                    switch viewModel.status {
+                    case .pending:
+                        break
+                    case .recording:
+                        viewModel.stopRecording()
+                    case .waiting:
+                        viewModel.startPlaying()
+                    case .playing:
+                        viewModel.stopPlaying()
+                    }
+                }
             
             Text("00:\(String(format: "%02d", viewModel.playTime))")
                 .font(.system(size: 22))
@@ -152,7 +141,7 @@ public struct RecordProfileView: View {
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
+                .font(.system(size: 18)) 
                 .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
@@ -187,7 +176,7 @@ public struct RecordProfileView: View {
                 .overlay {
                     RoundedRectangle(cornerRadius: 27)
                         .stroke(
-                            Color.Siso.Primary._80,
+                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
                             lineWidth: 1
                         )
                 }

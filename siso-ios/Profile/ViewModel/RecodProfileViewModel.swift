@@ -35,7 +35,7 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     var symbolName: String {
         switch status {
         case .pending:
-            return "microphone"
+            return "mic"
         case .recording, .playing:
             return "pause"
         case .waiting:
@@ -43,12 +43,16 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         }
     }
     
+    var symbolEffectIsActive: Bool {
+        return status == .recording || status == .playing
+    }
+    
     var recordButtonIsActive: Bool {
         return status == .pending
     }
     
     var nextButtonIsActive: Bool {
-        return status == .waiting || status == .playing
+        return status == .waiting
     }
     
     var restartButtonIsActive: Bool {
@@ -59,12 +63,14 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         self.userProfile = userProfile
     }
     
-    func startTimer() {
+    func startTimer(max: Int = 20) {
         timer = Timer.publish(every: 1.0, on: .main, in: .common)
+        playTime = 0
+        
         cancellable = timer?.autoconnect().sink { [weak self] _ in
             guard let self = self else { return }
             
-            if self.playTime < 20 {
+            if self.playTime < max {
                 self.playTime += 1
             } else {
                 self.stopTimer()
@@ -79,8 +85,6 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func startRecoding() {
-        playTime = 0
-        
         let session = AVAudioSession.sharedInstance()
         
         do {
@@ -115,6 +119,8 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     func startPlaying() {
         do {
             try player = AVAudioPlayer(contentsOf: audioFileUrl)
+            startTimer()
+            player?.delegate = self
             player?.play()
             status = .playing
             isPlaying = true
@@ -125,6 +131,13 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     
     func stopPlaying() {
         isPlaying = false
+        status = .waiting
+    }
+}
+
+extension RecordProfileViewModel: AVAudioPlayerDelegate {
+    public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        stopTimer()
         status = .waiting
     }
 }
