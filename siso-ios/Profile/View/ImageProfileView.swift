@@ -89,7 +89,7 @@ public struct ImageProfileView: View {
                             }
                     }
                 } else {
-                    Image("camera")
+                    Image("Camera")
                         .resizable()
                         .frame(width: 48, height: 48)
                         .scaledToFit()
@@ -142,7 +142,7 @@ public struct ImageProfileView: View {
                                         }
                                 }
                             } else {
-                                Image("camera")
+                                Image("Camera")
                                     .frame(width: width, height: width)
                                     .background(Color.Siso.Gray._20)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))

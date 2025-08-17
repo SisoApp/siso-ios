@@ -181,7 +181,7 @@ public struct RecordProfileView: View {
                         )
                 }
         }
-        .disabled(isActive)
+        .disabled(!isActive)
         .frame(height: 54)
         .padding(.horizontal)
         .padding(.bottom)
