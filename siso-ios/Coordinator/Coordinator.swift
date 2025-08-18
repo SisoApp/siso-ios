@@ -35,7 +35,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     public func popToRoot() {
-        path.removeLast(path.count)
+        path.removeLast(path.count - 1)
     }
     
     // Auth Page
