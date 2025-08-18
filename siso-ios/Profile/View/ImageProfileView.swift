@@ -176,13 +176,6 @@ public struct ImageProfileView: View {
                 .foregroundStyle(.black)
                 .background(Color.Siso.Primary.main)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            Color.Siso.Primary._80,
-                            lineWidth: 1
-                        )
-                }
                 .animation(.smooth, value: isActive)
         }
         .padding(.horizontal)
