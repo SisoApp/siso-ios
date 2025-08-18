@@ -45,18 +45,17 @@ public struct SocialLoginView: View {
                     Spacer()
                     Spacer()
                     
-                    loginButton(title: "카카오로 계속하기", color: .yellow) {
+                    loginButton(title: "카카오로 시작하기", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
                         Task {
                             await vm.kakaoLogin()
                             
                             if vm.isLogined {
-                                print("야호")
                                 delegate?.pushAuth(.accept)
                             }
                         }
                         
                     }
-                    loginButton(title: "애플로 계속하기", color: .white) {
+                    loginButton(title: "Apple로 시작하기", icon: "Apple" , bgColor: .black, textColor: .white) {
                         // Apple Login
                     }
                     
@@ -69,17 +68,21 @@ public struct SocialLoginView: View {
     }
     
     // TODO: 로그인 버튼 뷰
-    private func loginButton(title: String, color: Color ,action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 16))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
+    private func loginButton(title: String, icon: String ,bgColor: Color, textColor: Color,action: @escaping () -> Void) -> some View {
+
+        Button {
+            action()
+        } label: {
+            Label(title, image: icon)
+                .labelStyle(.titleAndIcon)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(bgColor)
+                .clipShape(.rect(cornerRadius: 8))
+                .foregroundStyle(textColor)
         }
-        .frame(maxWidth: .infinity, maxHeight: 54)
-        .background(color)
-        .clipShape(.rect(cornerRadius: 99))
-        .padding(.vertical, 4.5)
+        .font(.custom("AppleSDGothicNeo-Medium", size: 15))
+        .fontWeight(.semibold)
     }
 }
 

@@ -78,7 +78,8 @@ let auth: Target = .target(
         .external(name: "KakaoSDKCommon"),
         .external(name: "KakaoSDKAuth"),
         .external(name: "KakaoSDKUser"),
-        .target(name: "designSystem")
+        .target(name: "designSystem"),
+        .target(name: "network")
     ]
 )
 
@@ -90,7 +91,9 @@ let network: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Network/**"],
-    dependencies: []
+    dependencies: [
+        .external(name: "Alamofire")
+    ]
 )
 
 let matching: Target = .target(
@@ -101,7 +104,9 @@ let matching: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Matching/**"],
-    dependencies: []
+    dependencies: [
+        .target(name: "model")
+    ]
 )
 
 let profile: Target = .target(
@@ -142,6 +147,17 @@ let designSystem: Target = .target(
     dependencies: []
 )
 
+let model: Target = .target(
+    name: "model",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).model",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Model/**"],
+    dependencies: []
+)
+
 // -------
 
 let project = Project(
@@ -168,5 +184,6 @@ let project = Project(
         profile,
         coordinator,
         designSystem,
+        model
     ]
 )

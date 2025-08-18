@@ -16,7 +16,7 @@ public struct CompleteProfileView: View {
     
     public var body: some View {
         ZStack {
-            Image("bgProfile")
+            Image("bgprofile")
                 .resizable()
                 .scaledToFill()
             
