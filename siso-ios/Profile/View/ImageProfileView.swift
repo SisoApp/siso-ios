@@ -55,6 +55,9 @@ public struct ImageProfileView: View {
                     }
             }
         }
+        .onAppear {
+            print(Thread.isMainThread)
+        }
     }
     
     private func mainImageView() -> some View {
@@ -106,7 +109,7 @@ public struct ImageProfileView: View {
     
     private func subImageView() -> some View {
         return GeometryReader { geo in
-            let width =  (geo.size.width - (8 * 3 + 16 * 2)) / 4
+            let height =  (geo.size.width - (8 * 3 + 16 * 2)) / 4
             
             HStack(spacing: 8) {
                 ForEach(1...4, id: \.self) { index in
@@ -119,7 +122,7 @@ public struct ImageProfileView: View {
                                 Image(uiImage: userProfile.profileImageUrl[index])
                                     .resizable()
                                     .scaledToFill()
-                                    .frame(width: width, height: width)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                                     .background(Color.Siso.Gray._20)
                                     .clipped()
                                     .clipShape(.rect(cornerRadius: 12))
@@ -143,7 +146,7 @@ public struct ImageProfileView: View {
                                 }
                             } else {
                                 Image("Camera")
-                                    .frame(width: width, height: width)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                                     .background(Color.Siso.Gray._20)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
@@ -151,6 +154,7 @@ public struct ImageProfileView: View {
                     }
                 }
             }
+            .frame(height: height)
             .padding(.top, 8)
             .padding(.horizontal)
         }

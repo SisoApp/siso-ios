@@ -23,15 +23,12 @@ struct SisoIosApp: App {
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         
         self._coordinator = StateObject(wrappedValue: Coordinator(userProfile: userProfile, matchingViewModel: matchingViewModel))
-        
-        
-        
     }
     
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.home)
+                coordinator.build(.login)
                     .navigationDestination(for: AuthPage.self, destination: { page in
                         coordinator.build(page)
                     })

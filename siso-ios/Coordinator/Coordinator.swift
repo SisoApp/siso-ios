@@ -66,8 +66,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     @ViewBuilder
     public func build(_ page: MatchingPage) -> some View {
-        
-        
         switch page {
         case .home:
             MatchingMainView(viewModel: matchingViewModel, delegate: self)
@@ -179,7 +177,12 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     public func changeProfileToMatching() {
+        stackID = UUID()
+        path = NavigationPath()
         
+        withAnimation(.easeInOut(duration: 0.35)) { [weak self] in
+            self?.pushMatching(.home)
+        }
     }
     
     public func changeMatchingToAuth() {
