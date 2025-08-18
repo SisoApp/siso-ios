@@ -71,6 +71,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         switch page {
         case .home:
             MatchingMainView(viewModel: matchingViewModel, delegate: self)
+                .navigationBarBackButtonHidden(true)
+            
         case .beCalled:
             if let nowWatching = matchingViewModel.nowWatching {
                 MatchingCalledView(cardViewModel: nowWatching)
