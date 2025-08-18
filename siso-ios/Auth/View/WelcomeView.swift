@@ -60,13 +60,8 @@ public struct WelcomeView: View {
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(.black)
-                .background(.yellow)
+                .background(Color.Siso.Primary.main)
                 .clipShape(.rect(cornerRadius: 99))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 99)
-                        .stroke(lineWidth: 1)
-                        .foregroundStyle(.black)
-                }
         })
     }
 }

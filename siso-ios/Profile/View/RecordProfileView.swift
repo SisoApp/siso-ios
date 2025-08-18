@@ -123,7 +123,6 @@ public struct RecordProfileView: View {
         }
         .frame(height: 54)
         .padding(.horizontal)
-        .padding(.bottom)
     }
     
     private func nextButton() -> some View {
@@ -163,7 +162,6 @@ public struct RecordProfileView: View {
         .disabled(!isActive)
         .frame(height: 54)
         .padding(.horizontal)
-        .padding(.bottom)
     }
 }
 
