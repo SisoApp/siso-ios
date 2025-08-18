@@ -8,9 +8,16 @@
 import SwiftUI
 
 /// 전화가 걸리는 중인 뷰입니다
-struct MatchingContactingView: View {
-    @StateObject var cardViewModel: CardViewModel
-    var body: some View {
+public struct MatchingContactingView: View {
+    @ObservedObject var cardViewModel: CardViewModel
+    var delegate: MatchingCoordinatorDelegate?
+    
+    public init(cardViewModel: CardViewModel, delegate: MatchingCoordinatorDelegate? = nil) {
+        self._cardViewModel = ObservedObject(wrappedValue: cardViewModel)
+        self.delegate = delegate
+    }
+    
+   public var body: some View {
         VStack{
             Spacer()
             Text("\(cardViewModel.nickname) 님과\n연결중이에요")
@@ -33,6 +40,10 @@ struct MatchingContactingView: View {
             
             Spacer()
         }
+        .onAppear(){
+            cardViewModel.callMade()
+        }
+        
         
     }
     

@@ -7,9 +7,17 @@
 
 import SwiftUI
 import designSystem
-struct MatchingCalledView: View {
-    @StateObject var cardViewModel: CardViewModel
-    var body: some View {
+
+public struct MatchingCalledView: View {
+    @ObservedObject var cardViewModel: CardViewModel
+    
+    var delegate: MatchingCoordinatorDelegate?
+    public init(cardViewModel: CardViewModel, delegate: MatchingCoordinatorDelegate? = nil){
+        self._cardViewModel = .init(wrappedValue: cardViewModel)
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         VStack {
            
             callFromSection
@@ -34,16 +42,6 @@ struct MatchingCalledView: View {
     
     private var profileImageAnimatedView: some View {
         ZStack {
-            Image(systemName: "circle.fill")
-                        .font(.system(size: 248))
-                        .foregroundStyle(Color.Siso.Primary._20)
-                        .symbolEffect(.pulse)
-            Image(systemName: "circle.fill")
-                        .font(.system(size: 208))
-                        .foregroundStyle(Color.Siso.Primary._40)
-                        .symbolEffect(.pulse)
-            
-            
             AsyncImage(url: cardViewModel.profileImages.first){ image in
                 
                 image
@@ -84,9 +82,9 @@ struct MatchingCalledView: View {
             ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in // 태그가 너무 많으면 잘릴 수 있으므로 prefix 사용 고려
                 HStack(spacing: 2) {
                     Text("#")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                     Text(interest)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                 }
                 .font(.system(size: 18))
                 .padding(.horizontal, 10)
@@ -147,7 +145,7 @@ struct MatchingCalledView: View {
                     .foregroundStyle(Color.Siso.Green._60)
                     .overlay {
                         VStack {
-                            Image(systemName: "phone.fill")
+                            Image("phoneicon")
                                 .resizable()
                                 .frame(width: 40, height: 40)
                                 .foregroundStyle(.white)

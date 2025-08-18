@@ -7,20 +7,24 @@
 
 import SwiftUI
 
-struct AfterCallPopup: View {
-    @StateObject var cardViewModel: CardViewModel
-    var body: some View {
+public struct AfterCallPopup: View {
+    @ObservedObject var cardViewModel: CardViewModel
+    
+    public init(cardViewModel: CardViewModel){
+        self._cardViewModel = ObservedObject.init(wrappedValue: cardViewModel)
+    }
+    public var body: some View {
         
         VStack {
             profileImageAnimatedView
             
             Text("\(cardViewModel.nickname)님과의 통화는 어땠나요?")
-                .font(.system(size: 18))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.black)
                 .padding()
             
             Text("인연 이어가기를 누르면\n메시지를 보내고 상대의\n자세한 정보를 확인할 수 있어요")
-                .font(.system(size: 18))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.black)
                 .multilineTextAlignment(.center)
             

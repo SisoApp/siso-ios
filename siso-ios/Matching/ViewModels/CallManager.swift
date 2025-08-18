@@ -8,14 +8,14 @@
 
 import SwiftUI
 
-final class CallManager: ObservableObject {
-    @Published var isCalling = false {
-        willSet {
-            if newValue == true {
-                quitCall()
-            }
-        }
+public class CallManager: ObservableObject {
+    public static let shared = CallManager()
+    public weak var delegate: MatchingCoordinatorDelegate?
+    public init( isMuteMode: Bool = false, isSpeakerMode: Bool = false) {
+        self.isMuteMode = isMuteMode
+        self.isSpeakerMode = isSpeakerMode
     }
+
     @Published var isMuteMode = false
     {
         willSet {
@@ -36,12 +36,19 @@ final class CallManager: ObservableObject {
             }
         }
     }
+    func startCall() {
+        print("start Call")
+        delegate?.pushCallingView()
+    }
     
     func quitCall() {
         print("quit Call")
-        isCalling = true
+        
+         delegate?.popToRoot()
+        
+        delegate?.pushCallInteruptPopup()
     }
-    
+
     func speakerModeOn() {
         print("speakerPhoneMode")
         

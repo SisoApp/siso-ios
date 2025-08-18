@@ -3,16 +3,24 @@ import designSystem
 import model
 import AVFoundation
 
-struct MatchingCardView: View {
+public struct MatchingCardView: View {
     
     // MARK: - Properties
     
-    @StateObject var cardViewModel: CardViewModel
-    @State private var isPlaying = false
+    @ObservedObject var cardViewModel: CardViewModel
+    @ObservedObject var audioPlayer: AudioPlayerManager
+    
+    //@State private var isPlaying = false
+    //public var delegate: MatchingCoordinatorDelegate?
+    
+    public init(cardViewModel: CardViewModel, audioPlayer: AudioPlayerManager) {
+        self._cardViewModel = .init(wrappedValue: cardViewModel)
+        self._audioPlayer = .init(wrappedValue: audioPlayer)
+    }
     
     // MARK: - Main Body
     
-    var body: some View {
+    public var body: some View {
         
         VStack { // 컴포넌트 간 간격을 적절히 줍니다.
             Spacer()
@@ -148,15 +156,16 @@ struct MatchingCardView: View {
     
     /// 음성 재생 관련 UI를 표시하는 뷰
     private var voicePlayerSection: some View {
-        HStack {
+        let isCurrentlyPlayingThisCard = audioPlayer.isPlaying && audioPlayer.currentlyPlayingURL == cardViewModel.voiceSample
+        return HStack {
             HStack {
-                let systemName = cardViewModel.voiceSample != nil ? (isPlaying ? "pause.fill" : "play.fill") : "play.slash"
+                let systemName = cardViewModel.voiceSample != nil ? (audioPlayer.isPlaying ? "pause.fill" : "play.fill") : "play.slash"
                 
                 Image(systemName: systemName)
                     .foregroundStyle(.white)
                     .frame(width: 20, height: 20)
                 
-                WaveformView(count: 10, height: 14, isPlaying: $isPlaying)
+                WaveformView(count: 10, height: 14, isPlaying: .constant(isCurrentlyPlayingThisCard))
                     .frame(width: 70)
                     .padding(.leading, 5)
             }
@@ -168,9 +177,16 @@ struct MatchingCardView: View {
                     .opacity(0.3)
             )
             .onTapGesture {
-                if cardViewModel.voiceSample != nil {
-                    isPlaying.toggle()
-                    // TODO: 실제 음성 재생/정지 로직 호출
+                guard let voiceURL = cardViewModel.voiceSample else { return }
+                
+                // ✨ 6. 탭 제스처 로직을 수정합니다.
+                if isCurrentlyPlayingThisCard {
+                    // 현재 이 카드의 오디오가 재생 중이면 -> 일시정지
+                    audioPlayer.pause()
+                } else {
+                    // 다른 오디오가 재생 중이거나, 아무것도 재생 중이 아닐 때
+                    // -> 이 카드의 오디오를 처음부터 재생
+                    audioPlayer.play(from: voiceURL)
                 }
             }
             Spacer()
@@ -234,6 +250,7 @@ struct MatchingCardView: View {
             Spacer()
             
             Button {
+                //                delegate?.pushContactingView()
                 cardViewModel.call()
             } label: {
                 RoundedRectangle(cornerRadius: 24)
@@ -270,6 +287,6 @@ struct MatchingCardView: View {
         introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
         location: "인천 미추홀구"
     )
-    MatchingCardView(cardViewModel: cardViewModel)
+    //MatchingCardView(cardViewModel: cardViewModel)
     
 }

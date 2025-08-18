@@ -7,6 +7,7 @@ struct WaveformView: View {
     var height: CGFloat
     @Binding var isPlaying: Bool
 
+    
     init(count: Int, height: CGFloat, isPlaying: Binding<Bool>) {
         self.count = count
         self.randomFactors = (0..<count).map { _ in
