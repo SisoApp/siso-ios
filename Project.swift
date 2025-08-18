@@ -31,8 +31,8 @@ let sisoApp: Target = .target(
                 "kakaokompassauth",
             ],
             "UIAppFonts": .array([
-                               .string("JejuMyeongjoOTF.otf"),
-                           ]),
+                .string("JejuMyeongjoOTF.otf"),
+            ]),
             "NSCameraUsageDescription": "프로필 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
             "NSPhotoLibraryUsageDescription": "사진을 업로드하기 위해 갤러리 접근 권한이 필요합니다.",
             "NSMicrophoneUsageDescription": "녹음을 위해 마이크 접근 권한이 필요합니다"
@@ -46,7 +46,9 @@ let sisoApp: Target = .target(
         .target(name: "matching"),
         .target(name: "profile"),
         .target(name: "coordinator"),
-        .target(name: "designSystem")
+        .target(name: "designSystem"),
+        .target(name: "call"),
+        .target(name: "chat")
     ]
 )
 
@@ -109,6 +111,20 @@ let matching: Target = .target(
     ]
 )
 
+let call: Target = .target(
+    name: "call",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).call",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Call/**"],
+    dependencies: [
+        .target(name: "model"),
+        .xcframework(path: .relativeToRoot("Frameworks/AgoraRtcKit.xcframework"))
+    ]
+)
+
 let chat: Target = .target(
     name: "chat",
     destinations: .iOS,
@@ -146,7 +162,9 @@ let coordinator: Target = .target(
     dependencies: [
         .target(name: "auth"),
         .target(name: "matching"),
-        .target(name: "profile")
+        .target(name: "profile"),
+        .target(name: "call")
+        
     ]
 )
 let designSystem: Target = .target(
@@ -198,6 +216,7 @@ let project = Project(
         coordinator,
         designSystem,
         model,
-        chat
+        chat,
+        call
     ]
 )
