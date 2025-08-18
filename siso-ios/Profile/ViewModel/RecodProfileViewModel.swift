@@ -15,8 +15,6 @@ enum RecordStatus {
 
 class RecordProfileViewModel: NSObject, ObservableObject {
     @ObservedObject private var userProfile: UserProfile
-    @Published var isRecoding: Bool = false
-    @Published var isPlaying: Bool = false
     @Published var status: RecordStatus = .pending
     @Published var playTime: Int = 0
     
@@ -98,7 +96,6 @@ class RecordProfileViewModel: NSObject, ObservableObject {
             recoder = try AVAudioRecorder(url: audioFileUrl, settings: settings)
             recoder?.record()
             startTimer()
-            isRecoding = true
         } catch {
             print("Failed to start recording:", error)
         }
@@ -107,7 +104,6 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     func stopRecording() {
         stopTimer()
         recoder?.stop()
-        isRecoding = false
         status = .waiting
         userProfile.voice = true
     }
@@ -119,21 +115,19 @@ class RecordProfileViewModel: NSObject, ObservableObject {
             player?.delegate = self
             player?.play()
             status = .playing
-            isPlaying = true
         } catch {
             print("Failed to start playing:", error)
         }
     }
     
     func stopPlaying() {
-        isPlaying = false
+        stopTimer()
         status = .waiting
     }
 }
 
 extension RecordProfileViewModel: AVAudioPlayerDelegate {
     public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        stopTimer()
-        status = .waiting
+        stopPlaying()
     }
 }
