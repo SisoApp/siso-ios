@@ -74,16 +74,19 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .beCalled:
             if let nowWatching = matchingViewModel.nowWatching {
                 MatchingCalledView(cardViewModel: nowWatching)
+                    .navigationBarBackButtonHidden(true)
             }
         case .chat:
             EmptyView()
         case .contacting:
             if let nowWatching = matchingViewModel.nowWatching {
                 MatchingContactingView(cardViewModel: nowWatching)
+                    .navigationBarBackButtonHidden(true)
             }
         case .calling:
             if let nowWatching = matchingViewModel.nowWatching {
                 MatchingCallingView(cardViewModel: nowWatching, callManager: CallManager())
+                    .navigationBarBackButtonHidden(true)
             }
             
         }
