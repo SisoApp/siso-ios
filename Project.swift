@@ -107,7 +107,8 @@ let matching: Target = .target(
     infoPlist: .default,
     sources: ["siso-ios/Matching/**"],
     dependencies: [
-        .target(name: "model")
+        .target(name: "model"),
+        .target(name: "call")
     ]
 )
 

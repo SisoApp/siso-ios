@@ -62,12 +62,9 @@ public class CardViewModel: ObservableObject, Identifiable  {
     func callMade() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             print("call made")
-            CallManager.shared.startCall()
+            CallViewModel.shared.startCall(channelName: "channel")
         }
-        
     }
-    
-    
 }
 extension CardViewModel {
     static let testModel: CardViewModel = .init(
