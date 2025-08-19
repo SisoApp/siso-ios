@@ -30,6 +30,11 @@ struct MyPageView: View {
             .navigationTitle("내 정보")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    settingButton()
+                }
+            }
         }
     }
     
@@ -152,6 +157,17 @@ struct MyPageView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+        }
+    }
+    
+    private func settingButton() -> some View {
+        return Button {
+            
+        } label: {
+            Image("gear")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
         }
     }
 }
