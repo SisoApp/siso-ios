@@ -12,14 +12,12 @@ import profile
 import matching
 
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate {
-    
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
     @Published public var matchingSheet: MatchingSheet?
     
     var userProfile: UserProfile
-    
     var matchingViewModel: MatchingViewModel
     
     public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel) {
@@ -88,7 +86,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
                 MatchingCallingView(cardViewModel: nowWatching, callManager: CallManager())
                     .navigationBarBackButtonHidden(true)
             }
-            
         }
     }
     public func popToMainView() {
@@ -171,17 +168,24 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         stackID = UUID()
         path = NavigationPath()
         
-        withAnimation(.easeInOut(duration: 0.35)) { [weak self] in
-            self?.pushProfile(.basic)
+        Task { @MainActor in
+            try await Task.sleep(nanoseconds: 50_000_000)
+            withAnimation(.easeInOut) {
+                pushProfile(.basic)
+            }
         }
+        
     }
     
     public func changeProfileToMatching() {
         stackID = UUID()
         path = NavigationPath()
         
-        withAnimation(.easeInOut(duration: 0.35)) { [weak self] in
-            self?.pushMatching(.home)
+        Task { @MainActor in
+            try await Task.sleep(nanoseconds: 50_000_000)
+            withAnimation(.easeInOut) {
+                pushMatching(.home)
+            }
         }
     }
     

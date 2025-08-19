@@ -41,8 +41,6 @@ public struct AcceptanceView: View {
             Spacer()
             
             allAcceptButton()
-            
-            Spacer()
         }
         .frame(maxWidth: .infinity)
         .padding()
@@ -99,18 +97,13 @@ public struct AcceptanceView: View {
         return Button(action: {
             delegate?.pushAuth(.welcome)
         }, label: {
-            Text("모두 동의")
+            Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(isActive ? .black : .gray)
-                .background(isActive ? .yellow : .clear)
+                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 99))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 99)
-                        .stroke(lineWidth: 1)
-                        .foregroundStyle(isActive ? .black : .gray)
-                }
         })
         .disabled(!isActive)
     }

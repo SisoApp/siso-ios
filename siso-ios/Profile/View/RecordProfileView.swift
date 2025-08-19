@@ -104,13 +104,6 @@ public struct RecordProfileView: View {
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
-                            lineWidth: 1
-                        )
-                }
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
@@ -130,7 +123,6 @@ public struct RecordProfileView: View {
         }
         .frame(height: 54)
         .padding(.horizontal)
-        .padding(.bottom)
     }
     
     private func nextButton() -> some View {
@@ -146,13 +138,6 @@ public struct RecordProfileView: View {
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
-                            lineWidth: 1
-                        )
-                }
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
@@ -173,18 +158,10 @@ public struct RecordProfileView: View {
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
-                            lineWidth: 1
-                        )
-                }
         }
         .disabled(!isActive)
         .frame(height: 54)
         .padding(.horizontal)
-        .padding(.bottom)
     }
 }
 
