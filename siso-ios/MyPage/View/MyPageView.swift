@@ -64,7 +64,8 @@ struct MyPageView: View {
                 Text("28세")
                     .font(.system(size: 22))
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color.Siso.Gray._70)
+                    .foregroundStyle(Color.Siso.Gray._50)
+                    
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Label {
@@ -116,7 +117,7 @@ struct MyPageView: View {
             .frame(height: 48)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 24)
+                SpeechBubble()
                     .fill(Color.Siso.Primary.main)
             )
 
@@ -152,6 +153,34 @@ struct MyPageView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
         }
+    }
+}
+
+struct SpeechBubble: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        let cornerRadius: CGFloat = 16
+        let tailWidth: CGFloat = 16
+        let tailHeight: CGFloat = 10
+        let bubbleRect = CGRect(
+            x: rect.minX + tailWidth,
+            y: rect.minY,
+            width: rect.width - tailWidth,
+            height: rect.height
+        )
+        
+        // 본체
+        path.addRoundedRect(in: bubbleRect, cornerSize: CGSize(width: cornerRadius, height: cornerRadius))
+        
+        // 꼬리
+        let midY = bubbleRect.midY
+        path.move(to: CGPoint(x: bubbleRect.minX, y: midY - tailHeight))
+        path.addLine(to: CGPoint(x: rect.minX, y: midY))
+        path.addLine(to: CGPoint(x: bubbleRect.minX, y: midY + tailHeight))
+        path.closeSubpath()
+        
+        return path
     }
 }
 
