@@ -21,6 +21,7 @@ struct MyPageView: View {
         NavigationStack {
             VStack {
                 profileBox()
+                profileProgressView()
                 userInfoList()
                 
                 Spacer()
@@ -34,23 +35,25 @@ struct MyPageView: View {
     
     private func profileBox() -> some View {
         return HStack {
-            Image("testimg")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 120, height: 120)
-                .clipShape(.rect(cornerRadius: 60))
-                .overlay {
-                    Circle()
-                        .rotation(.degrees(270))
-                        .trim(from: 0, to: 0.36)
-                        .stroke(
-                            Color.Siso.Primary.main,
-                            style: StrokeStyle(
-                                lineWidth: 8,
-                                lineCap: .round
+            VStack {
+                Image("testimg")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 120, height: 120)
+                    .clipShape(.rect(cornerRadius: 60))
+                    .overlay {
+                        Circle()
+                            .rotation(.degrees(270))
+                            .trim(from: 0, to: 0.36)
+                            .stroke(
+                                Color.Siso.Primary.main,
+                                style: StrokeStyle(
+                                    lineWidth: 8,
+                                    lineCap: .round
+                                )
                             )
-                        )
-                }
+                    }
+            }
             
             VStack {
                 Text("삼성전자회장이나야")
@@ -79,12 +82,55 @@ struct MyPageView: View {
         .padding(.horizontal, 8)
     }
     
+    private func profileProgressView() -> some View {
+        return HStack(spacing: 12) {
+            Text("36% 완성")
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(
+                            Color.Siso.Primary._50,
+                            style: StrokeStyle(lineWidth: 3)
+                        )
+                        .background(.clear)
+                }
+                .background(.white)
+            
+            Button {
+                
+            } label: {
+                HStack {
+                    Text("자기소개 완성하기")
+                        .font(.system(size: 18))
+                        .fontWeight(.semibold)
+                    Image("pencil_black")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                }
+            }
+            .foregroundStyle(.black)
+            .frame(height: 48)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.Siso.Primary.main)
+            )
+
+        }
+        .padding(.horizontal)
+        .offset(y: -20)
+    }
+    
     private func userInfoList() -> some View {
         return Group {
             Text("계정 정보")
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
-                .padding(.top, 30)
+                .padding(.top, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             List(MyPageInfo.allCases, id: \.self) { item in
