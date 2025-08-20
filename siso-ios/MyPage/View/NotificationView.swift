@@ -18,7 +18,7 @@ public struct NotificationView: View {
     public var body: some View {
         settingList()
             .padding(.top, 24)
-            .padding(.horizontal)
+            .padding(.trailing)
             .navigationTitle("알림")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()

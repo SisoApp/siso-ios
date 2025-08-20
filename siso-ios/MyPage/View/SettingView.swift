@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum Setting: String, Identifiable, CaseIterable {
+enum Settings: String, Identifiable, CaseIterable {
     case account = "계정"
     case notification = "알림"
     case inquiry = "문의하기"
@@ -21,7 +21,7 @@ enum Setting: String, Identifiable, CaseIterable {
 
 public struct SettingView: View {
     weak var delegate: MyPageCoordinatorDelegate?
-    
+
     public init(delegate: MyPageCoordinatorDelegate?) {
         self.delegate = delegate
     }
@@ -29,6 +29,7 @@ public struct SettingView: View {
     public var body: some View {
         settingList()
             .padding(.top, 27)
+            .padding(.trailing)
             .navigationTitle("설정")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
@@ -44,7 +45,7 @@ public struct SettingView: View {
     }
     
     private func settingList() -> some View {
-        return List(Setting.allCases, id: \.self) { item in
+        return List(Settings.allCases, id: \.self) { item in
             Text(item.rawValue)
                 .font(.system(size: 20))
                 .fontWeight(.semibold)

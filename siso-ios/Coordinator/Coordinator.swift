@@ -156,6 +156,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             ImageHelperSheet(delegate: self, userProfile: userProfile, completion: completion)
         case .cameraSheet:
             ImagePicker(userProfile: userProfile)
+        case .location:
+            LocationProfileView()
         }
     }
     
