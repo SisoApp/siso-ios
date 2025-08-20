@@ -24,8 +24,8 @@ public struct InterestProfileView: View {
         VStack(spacing: 0) {
             ProfileHeaderView(
                 currentPage: 2,
-                title: "나의 관심사를 선택해주세요",
-                subTitle: "최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요\n정보는 나중에 수정할 수 있어요"
+                title: "나의 관심을 선택해주세요",
+                subTitle: "최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요"
             )
             
             interestButtonScrollView()
@@ -72,12 +72,13 @@ public struct InterestProfileView: View {
             VStack(spacing: 12) {
                 ForEach(InterestType.allCases, id: \.self) { type in
                     Text(type.id)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.system(size: 18))
                         .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundStyle(Color.Siso.Gray._50)
                         .padding(.top, 12)
                     
-                    ForEach(viewModel.chucked(type, into: 3), id: \.self) { chunk in
+                    ForEach(viewModel.chucked(type, into: 2), id: \.self) { chunk in
                         HStack {
                             ForEach(chunk, id: \.self) { item in
                                 interestButton(item)
@@ -87,7 +88,7 @@ public struct InterestProfileView: View {
                     }
                 }
             }
-            .padding(.top, 12)
+            .padding(.vertical, 12)
             .padding(.horizontal)
         }
     }
