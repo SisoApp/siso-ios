@@ -58,7 +58,7 @@ public struct InterestProfileView: View {
             }
         } label: {
             Text(title)
-                .padding(EdgeInsets(top: 8, leading: 24, bottom: 8, trailing: 24))
+                .padding(EdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 18))
                 .frame(height: 48)
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._90)

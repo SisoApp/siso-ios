@@ -42,7 +42,7 @@ public struct PersonalityProfileView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
-                    .foregroundStyle(Color.Siso.Gray._50)
+                    .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
                         delegate?.pop()
                     }
