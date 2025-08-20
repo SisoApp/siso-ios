@@ -146,6 +146,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             RecordProfileView(delegate: self, userProfile: userProfile)
         case .complete:
             CompleteProfileView(delegate: self)
+        case .location:
+            LocationProfileView()
         }
     }
     
