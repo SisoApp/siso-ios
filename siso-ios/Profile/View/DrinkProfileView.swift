@@ -52,7 +52,6 @@ public struct DrinkProfileView: View {
                     .onTapGesture {
                         delegate?.pop()
                     }
-                
             }
         }
     }
