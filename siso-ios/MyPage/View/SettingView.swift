@@ -51,7 +51,12 @@ public struct SettingView: View {
                 .foregroundStyle(item == .withdraw ? Color.Siso.Gray._50 : .black)
                 .padding(.vertical, 8)
                 .onTapGesture {
-                    
+                    switch item {
+                    case .notification:
+                        break 
+                    default:
+                        break
+                    }
                 }
         }
         .listStyle(.plain)
