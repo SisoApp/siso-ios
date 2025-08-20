@@ -158,6 +158,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             PersonalityProfileView(delegate: self)
         case .meeting:
             MeetingProfileView(delegate: self)
+        case .profile:
+            ProfileView(delegate: self)
         }
     }
     
