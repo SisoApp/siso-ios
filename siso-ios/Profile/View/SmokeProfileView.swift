@@ -42,7 +42,19 @@ public struct SmokeProfileView: View {
             
             completeButton()
         }
-        .padding()
+        .padding(EdgeInsets(top: 40, leading: 16, bottom: 0, trailing: 16))
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Image(systemName: "chevron.backward")
+                    .foregroundStyle(Color.Siso.Gray._90)
+                    .onTapGesture {
+                        delegate?.pop()
+                    }
+            }
+        }
     }
     
     private func buttonStack() -> some View {

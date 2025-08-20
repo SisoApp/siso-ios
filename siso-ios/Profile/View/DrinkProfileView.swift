@@ -1,5 +1,5 @@
 //
-//  ReligionProfileView.swift
+//  DrinkProfileView.swift
 //  profile
 //
 //  Created by 멘태 on 8/20/25.
@@ -7,18 +7,15 @@
 
 import SwiftUI
 
-enum Religion: String, Identifiable, CaseIterable {
-    case christianity = "기독교"
-    case catholic = "천주교"
-    case buddhism = "불교"
-    case wonBuddhism = "원불교"
-    case none = "무교"
-    case other = "기타/(직접입력)"
+enum DrinkFrequency: String, Identifiable, CaseIterable {
+    case often = "자주 마셔요 (주 3회이상)"
+    case sometimes = "가끔 마셔요 (주 1회 ~ 한달에 한번)"
+    case none = "전혀 안해요"
     
-    var id: String { rawValue }
+    var id: String { self.rawValue }
 }
 
-public struct ReligionProfileView: View {
+public struct DrinkProfileView: View {
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?) {
@@ -26,17 +23,19 @@ public struct ReligionProfileView: View {
     }
     
     public var body: some View {
-        VStack(alignment: .leading) {
-            Text("종교가 있나요?")
+        VStack {
+            Text("음주 습관을 알려주세요.\n서로 이해하는 데 도움이 돼요")
                 .font(.system(size: 24))
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            firstButtonStack()
-                .padding(.top, 24)
-                .padding(.bottom, 4)
+            Text("최소 1개 이상 선택해주세요")
+                .font(.system(size: 18))
+                .foregroundStyle(Color.Siso.Gray._60)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 4)
             
-            secondButtonStack()
+            buttonStack()
             
             Spacer()
             
@@ -53,56 +52,33 @@ public struct ReligionProfileView: View {
                     .onTapGesture {
                         delegate?.pop()
                     }
+                
             }
         }
     }
     
-    private func firstButtonStack() -> some View {
-        let religions = Religion.allCases.prefix(Religion.allCases.count / 2)
-        
-        return HStack(spacing: 12) {
-            ForEach(religions) { religion in
+    private func buttonStack() -> some View {
+        return VStack(alignment: .leading, spacing: 12) {
+            ForEach(DrinkFrequency.allCases, id: \.self) { item in
                 Button {
                     
                 } label: {
-                    Text(religion.rawValue)
+                    Text(item.rawValue)
                         .font(.system(size: 18))
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.Siso.Gray._90)
                         .padding(.vertical, 12)
                         .padding(.horizontal, 18)
                 }
+                .frame(height: 48)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.Siso.Gray._20)
                 )
-                .frame(height: 48)
             }
         }
-    }
-    
-    private func secondButtonStack() -> some View {
-        let religions = Religion.allCases.suffix(Religion.allCases.count / 2)
-        
-        return HStack(spacing: 12) {
-            ForEach(religions) { religion in
-                Button {
-                    
-                } label: {
-                    Text(religion.rawValue)
-                        .font(.system(size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.Siso.Gray._90)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 18)
-                }
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.Siso.Gray._20)
-                )
-                .frame(height: 48)
-            }
-        }
+        .padding(.top, 24)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func completeButton() -> some View {
@@ -128,6 +104,6 @@ public struct ReligionProfileView: View {
 
 #Preview {
     NavigationStack {
-        ReligionProfileView(delegate: nil)
+        DrinkProfileView(delegate: nil)
     }
 }
