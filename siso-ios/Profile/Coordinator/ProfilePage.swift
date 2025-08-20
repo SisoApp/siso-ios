@@ -7,7 +7,7 @@
 import SwiftUI
 
 public enum ProfilePage: String, Identifiable, Hashable {
-    case basic, interest, image, introduce, record, complete, location
+    case basic, interest, image, introduce, record, complete, location, religion
     
     public var id: String { self.rawValue }
 }
