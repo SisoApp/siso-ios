@@ -16,8 +16,14 @@ enum MyPageInfo: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
-struct MyPageView: View {
-    var body: some View {
+public struct MyPageView: View {
+    weak var delegate: MyPageCoordinatorDelegate?
+    
+    public init(delegate: MyPageCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
+    
+    public var body: some View {
         NavigationStack {
             VStack {
                 profileBox()
@@ -70,7 +76,6 @@ struct MyPageView: View {
                     .font(.system(size: 22))
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.Siso.Gray._50)
-                    
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Label {
@@ -84,6 +89,7 @@ struct MyPageView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.horizontal, 16)
         }
         .padding(.horizontal, 8)
     }
@@ -105,30 +111,33 @@ struct MyPageView: View {
                 }
                 .background(.white)
             
-            Button {
-                
-            } label: {
-                HStack {
-                    Text("자기소개 완성하기")
-                        .font(.system(size: 18))
-                        .fontWeight(.semibold)
-                    Image("pencil_black")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20)
-                }
-            }
-            .foregroundStyle(.black)
-            .frame(height: 48)
-            .frame(maxWidth: .infinity)
-            .background(
-                SpeechBubble()
-                    .fill(Color.Siso.Primary.main)
-            )
-
+            profileButton()
         }
         .padding(.horizontal)
         .offset(y: -20)
+    }
+    
+    private func profileButton() -> some View {
+        return Button {
+            delegate?.pushMyPageToProfile()
+        } label: {
+            HStack {
+                Text("자기소개 완성하기")
+                    .font(.system(size: 18))
+                    .fontWeight(.semibold)
+                Image("pencil_black")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+            }
+        }
+        .foregroundStyle(.black)
+        .frame(height: 48)
+        .frame(maxWidth: .infinity)
+        .background(
+            SpeechBubble()
+                .fill(Color.Siso.Primary.main)
+        )
     }
     
     private func userInfoList() -> some View {
@@ -162,7 +171,7 @@ struct MyPageView: View {
     
     private func settingButton() -> some View {
         return Button {
-            
+            delegate?.pushMyPage(.setting)
         } label: {
             Image("gear")
                 .resizable()
@@ -201,5 +210,5 @@ struct SpeechBubble: Shape {
 }
 
 #Preview {
-    MyPageView()
+    MyPageView(delegate: nil)
 }

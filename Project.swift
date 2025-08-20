@@ -148,7 +148,8 @@ let coordinator: Target = .target(
     dependencies: [
         .target(name: "auth"),
         .target(name: "matching"),
-        .target(name: "profile")
+        .target(name: "profile"),
+        .target(name: "mypage")
     ]
 )
 let designSystem: Target = .target(

@@ -10,8 +10,9 @@ import Foundation
 import auth
 import profile
 import matching
+import mypage
 
-public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate {
+public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate, MyPageCoordinatorDelegate {
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
@@ -56,10 +57,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     // Matching Page
     public func pushMatching(_ page: MatchingPage) {
         path.append(page)
-    }
-    
-    public func buildMatchingView(_ page: MatchingPage) -> AnyView {
-        AnyView(build(page))
     }
     
     @ViewBuilder
@@ -161,7 +158,23 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             ImagePicker(userProfile: userProfile)
         }
     }
-
+    
+    // MyPage
+    public func pushMyPage(_ page: MyPage) {
+        path.append(page)
+    }
+    
+    @ViewBuilder
+    public func build(_ page: MyPage) -> some View {
+        switch page {
+        case .main:
+            MyPageView(delegate: self)
+        case .setting:
+            EmptyView()
+        case .notification:
+            EmptyView()
+        }
+    }
     
     // Flow
     public func changeAuthToProfile() {
@@ -187,6 +200,10 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
                 pushMatching(.home)
             }
         }
+    }
+    
+    public func pushMyPageToProfile() {
+        pushProfile(.basic)
     }
     
     public func changeMatchingToAuth() {
