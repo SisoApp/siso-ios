@@ -9,7 +9,6 @@
 import SwiftUI
 import Combine
 import AgoraRtcKit
-import call
 
 
 public class CallViewModel: ObservableObject {
@@ -17,7 +16,7 @@ public class CallViewModel: ObservableObject {
     // MARK: - Properties
     public static let shared = CallViewModel()
     
-    public weak var delegate: MatchingCoordinatorDelegate?
+    public weak var delegate: CallCoordinatorDelegate?
     
     public init( isMuteMode: Bool = false, isSpeakerMode: Bool = false) {
         self.isMuteMode = isMuteMode
@@ -113,11 +112,13 @@ public class CallViewModel: ObservableObject {
     
     func quitCall() {
         print("CallManager: Ending call")
+        // 채널 폭파
         agoraManager.leaveChannel()
-        
-        delegate?.popToRoot()
-        
+        // 이전 화면으로 돌아가기
+        delegate?.finishCallAndPopToPreviousView()
+        // 인연 이어가기 팝업 호출
         delegate?.pushCallInteruptPopup()
+
     }
     
     func speakerModeOn() {

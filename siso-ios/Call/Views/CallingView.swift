@@ -1,80 +1,88 @@
 //
-//  CalledView.swift
+//  MatchingCallingView.swift
 //  matching
 //
-//  Created by jdios on 8/15/25.
+//  Created by jdios on 8/16/25.
 //
 
 import SwiftUI
-import designSystem
+import matching
 
-public struct MatchingCalledView: View {
+public struct CallingView: View {
     @ObservedObject var cardViewModel: CardViewModel
+    //@ObservedObject var callViewModel: CallViewModel
     
-    
-    var delegate: MatchingCoordinatorDelegate?
-    public init(cardViewModel: CardViewModel, delegate: MatchingCoordinatorDelegate? = nil){
+    public init(cardViewModel: CardViewModel, callViewModel: CallViewModel) {
         self._cardViewModel = .init(wrappedValue: cardViewModel)
-        self.delegate = delegate
     }
     
     public var body: some View {
         VStack {
-           
-            callFromSection
-            
-            profileImageAnimatedView
+            profileImageView
             
             userInfoSection
             
-            interestTagsSection
+            locationInfoSection
             
             introductionSection
+            
+            CountdownView()
             
             actionButtonsSection
         }
     }
-    /// 전화가 걸려온 사람을 표시하는 섹션
-    private var callFromSection: some View {
-        Text("\(cardViewModel.nickname) 님으로부터\n전화가 걸려왔어요")
-            .multilineTextAlignment(.center)
-            .font(.system(size: 24, weight: .bold))
-    }
     
-    private var profileImageAnimatedView: some View {
+    private var profileImageView: some View {
         ZStack {
-            AsyncImage(url: cardViewModel.profileImages.first){ image in
+            Group {
+                Rectangle()
                 
-                image
-                    .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
-                    .scaledToFill() // 2. 프레임을 꽉 채우도록 비율 유지 (프로필 사진에 필수!)
-                    .frame(width: 180, height: 180) // 3. 프레임 크기 지정
-                    .clipShape(Circle()) // 4. 원형으로 자르기
-                
-            } placeholder: {
-                Circle()
-                    .frame(width: 180, height: 180) // 3. 프레임 크기 지정
+                TabView() {
+                    ForEach(cardViewModel.profileImages,id: \.self) { url in
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                            
+                        } placeholder: {
+                            ProgressView()
+                        }
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .automatic))
             }
+            .frame(maxWidth: .infinity, maxHeight: 242)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .padding(.horizontal)
         }
-        
         
     }
     /// 사용자 이름과 나이를 표시하는 뷰
     private var userInfoSection: some View {
         HStack {
-                Text("\(cardViewModel.nickname)")
-                .font(.system(size: 24, weight: .bold, design: .default))
-                .foregroundStyle(.black)
+            Group {
+                Text("\(cardViewModel   .nickname),")
                 Text("\(cardViewModel.age)세")
-                .font(.system(size: 24, weight: .bold, design: .default))
-                .foregroundStyle(.gray)
-            
+            }
             .font(.system(size: 24, weight: .bold, design: .default))
-            .foregroundStyle(.white)
+            .foregroundStyle(.black)
             
+            Spacer()
         }
         .padding(.horizontal)
     }
+    
+    /// 위치 정보를 표시하는 뷰
+    private var locationInfoSection: some View {
+        HStack {
+            Image("locationicon_inverse")
+            Text(cardViewModel.location)
+                .foregroundStyle(.black) // 배경이 어두울 것을 가정
+            Spacer()
+        }
+        .padding(.horizontal)
+    }
+    
     
     /// 관심사 태그들을 표시하는 뷰
     private var interestTagsSection: some View {
@@ -93,6 +101,7 @@ public struct MatchingCalledView: View {
                 .background(Color.gray.opacity(0.2))
                 .clipShape(Capsule())
             }
+            Spacer()
         }
         .padding(.horizontal)
     }
@@ -102,7 +111,6 @@ public struct MatchingCalledView: View {
         Text(cardViewModel.introduction)
             .foregroundStyle(.black)
             .font(.system(size: 18))
-            .lineLimit(2)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .onTapGesture {
@@ -110,53 +118,72 @@ public struct MatchingCalledView: View {
             }
     }
     
-    
     /// 하단 액션 버튼 (메시지, 통화) 뷰
     private var actionButtonsSection: some View {
         HStack {
             Button {
-                cardViewModel.chat()
+            CallViewModel.shared.quitCall()
             } label: {
+                
                 RoundedRectangle(cornerRadius: 24)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .frame(maxWidth: .infinity, maxHeight: 96)
                     .foregroundStyle(Color.Siso.Red._60)
                     .overlay {
-                        VStack {
-                            Image("Phone-miss")
+                        VStack{
+                            Image("quitcallicon")
                                 .resizable()
-                                .renderingMode(.template) // 아이콘 색상 변경을 위해 추가
-                                .foregroundStyle(.white)
                                 .frame(width: 40, height: 40)
-                            
-                            Text("나중에 전화하기")
-                                .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(.white)
+                            Text("통화 종료")
+                                .foregroundStyle(.white)
+                                .font(.system(size: 18, weight: .semibold))
                         }
-                        
                     }
             }
-            
             Spacer()
             
             Button {
-                cardViewModel.call()
+                CallViewModel.shared.isMuteMode.toggle()
             } label: {
+                
                 RoundedRectangle(cornerRadius: 24)
                     .frame(maxWidth: .infinity, maxHeight: 80)
-                    .foregroundStyle(Color.Siso.Green._60)
+                    .foregroundStyle(Color.Siso.Gray._50)
                     .overlay {
                         VStack {
-                            Image("phoneicon")
+                            Image(systemName: "speaker.slash.fill")
                                 .resizable()
                                 .frame(width: 40, height: 40)
                                 .foregroundStyle(.white)
-                            
-                            Text("전화 연결")
-                                .font(.system(size: 18, weight: .semibold))
+                            Text("음소거")
                                 .foregroundStyle(.white)
+                                .font(.system(size: 18, weight: .semibold))
+                        }
+                    }
+                
+            }
+            
+            Button {
+                CallViewModel.shared.isSpeakerMode.toggle()
+            } label: {
+                
+                RoundedRectangle(cornerRadius: 24)
+                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .foregroundStyle(Color.Siso.Blue._50)
+                    .overlay {
+                        VStack {
+                            Image("speakericon")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .foregroundStyle(.white)
+                            Text("스피커")
+                                .foregroundStyle(.white)
+                                .font(.system(size: 18, weight: .semibold))
                         }
                         
                     }
+                
+                
             }
         }
         .frame(height: 80)
@@ -164,6 +191,8 @@ public struct MatchingCalledView: View {
     }
 }
 
+
+// #Preview는 기존과 동일합니다.
 #Preview {
     let cardViewModel = CardViewModel(
         nickname: "삼성전자회장이나야",
@@ -171,7 +200,7 @@ public struct MatchingCalledView: View {
         isOnline: true,
         interestTags: ["여행✈️", "사진", "카페투어"],
         profileImages: [
-           
+            URL(string: "https://picsum.photos/seed/jane4/600/400")!,
             URL(string: "https://picsum.photos/seed/jane1/600/400")!,
             URL(string: "https://picsum.photos/seed/jane2/400/600")!,
             URL(string: "https://picsum.photos/seed/jane3/400/600")!
@@ -180,6 +209,6 @@ public struct MatchingCalledView: View {
         introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
         location: "인천 미추홀구"
     )
-    MatchingCalledView(cardViewModel: cardViewModel)
+    CallingView(cardViewModel: cardViewModel, callViewModel: CallViewModel())
+    
 }
-

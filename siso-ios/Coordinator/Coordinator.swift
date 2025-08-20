@@ -10,8 +10,10 @@ import Foundation
 import auth
 import profile
 import matching
+import call
 
-public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate {
+public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate, CallCoordinatorDelegate {
+
     
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
@@ -26,7 +28,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
         self.matchingViewModel.delegate = self
-        CallManager.shared.delegate = self
+        CallViewModel.shared.delegate = self
     }
     
     // Common
@@ -54,6 +56,19 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             WelcomeView(delegate: self)
         }
     }
+    // Call
+    public func pushCallingView() {
+        <#code#>
+    }
+    
+    public func finishCallAndPopToPreviousView() {
+        <#code#>
+    }
+    
+    public func pushKeepConnectionPopup() {
+        <#code#>
+    }
+    
     
     // Matching Page
     public func pushMatching(_ page: MatchingPage) {
@@ -72,25 +87,15 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .home:
             MatchingMainView(viewModel: matchingViewModel, delegate: self)
                 .navigationBarBackButtonHidden(true)
-            
-        case .beCalled:
-            if let nowWatching = matchingViewModel.nowWatching {
-                MatchingCalledView(cardViewModel: nowWatching)
-                    .navigationBarBackButtonHidden(true)
-            }
+
         case .chat:
             EmptyView()
+            
         case .contacting:
             if let nowWatching = matchingViewModel.nowWatching {
-                MatchingContactingView(cardViewModel: nowWatching)
+                ConnectingView(cardViewModel: nowWatching)
                     .navigationBarBackButtonHidden(true)
             }
-        case .calling:
-            if let nowWatching = matchingViewModel.nowWatching {
-                MatchingCallingView(cardViewModel: nowWatching, callManager: CallManager())
-                    .navigationBarBackButtonHidden(true)
-            }
-            
         }
     }
     public func popToMainView() {
@@ -100,10 +105,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     public func pushContactingView() {
         print("contactingView로 진행합니다")
         path.append(MatchingPage.contacting)
-    }
-    
-    public func pushCallingView() { // 전화중 (이야기중)
-        path.append(MatchingPage.calling)
     }
     
     public func pushChatView() { // 채팅 하기 누른경우

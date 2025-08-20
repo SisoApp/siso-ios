@@ -108,7 +108,7 @@ let matching: Target = .target(
     sources: ["siso-ios/Matching/**"],
     dependencies: [
         .target(name: "model"),
-        .target(name: "call")
+        
     ]
 )
 
@@ -122,6 +122,7 @@ let call: Target = .target(
     sources: ["siso-ios/Call/**"],
     dependencies: [
         .target(name: "model"),
+        .target(name: "matching"),
         .xcframework(path: .relativeToRoot("Frameworks/AgoraRtcKit.xcframework"))
     ]
 )

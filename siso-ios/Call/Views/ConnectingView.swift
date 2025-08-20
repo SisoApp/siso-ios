@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import matching
 
 /// 전화가 걸리는 중인 뷰입니다
-public struct MatchingContactingView: View {
+public struct ConnectingView: View {
     @ObservedObject var cardViewModel: CardViewModel
     var delegate: MatchingCoordinatorDelegate?
     
@@ -41,7 +42,7 @@ public struct MatchingContactingView: View {
             Spacer()
         }
         .onAppear(){
-            cardViewModel.callMade()
+           
         }
         
         
@@ -77,5 +78,5 @@ public struct MatchingContactingView: View {
         introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
         location: "인천 미추홀구"
     )
-    MatchingContactingView(cardViewModel: cardViewModel)
+    ConnectingView(cardViewModel: cardViewModel)
 }

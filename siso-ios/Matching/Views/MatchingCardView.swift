@@ -44,7 +44,7 @@ public struct MatchingCardView: View {
             Spacer()
         }
         .background {
-            backgroundView
+           // backgroundView
         }
         
     }
