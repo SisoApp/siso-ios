@@ -150,6 +150,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             LocationProfileView(delegate: self)
         case .religion:
             ReligionProfileView(delegate: self)
+        case .smoke:
+            SmokeProfileView(delegate: self)
         }
     }
     

@@ -122,7 +122,6 @@ public struct ReligionProfileView: View {
         }
         .disabled(!isActive)
         .frame(height: 54)
-        .padding(.horizontal)
         .padding(.bottom, 38)
     }
 }
