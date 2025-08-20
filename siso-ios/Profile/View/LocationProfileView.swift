@@ -8,7 +8,11 @@
 import SwiftUI
 
 public struct LocationProfileView: View {
-    public init() {}
+    weak var delegate: ProfileCoordinatorDelegate?
+    
+    public init(delegate: ProfileCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
     
     public var body: some View {
         VStack {
@@ -18,7 +22,7 @@ public struct LocationProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             Button {
-                
+                delegate?.presentProfile(sheet: .location)
             } label: {
                 Text("검색")
                     .font(.system(size: 18))
@@ -51,9 +55,10 @@ public struct LocationProfileView: View {
             Spacer()
         }
         .padding()
+        
     }
 }
 
 #Preview {
-    LocationProfileView()
+    LocationProfileView(delegate: nil)
 }

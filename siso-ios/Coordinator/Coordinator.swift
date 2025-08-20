@@ -147,7 +147,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .complete:
             CompleteProfileView(delegate: self)
         case .location:
-            LocationProfileView()
+            LocationProfileView(delegate: self)
         }
     }
     
@@ -159,7 +159,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .cameraSheet:
             ImagePicker(userProfile: userProfile)
         case .location:
-            LocationProfileView()
+            LocationProfileSheet(delegate: self)
         }
     }
     
