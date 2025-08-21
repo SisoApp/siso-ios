@@ -155,7 +155,11 @@ public struct ProfileView: View {
                 .padding(.top, 16)
             RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $target)
                 .padding(.top, 16)
+            
             inputView(title: "지역", placeholder: "나의 지역을 등록해주세요")
+                .onTapGesture {
+                    delegate?.pushProfile(.location)
+                }
         }
     }
     
@@ -207,7 +211,7 @@ public struct ProfileView: View {
                 Text(title)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Color.Siso.Gray._50)
-                Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "chevron.right")
                     .frame(width: 10, height: 10)
                     .foregroundStyle(Color.Siso.Gray._50)

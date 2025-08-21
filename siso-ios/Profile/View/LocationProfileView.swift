@@ -55,6 +55,18 @@ public struct LocationProfileView: View {
             Spacer()
         }
         .padding()
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Image(systemName: "chevron.backward")
+                    .foregroundStyle(Color.Siso.Gray._50)
+                    .onTapGesture {
+                        delegate?.pop()
+                    }
+            }
+        }
         
     }
 }
