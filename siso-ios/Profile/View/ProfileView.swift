@@ -24,14 +24,7 @@ public struct ProfileView: View {
     public var body: some View {
         ScrollView {
             VStack {
-                Image("testimg")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 120, height: 120)
-                    .clipped()
-                    .clipShape(.rect(cornerRadius: 60))
-                    .padding(.top, 10)
-                
+                profileImage()
                 nicknameView()
                 ageView()
                 introduceView()
@@ -57,6 +50,16 @@ public struct ProfileView: View {
         }
     }
     
+    private func profileImage() -> some View {
+        return Image("testimg")
+            .resizable()
+            .scaledToFill()
+            .frame(width: 120, height: 120)
+            .clipped()
+            .clipShape(.rect(cornerRadius: 60))
+            .padding(.top, 10)
+    }
+    
     private func sectionHeader(title: String, point: String) -> some View {
         return HStack {
             Text(title)
@@ -78,10 +81,11 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._50)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            TextField("", text: $nickname)
+            Text("닉네임입니다")
                 .font(.system(size: 24, weight: .bold))
                 .padding()
                 .frame(height: 54)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: 54 / 2)
                         .fill(Color.Siso.Gray._20)
@@ -91,8 +95,28 @@ public struct ProfileView: View {
     }
     
     private func ageView() -> some View {
-        return textFieldView(title: "나이", unit: "세")
-            .padding(.top)
+        return VStack {
+            Text("나이")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack {
+                Text("50")
+                    .font(.system(size: 24, weight: .bold))
+                    .padding()
+                    .frame(height: 54)
+                    .background(
+                        RoundedRectangle(cornerRadius: 54 / 2)
+                            .fill(Color.Siso.Gray._20)
+                    )
+                Text("세")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.Siso.Gray._50)
+                Spacer()
+            }
+        }
+        .padding(.top)
     }
     
     private func introduceView() -> some View {
@@ -113,6 +137,7 @@ public struct ProfileView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
+                    .offset(x: -5)
             }
             .padding(.top)
             
