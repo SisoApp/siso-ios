@@ -29,9 +29,9 @@ public struct ProfileView: View {
                 nicknameView()
                 ageView()
                 introduceView()
-                //basicInfoSection()
-                //additionalInfoSection()
-                //tagSection()
+                basicInfoSection()
+                additionalInfoSection()
+                tagSection()
                 
                 Spacer()
             }
