@@ -11,6 +11,9 @@ public struct ProfileView: View {
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
+    @State private var height: String = ""
+    @State private var sex: String = ""
+    @State private var target: String = ""
     
     weak var delegate: ProfileCoordinatorDelegate?
     
@@ -29,9 +32,10 @@ public struct ProfileView: View {
                     .clipShape(.rect(cornerRadius: 60))
                     .padding(.top, 10)
                 
-                nicknameView()
-                ageView()
-                introduceView()
+                //nicknameView()
+                //textFieldView(title: "나이", unit: "세")
+                //introduceView()
+                basicInfoView()
                 
                 Spacer()
             }
@@ -61,35 +65,11 @@ public struct ProfileView: View {
             TextField("", text: $nickname)
                 .font(.system(size: 24, weight: .bold))
                 .padding()
-                .frame(height: 55)
+                .frame(height: 54)
                 .background(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 54 / 2)
                         .fill(Color.Siso.Gray._20)
                 )
-        }
-    }
-    
-    private func ageView() -> some View {
-        return Group {
-            Text("나이")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.Siso.Gray._50)
-                .padding(.top)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack {
-                TextField("", text: $age)
-                    .padding()
-                    .frame(width: 86, height: 55)
-                    .background(
-                        RoundedRectangle(cornerRadius: 25)
-                            .fill(Color.Siso.Gray._20)
-                    )
-                Text("세")
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color.Siso.Gray._50)
-                Spacer()
-            }
         }
     }
     
@@ -139,6 +119,116 @@ public struct ProfileView: View {
             }
             .padding(.top)
         }
+    }
+    
+    private func basicInfoView() -> some View {
+        return VStack {
+            HStack {
+                Text("기본 정보")
+                    .font(.system(size: 18, weight: .semibold))
+                Spacer()
+                Text("+ 30%")
+                    .font(.system(size: 18, weight: .semibold))
+                    .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                    .background(Color.Siso.Primary._40)
+                    .clipShape(.rect(cornerRadius: 8))
+            }
+            
+            textFieldView(title: "키", unit: "cm")
+                .padding(.top, 16)
+            textFieldView(title: "몸무게", unit: "kg")
+                .padding(.top, 8)
+            RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
+                .padding(.top, 16)
+            RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $target)
+                .padding(.top, 16)
+            inputView(title: "지역", placeholder: "나의 지역을 등록해주세요")
+        }
+        .padding(.top, 40)
+    }
+    
+    private func textFieldView(title: String, unit: String) -> some View {
+        return VStack {
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack {
+                TextField("", text: $height)
+                    .padding()
+                    .frame(width: 80, height: 54)
+                    .background(
+                        RoundedRectangle(cornerRadius: 54 / 2)
+                            .fill(Color.Siso.Gray._20)
+                    )
+                Text(unit)
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.Siso.Gray._50)
+                Spacer()
+            }
+        }
+    }
+    
+    private func RadioButtonView(title: String, options: [String], binding: Binding<String>) -> some View {
+        return VStack {
+            Text(title)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack() {
+                ForEach(options, id: \.self) { option in
+                    let isSelect: Bool = binding.wrappedValue == option
+                    
+                    HStack(spacing: 2) {
+                        Text(option)
+                            .padding(.trailing, 2)
+                            .font(.system(size: 20))
+                            .fontWeight(.semibold)
+                        
+                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .bold()
+                            .foregroundStyle(isSelect ? .black : .gray)
+                            .padding(.trailing, 24)
+                    }
+                    .onTapGesture {
+                        binding.wrappedValue = option
+                    }
+                }
+                .padding(.top, 4)
+                
+                Spacer()
+            }
+        }
+    }
+    
+    private func inputView(title: String, placeholder: String) -> some View {
+        return VStack {
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            inputButton(placeholder)
+        }
+        .padding(.top, 24)
+    }
+    
+    private func inputButton(_ placeholder: String) -> some View {
+        return HStack {
+            Text(placeholder)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color.Siso.Gray._50)
+            Spacer()
+            Image(systemName: "chevron.right")
+        }
+        .padding()
+        .frame(height: 52)
+        .background(Color.Siso.Gray._20)
+        .clipShape(.rect(cornerRadius: 52 / 2))
     }
 }
 
