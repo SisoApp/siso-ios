@@ -33,7 +33,7 @@ public struct ProfileView: View {
                     .padding(.top, 10)
                 
                 nicknameView()
-                textFieldView(title: "나이", unit: "세")
+                ageView()
                 introduceView()
                 basicInfoSection()
                 additionalInfoSection()
@@ -72,7 +72,7 @@ public struct ProfileView: View {
     }
     
     private func nicknameView() -> some View {
-        return Group {
+        return VStack {
             Text("닉네임")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color.Siso.Gray._50)
@@ -87,6 +87,12 @@ public struct ProfileView: View {
                         .fill(Color.Siso.Gray._20)
                 )
         }
+        .padding(.top)
+    }
+    
+    private func ageView() -> some View {
+        return textFieldView(title: "나이", unit: "세")
+            .padding(.top)
     }
     
     private func introduceView() -> some View {
@@ -156,18 +162,42 @@ public struct ProfileView: View {
     private func additionalInfoSection() -> some View {
         return VStack {
             sectionHeader(title: "추가 정보", point: "+ 30%")
+            
             inputView(title: "종교", placeholder: "정보를 입력해주세요")
+                .onTapGesture {
+                    delegate?.pushProfile(.religion)
+                }
+            
             inputView(title: "흡연", placeholder: "정보를 입력해주세요")
+                .onTapGesture {
+                    delegate?.pushProfile(.smoke)
+                }
+            
             inputView(title: "음주", placeholder: "정보를 입력해주세요")
+                .onTapGesture {
+                    delegate?.pushProfile(.drink)
+                }
+            
             inputView(title: "MBTI", placeholder: "정보를 입력해주세요")
+                .onTapGesture {
+                    delegate?.pushProfile(.personality)
+                }
         }
     }
     
     private func tagSection() -> some View {
         return VStack {
             sectionHeader(title: "관심사 / 취향 태그", point: "+ 30%")
+            
             tagView(title: "나의 관심사", placehorder: "나의 관심사를 골라주세요")
+                .onTapGesture {
+                    delegate?.pushProfile(.interest)
+                }
+            
             tagView(title: "매칭 상대와의 관계", placehorder: "어떤 관계를 원하시나요?")
+                .onTapGesture {
+                    delegate?.pushProfile(.meeting)
+                }
         }
     }
     
