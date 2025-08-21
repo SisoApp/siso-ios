@@ -32,10 +32,12 @@ public struct ProfileView: View {
                     .clipShape(.rect(cornerRadius: 60))
                     .padding(.top, 10)
                 
-                //nicknameView()
-                //textFieldView(title: "나이", unit: "세")
-                //introduceView()
-                basicInfoView()
+                nicknameView()
+                textFieldView(title: "나이", unit: "세")
+                introduceView()
+                basicInfoSection()
+                additionalInfoSection()
+                tagSection()
                 
                 Spacer()
             }
@@ -53,6 +55,20 @@ public struct ProfileView: View {
                 }
             }
         }
+    }
+    
+    private func sectionHeader(title: String, point: String) -> some View {
+        return HStack {
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
+            Spacer()
+            Text(point)
+                .font(.system(size: 18, weight: .semibold))
+                .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                .background(Color.Siso.Primary._40)
+                .clipShape(.rect(cornerRadius: 8))
+        }
+        .padding(.top, 40)
     }
     
     private func nicknameView() -> some View {
@@ -74,7 +90,7 @@ public struct ProfileView: View {
     }
     
     private func introduceView() -> some View {
-        return Group {
+        return VStack {
             Text("자기소개")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color.Siso.Gray._50)
@@ -121,18 +137,9 @@ public struct ProfileView: View {
         }
     }
     
-    private func basicInfoView() -> some View {
+    private func basicInfoSection() -> some View {
         return VStack {
-            HStack {
-                Text("기본 정보")
-                    .font(.system(size: 18, weight: .semibold))
-                Spacer()
-                Text("+ 30%")
-                    .font(.system(size: 18, weight: .semibold))
-                    .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                    .background(Color.Siso.Primary._40)
-                    .clipShape(.rect(cornerRadius: 8))
-            }
+            sectionHeader(title: "기본 정보", point: "+ 30%")
             
             textFieldView(title: "키", unit: "cm")
                 .padding(.top, 16)
@@ -144,7 +151,56 @@ public struct ProfileView: View {
                 .padding(.top, 16)
             inputView(title: "지역", placeholder: "나의 지역을 등록해주세요")
         }
-        .padding(.top, 40)
+    }
+    
+    private func additionalInfoSection() -> some View {
+        return VStack {
+            sectionHeader(title: "추가 정보", point: "+ 30%")
+            inputView(title: "종교", placeholder: "정보를 입력해주세요")
+            inputView(title: "흡연", placeholder: "정보를 입력해주세요")
+            inputView(title: "음주", placeholder: "정보를 입력해주세요")
+            inputView(title: "MBTI", placeholder: "정보를 입력해주세요")
+        }
+    }
+    
+    private func tagSection() -> some View {
+        return VStack {
+            sectionHeader(title: "관심사 / 취향 태그", point: "+ 30%")
+            tagView(title: "나의 관심사", placehorder: "나의 관심사를 골라주세요")
+            tagView(title: "매칭 상대와의 관계", placehorder: "어떤 관계를 원하시나요?")
+        }
+    }
+    
+    private func tagView(title: String, placehorder: String) -> some View {
+        return VStack(spacing: 12) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color.Siso.Gray._50)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .frame(width: 10, height: 10)
+                    .foregroundStyle(Color.Siso.Gray._50)
+            }
+            
+            HStack {
+                Button {
+                    
+                } label: {
+                    Text(placehorder)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color.Siso.Gray._70)
+                }
+                .padding()
+                .frame(height: 48)
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.Siso.Gray._20)
+                )
+                Spacer()
+            }
+        }
+        .padding(.top, 24)
     }
     
     private func textFieldView(title: String, unit: String) -> some View {
