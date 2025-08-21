@@ -14,6 +14,7 @@ public struct ProfileView: View {
     @State private var height: String = ""
     @State private var sex: String = ""
     @State private var target: String = ""
+    @State private var isPlaying: Bool = false
     
     weak var delegate: ProfileCoordinatorDelegate?
     
@@ -28,9 +29,9 @@ public struct ProfileView: View {
                 nicknameView()
                 ageView()
                 introduceView()
-                basicInfoSection()
-                additionalInfoSection()
-                tagSection()
+                //basicInfoSection()
+                //additionalInfoSection()
+                //tagSection()
                 
                 Spacer()
             }
@@ -128,18 +129,37 @@ public struct ProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             HStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.Siso.Gray._60)
-                    .padding(.trailing, 8)
-                    .frame(height: 44)
+                HStack {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .resizable()
+                        .foregroundStyle(.white)
+                        .frame(width: 15, height: 15)
+                        .onTapGesture {
+                            isPlaying.toggle()
+                        }
+                    
+                    waveFormView(count: 30, height: 44)
+                    
+                    Text("00:15")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(
+                    RoundedRectangle(cornerRadius: 44 / 2)
+                        .fill(Color.Siso.Gray._60)
+                )
+                
+                Spacer()
                 
                 Image("pencil")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
-                    .offset(x: -5)
+                    .offset(x: -15)
             }
-            .padding(.top)
+            .padding(.top, 8)
             
             ZStack {
                 RoundedRectangle(cornerRadius: 16)
@@ -166,6 +186,38 @@ public struct ProfileView: View {
             }
             .padding(.top)
         }
+    }
+    
+    private func waveFormView(count: Int, height: CGFloat) -> some View {
+        let randomFactors: [(offset: Double, speed: Double)] = (0..<count).map { _ in
+            (offset: Double.random(in: 0...(.pi * 2)),
+             speed: Double.random(in: 0.5...1.5))
+        }
+        
+        return TimelineView(.animation(minimumInterval: 0.016)) { timeline in
+            HStack(spacing: 4) {
+                ForEach(0..<count, id: \.self) { index in
+                    
+                    let heightRatio: CGFloat = {
+                        if isPlaying {
+                            let now = timeline.date.timeIntervalSinceReferenceDate
+                            let factor = randomFactors[index]
+                            let sinValue = sin(now * factor.speed + factor.offset)
+                            return (sinValue + 1) / 2
+                        } else {
+                            return 0.1
+                        }
+                    }() // 클로저를 정의하고 바로 실행하여 값을 할당
+
+                    Rectangle()
+                        .fill(Color.white)
+                        .frame(width: 3, height: height * heightRatio)
+                        .cornerRadius(4)
+                }
+            }
+            .animation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 0.5), value: isPlaying)
+        }
+        .frame(height: height)
     }
     
     private func basicInfoSection() -> some View {
