@@ -11,6 +11,8 @@ import auth
 import profile
 import matching
 import call
+import model
+
 
 public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate, CallCoordinatorDelegate {
 
@@ -18,11 +20,13 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
-    @Published public var matchingSheet: MatchingSheet?
+    @Published public var callSheet: CallSheet?
     
     var userProfile: UserProfile
     
     var matchingViewModel: MatchingViewModel
+    
+    var callViewModel: CallViewModel = CallViewModel.shared
     
     public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel) {
         self.userProfile = userProfile
@@ -56,19 +60,33 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             WelcomeView(delegate: self)
         }
     }
+    
     // Call
     public func pushCallingView() {
-        <#code#>
+        print("callingView showed")
     }
     
     public func finishCallAndPopToPreviousView() {
-        <#code#>
+        print("전화 이전 화면으로 돌아가기  showed")
     }
     
     public func pushKeepConnectionPopup() {
-        <#code#>
+        print("인연 이어가기  showed")
     }
-    
+    @ViewBuilder
+    public func build(_ page: CallPage) -> some View {
+        switch page {
+        case .connecting:
+            // 닉네임만 있으면 그릴 수 있음
+            ConnectingView(delegate: self)
+        case .called:
+            // 프로필만 있으면 그릴 수 있음
+            CalledView(callViewModel: callViewModel, delegate: self)
+        case .calling:
+            // 전화중
+            CallingView(callViewModel: callViewModel)
+        }
+    }
     
     // Matching Page
     public func pushMatching(_ page: MatchingPage) {
@@ -91,9 +109,9 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .chat:
             EmptyView()
             
-        case .contacting:
+        case .connecting:
             if let nowWatching = matchingViewModel.nowWatching {
-                ConnectingView(cardViewModel: nowWatching)
+                ConnectingView(delegate: self)
                     .navigationBarBackButtonHidden(true)
             }
         }
@@ -104,7 +122,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     public func pushContactingView() {
         print("contactingView로 진행합니다")
-        path.append(MatchingPage.contacting)
+        path.append(MatchingPage.connecting)
     }
     
     public func pushChatView() { // 채팅 하기 누른경우
@@ -112,7 +130,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     public func pushCallInteruptPopup() { 
-        matchingSheet = .afterCallPopup
+        callSheet = .afterCallPopup
     }
     
     public func pushFullScreenProfileImageView() {
@@ -120,7 +138,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
   
     @ViewBuilder
-    public func build(_ sheet: MatchingSheet) -> some View {
+    public func build(_ sheet: CallSheet) -> some View {
         switch sheet {
         case .afterCallPopup:
             AfterCallPopup(cardViewModel: matchingViewModel.cards[0])

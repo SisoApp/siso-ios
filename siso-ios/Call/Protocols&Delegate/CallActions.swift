@@ -17,13 +17,11 @@ public enum CallAgoraActions {
     case receiveCall
     // accept invite and join that channel
     case joinCall
-    
-   
-    
 }
 
+// MARK: - Call State Changes
 public enum CallViewActions {
-    // MARK: - Call State Changes
+   
     case muteModeOn
     
     case muteModeOff
@@ -31,10 +29,6 @@ public enum CallViewActions {
     case speakerModeOn
     
     case speakerModeOff
-    
-}
-
-public enum CallCoordinatorActions {
     
 }
 

@@ -1,5 +1,5 @@
 //
-//  MatchingCallingView.swift
+//  ConnectingView.swift
 //  matching
 //
 //  Created by jdios on 8/16/25.
@@ -7,76 +7,82 @@
 
 import SwiftUI
 import matching
+import model // UserProfileServer 모델을 사용하기 위해 import
+import designSystem // Color.Siso 등을 사용하기 위해 import
 
-/// 전화가 걸리는 중인 뷰입니다
+/// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
 public struct ConnectingView: View {
-    @ObservedObject var cardViewModel: CardViewModel
+    @ObservedObject var callViewModel: CallViewModel
     var delegate: MatchingCoordinatorDelegate?
     
-    public init(cardViewModel: CardViewModel, delegate: MatchingCoordinatorDelegate? = nil) {
-        self._cardViewModel = ObservedObject(wrappedValue: cardViewModel)
+    public init(callViewModel: CallViewModel, delegate: MatchingCoordinatorDelegate? = nil) {
         self.delegate = delegate
+        self._callViewModel = .init(wrappedValue: callViewModel)
     }
     
-   public var body: some View {
-        VStack{
+    // MARK: - Body
+    
+    public var body: some View {
+        VStack(spacing: 30) {
             Spacer()
-            Text("\(cardViewModel.nickname) 님과\n연결중이에요")
+            
+            // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
+            Text("\((callViewModel.opponentProfile?.nickname) ?? "상대방") 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
                 .padding()
 
-            CallingWaveformView(count: 15, height: 100, isplaying: true)
-                .frame(width: 300)
-                .padding()
-           
+            // 이 뷰는 이미 존재한다고 가정합니다.
+             CallingWaveformView(count: 15, height: 100, isplaying: true)
+                 .frame(width: 300)
+                 .padding()
             
+            // TabView를 사용하여 대화 팁을 보여줍니다.
             TabView {
-                TalkTips
+                talkTipsSection
             }
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-            .frame(height: 200)
+            .frame(height: 150) // 콘텐츠에 맞게 높이 조절
             
             Spacer()
         }
         .onAppear(){
-           
+           // TODO: 연결 시도 로직 시작 (예: 타이머, 실제 연결 요청 등)
         }
-        
-        
     }
     
-    private var TalkTips: some View {
-        Group {
-            Text("처음엔\n가볍고 따듯한 이야기로\n시작해보세요.")
-            Text("서로 다른 점보다는 공감할 수\n있는 이야기를 먼저 나눠요.")
-            Text("예의있는 대화를 나눌수록\n긍정적인 매칭결과를 보여요.")
-            Text("취미, 관심사 등으로\n대화의 물꼬를 터봐요.")
-            
-        }.multilineTextAlignment(.center)
-            .font(.system(size: 18))
-            .foregroundStyle(Color.Siso.Gray._70)
+    // MARK: - Subviews
+    
+    // 2. 팁 내용을 배열로 관리하여 유지보수를 쉽게 합니다.
+    private let tips = [
+        "처음엔\n가볍고 따듯한 이야기로\n시작해보세요.",
+        "서로 다른 점보다는 공감할 수\n있는 이야기를 먼저 나눠요.",
+        "예의있는 대화를 나눌수록\n긍정적인 매칭결과를 보여요.",
+        "취미, 관심사 등으로\n대화의 물꼬를 터봐요."
+    ]
+    
+    private var talkTipsSection: some View {
+        // ForEach를 사용하여 팁 배열을 순회하며 Text 뷰를 생성합니다.
+        ForEach(tips, id: \.self) { tip in
+            Text(tip)
+                .multilineTextAlignment(.center)
+                .font(.system(size: 18))
+                .foregroundStyle(Color.Siso.Gray._70)
+                .padding(.horizontal)
+        }
     }
 }
 
 
+// MARK: - Preview
+
 #Preview {
-    let cardViewModel = CardViewModel(
-        nickname: "삼성전자회장",
-        age: 58,
-        isOnline: true,
-        interestTags: ["여행✈️", "사진", "카페투어"],
-        profileImages: [
-            
-            URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-            URL(string: "https://picsum.photos/seed/jane2/400/600")!,
-            URL(string: "https://picsum.photos/seed/jane3/400/600")!
-        ],
-        voiceSample: URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"),
-        introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
-        location: "인천 미추홀구"
-    )
-    ConnectingView(cardViewModel: cardViewModel)
+    // 1. 프리뷰를 위해 ViewModel 인스턴스를 생성합니다.
+    let previewViewModel = CallViewModel( oppnentProfile: UserProfileServer.sampleMessi)
+    
+   
+    // 4. 완성된 ViewModel을 View에 주입하여 프리뷰를 실행합니다.
+    ConnectingView(callViewModel: previewViewModel)
 }

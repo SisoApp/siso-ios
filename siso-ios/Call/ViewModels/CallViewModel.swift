@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import model
 import AgoraRtcKit
 
 
@@ -18,14 +19,17 @@ public class CallViewModel: ObservableObject {
     
     public weak var delegate: CallCoordinatorDelegate?
     
-    public init( isMuteMode: Bool = false, isSpeakerMode: Bool = false) {
+    public init( isMuteMode: Bool = false, isSpeakerMode: Bool = false, oppnentProfile: UserProfileServer) {
         self.isMuteMode = isMuteMode
         self.isSpeakerMode = isSpeakerMode
+        self.opponentProfile = oppnentProfile
     }
     
     private let agoraManager = AgoraManager.shared
     
     private var cancellables = Set<AnyCancellable>()
+    
+    public var opponentProfile: UserProfileServer?
     
     
     
@@ -140,6 +144,5 @@ public class CallViewModel: ObservableObject {
         print("MuteModeOff")
         agoraManager.muteLocalAudio(false)
     }
-    
-    
 }
+

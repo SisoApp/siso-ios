@@ -8,179 +8,191 @@
 import SwiftUI
 import designSystem
 import matching
+import model
+
 
 public struct CalledView: View {
-    @ObservedObject var cardViewModel: CardViewModel
+ 
+    @ObservedObject var callViewModel: CallViewModel
     
+    // Coordinator와 통신이 필요할 경우를 위해 delegate는 유지합니다.
+    var delegate: CallCoordinatorDelegate?
     
-    var delegate: MatchingCoordinatorDelegate?
-    public init(cardViewModel: CardViewModel, delegate: MatchingCoordinatorDelegate? = nil){
-        self._cardViewModel = .init(wrappedValue: cardViewModel)
+    public init(callViewModel: CallViewModel, delegate: CallCoordinatorDelegate? = nil){
         self.delegate = delegate
+        self.callViewModel = callViewModel
     }
+    
+    // MARK: - Body
     
     public var body: some View {
-        VStack {
-           
-            callFromSection
-            
-            profileImageAnimatedView
-            
-            userInfoSection
-            
-            interestTagsSection
-            
-            introductionSection
-            
-            actionButtonsSection
-        }
-    }
-    /// 전화가 걸려온 사람을 표시하는 섹션
-    private var callFromSection: some View {
-        Text("\(cardViewModel.nickname) 님으로부터\n전화가 걸려왔어요")
-            .multilineTextAlignment(.center)
-            .font(.system(size: 24, weight: .bold))
-    }
-    
-    private var profileImageAnimatedView: some View {
-        ZStack {
-            AsyncImage(url: cardViewModel.profileImages.first){ image in
+        VStack(spacing: 24) { // 컴포넌트 간 간격을 적절히 줍니다.
+            // 1. callViewModel.opponentProfile이 nil이 아닐 때만 프로필 정보를 표시합니다.
+            if let profile = callViewModel.opponentProfile {
                 
-                image
-                    .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
-                    .scaledToFill() // 2. 프레임을 꽉 채우도록 비율 유지 (프로필 사진에 필수!)
-                    .frame(width: 180, height: 180) // 3. 프레임 크기 지정
-                    .clipShape(Circle()) // 4. 원형으로 자르기
+                Spacer() // 상단 공간을 채워 콘텐츠를 중앙에 가깝게 배치
                 
-            } placeholder: {
-                Circle()
-                    .frame(width: 180, height: 180) // 3. 프레임 크기 지정
+                // 2. 안전하게 얻은 profile 데이터를 각 뷰 '함수'에 파라미터로 전달합니다.
+                callFromSection(profile: profile)
+                
+                profileImageAnimatedView(profile: profile)
+                
+                userInfoSection(profile: profile)
+                
+                interestTagsSection(profile: profile)
+                
+                introductionSection(profile: profile)
+                
+                Spacer() // 액션 버튼을 하단에 고정하기 위한 Spacer
+                
+                actionButtonsSection(profile: profile)
+                
+            } else {
+                // 3. nil일 경우, 사용자에게 로딩 중임을 알려주는 UI를 표시합니다.
+                Spacer()
+                ProgressView()
+                    .scaleEffect(1.5) // 로딩 인디케이터 크기 조절
+                Text("상대방 정보를 불러오는 중...")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+                    .padding(.top)
+                Spacer()
             }
         }
-        
-        
+        .padding(.vertical) // 상하단에 약간의 여백 추가
     }
-    /// 사용자 이름과 나이를 표시하는 뷰
-    private var userInfoSection: some View {
-        HStack {
-                Text("\(cardViewModel.nickname)")
-                .font(.system(size: 24, weight: .bold, design: .default))
-                .foregroundStyle(.black)
-                Text("\(cardViewModel.age)세")
-                .font(.system(size: 24, weight: .bold, design: .default))
-                .foregroundStyle(.gray)
-            
-            .font(.system(size: 24, weight: .bold, design: .default))
-            .foregroundStyle(.white)
-            
+    
+    // MARK: - View Components (Functions)
+    
+    /// 전화가 걸려온 사람을 표시하는 섹션
+    private func callFromSection(profile: UserProfileServer) -> some View {
+        Text("\(profile.nickname) 님으로부터\n전화가 걸려왔어요")
+            .multilineTextAlignment(.center)
+            .font(.system(size: 24, weight: .bold))
+            .padding(.horizontal)
+    }
+    
+    /// 프로필 이미지를 표시하는 뷰
+    private func profileImageAnimatedView(profile: UserProfileServer) -> some View {
+        // profileImageUrls 배열의 첫 번째 이미지를 사용하되, nil-coalescing으로 안전하게 처리합니다.
+        // URL(string:) 생성자도 옵셔널을 반환하므로 if let으로 처리하는 것이 더 안전합니다.
+        let imageUrl = URL(string: profile.profileImageUrls.first ?? "")
+        
+        return AsyncImage(url: imageUrl) { image in
+            image
+                .resizable()
+                .scaledToFill()
+        } placeholder: {
+            // 이미지가 로드되기 전이나 URL이 유효하지 않을 때 표시될 뷰
+            Circle()
+                .fill(Color.gray.opacity(0.2))
+                .overlay(
+                    Image(systemName: "person.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(.gray)
+                )
         }
-        .padding(.horizontal)
+        .frame(width: 180, height: 180)
+        .clipShape(Circle())
+        .shadow(radius: 5) // 약간의 그림자 효과 추가
+    }
+    
+    /// 사용자 이름과 나이를 표시하는 뷰
+    private func userInfoSection(profile: UserProfileServer) -> some View {
+        HStack(spacing: 8) {
+            Text(profile.nickname)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(.black)
+            
+            Text("\(profile.age)세")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(.gray)
+        }
     }
     
     /// 관심사 태그들을 표시하는 뷰
-    private var interestTagsSection: some View {
-        HStack {
-            // Group은 ForEach가 여러 뷰를 생성할 때 컨테이너 역할을 합니다. 여기서는 생략 가능.
-            ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in // 태그가 너무 많으면 잘릴 수 있으므로 prefix 사용 고려
-                HStack(spacing: 2) {
-                    Text("#")
-                        .foregroundStyle(.black)
-                    Text(interest)
-                        .foregroundStyle(.black)
+    private func interestTagsSection(profile: UserProfileServer) -> some View {
+        // 태그가 많을 경우를 대비해 스크롤 뷰를 사용하고, 최대 5개까지만 표시
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach(profile.interestTags.prefix(5), id: \.self) { interest in
+                    Text("#\(interest)")
+                        .font(.system(size: 16, weight: .medium))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.gray.opacity(0.15))
+                        .clipShape(Capsule())
                 }
-                .font(.system(size: 18))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.gray.opacity(0.2))
-                .clipShape(Capsule())
             }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
+        .frame(height: 35) // 스크롤뷰 높이 고정
     }
     
     /// 자기소개 텍스트를 표시하는 뷰
-    private var introductionSection: some View {
-        Text(cardViewModel.introduction)
-            .foregroundStyle(.black)
-            .font(.system(size: 18))
+    private func introductionSection(profile: UserProfileServer) -> some View {
+        Text(profile.introduce)
+            .foregroundStyle(.secondary) // 본문 텍스트에 적합한 색상
+            .font(.system(size: 16))
             .lineLimit(2)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .onTapGesture {
-                print ("show all text")
-            }
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, 30) // 좌우 여백을 더 주어 가독성 향상
     }
     
     
-    /// 하단 액션 버튼 (메시지, 통화) 뷰
-    private var actionButtonsSection: some View {
-        HStack {
+    /// 하단 액션 버튼 (거절, 수락) 뷰
+    private func actionButtonsSection(profile: UserProfileServer) -> some View {
+        HStack(spacing: 20) {
+            // "나중에 전화하기" (거절) 버튼
             Button {
-             //   cardViewModel.chat()
+                // TODO: 전화 거절 로직 연결 (예: delegate?.rejectCall())
             } label: {
-                RoundedRectangle(cornerRadius: 24)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
-                    .foregroundStyle(Color.Siso.Red._60)
-                    .overlay {
-                        VStack {
-                            Image("Phone-miss")
-                                .resizable()
-                                .renderingMode(.template) // 아이콘 색상 변경을 위해 추가
-                                .foregroundStyle(.white)
-                                .frame(width: 40, height: 40)
-                            
-                            Text("나중에 전화하기")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                        
-                    }
+                VStack(spacing: 4) {
+                    Image("Phone-miss") // 에셋 이름 확인 필요
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundStyle(.white)
+                        .frame(width: 32, height: 32)
+                    
+                    Text("나중에 전화하기")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(maxWidth: .infinity, minHeight: 80)
+                .background(Color.Siso.Red._60)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
             }
             
-            Spacer()
-            
+            // "전화 연결" (수락) 버튼
             Button {
-               // cardViewModel.call()
+               // TODO: 전화 수락 로직 연결 (예: delegate?.acceptCall(channelName: ...))
             } label: {
-                RoundedRectangle(cornerRadius: 24)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
-                    .foregroundStyle(Color.Siso.Green._60)
-                    .overlay {
-                        VStack {
-                            Image("phoneicon")
-                                .resizable()
-                                .frame(width: 40, height: 40)
-                                .foregroundStyle(.white)
-                            
-                            Text("전화 연결")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                        
-                    }
+                VStack(spacing: 4) {
+                    Image("phoneicon") // 에셋 이름 확인 필요
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundStyle(.white)
+                    
+                    Text("전화 연결")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(maxWidth: .infinity, minHeight: 80)
+                .background(Color.Siso.Green._60)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
-        .frame(height: 80)
         .padding(.horizontal)
     }
 }
 
-#Preview {
-    let cardViewModel = CardViewModel(
-        nickname: "삼성전자회장이나야",
-        age: 58,
-        isOnline: true,
-        interestTags: ["여행✈️", "사진", "카페투어"],
-        profileImages: [
-           
-            URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-            URL(string: "https://picsum.photos/seed/jane2/400/600")!,
-            URL(string: "https://picsum.photos/seed/jane3/400/600")!
-        ],
-        voiceSample: URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"),
-        introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
-        location: "인천 미추홀구"
-    )
-    CalledView(cardViewModel: cardViewModel)
-}
+// MARK: - Preview
 
+#Preview {
+    // ViewModel을 생성하고 샘플 데이터를 주입하여 프리뷰를 구성합니다.
+    let previewViewModel = CallViewModel( oppnentProfile: UserProfileServer.sampleMessi)
+    
+    // CalledView에 ViewModel을 주입하여 프리뷰
+    CalledView(callViewModel: previewViewModel, delegate: nil)
+}
