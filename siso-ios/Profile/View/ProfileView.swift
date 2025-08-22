@@ -8,6 +8,7 @@
 import SwiftUI
 
 public struct ProfileView: View {
+    @ObservedObject var userProfile: UserProfile
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
@@ -15,11 +16,13 @@ public struct ProfileView: View {
     @State private var sex: String = ""
     @State private var target: String = ""
     @State private var isPlaying: Bool = false
+    @State private var religion: String = ""
     
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -233,7 +236,7 @@ public struct ProfileView: View {
             RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $target)
                 .padding(.top, 16)
             
-            inputView(title: "지역", placeholder: "나의 지역을 등록해주세요")
+            inputView(title: "지역", item: userProfile.location)
                 .onTapGesture {
                     delegate?.pushProfile(.location)
                 }
@@ -244,22 +247,22 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "추가 정보", point: "+ 30%")
             
-            inputView(title: "종교", placeholder: "정보를 입력해주세요")
+            inputView(title: "종교", item: userProfile.religion)
                 .onTapGesture {
                     delegate?.pushProfile(.religion)
                 }
             
-            inputView(title: "흡연", placeholder: "정보를 입력해주세요")
+            inputView(title: "흡연", item: userProfile.smoking)
                 .onTapGesture {
                     delegate?.pushProfile(.smoke)
                 }
             
-            inputView(title: "음주", placeholder: "정보를 입력해주세요")
+            inputView(title: "음주", item: userProfile.drinking)
                 .onTapGesture {
                     delegate?.pushProfile(.drink)
                 }
             
-            inputView(title: "MBTI", placeholder: "정보를 입력해주세요")
+            inputView(title: "mbti", item: userProfile.mbti)
                 .onTapGesture {
                     delegate?.pushProfile(.personality)
                 }
@@ -373,22 +376,25 @@ public struct ProfileView: View {
         }
     }
     
-    private func inputView(title: String, placeholder: String) -> some View {
+    private func inputView(title: String, item: String) -> some View {
         return VStack {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color.Siso.Gray._50)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            inputButton(placeholder)
+            inputButton(item)
         }
         .padding(.top, 24)
     }
     
-    private func inputButton(_ placeholder: String) -> some View {
+    private func inputButton(_ item: String) -> some View {
+        let placeholder: String = "정보를 입력해주세요"
+        let isActive: Bool = !item.isEmpty
+        
         return HStack {
-            Text(placeholder)
+            Text(isActive ? item : placeholder)
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(Color.Siso.Gray._50)
+                .foregroundStyle(isActive ? Color.Siso.Gray._90 : Color.Siso.Gray._50)
             Spacer()
             Image(systemName: "chevron.right")
         }
@@ -401,6 +407,6 @@ public struct ProfileView: View {
 
 #Preview {
     NavigationStack {
-        ProfileView(delegate: nil)
+        ProfileView(delegate: nil, userProfile: .empty)
     }
 }

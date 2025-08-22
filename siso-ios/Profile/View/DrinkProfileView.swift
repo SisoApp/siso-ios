@@ -16,10 +16,12 @@ enum DrinkFrequency: String, Identifiable, CaseIterable {
 }
 
 public struct DrinkProfileView: View {
+    @ObservedObject var userProfile: UserProfile
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -103,6 +105,6 @@ public struct DrinkProfileView: View {
 
 #Preview {
     NavigationStack {
-        DrinkProfileView(delegate: nil)
+        DrinkProfileView(delegate: nil, userProfile: .empty)
     }
 }

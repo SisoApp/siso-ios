@@ -8,11 +8,14 @@
 import SwiftUI
 
 public struct MeetingProfileView: View {
+    @ObservedObject var userProfile: UserProfile
+    
     private var viewModel: MeetingProfileViewModel = MeetingProfileViewModel()
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -96,6 +99,6 @@ public struct MeetingProfileView: View {
 
 #Preview {
     NavigationStack {
-        MeetingProfileView(delegate: nil)
+        MeetingProfileView(delegate: nil, userProfile: .empty)
     }
 }

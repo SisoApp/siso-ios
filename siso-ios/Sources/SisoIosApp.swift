@@ -14,7 +14,8 @@ struct SisoIosApp: App {
     init() {
         let userProfile: UserProfile = UserProfile(
             nickname: "", age: "", sex: "", targetSex: "",
-            profileImageUrl: [], interests: [], introduce: ""
+            profileImageUrl: [], interests: [], introduce: "",
+            religion: "", smoking: "", drinking: "", meeting: [], mbti: "", location: ""
         )
         
         let matchingViewModel: MatchingViewModel = .init(cards: [])
@@ -28,7 +29,7 @@ struct SisoIosApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.login)
+                coordinator.build(.main)
                     .navigationDestination(for: AuthPage.self, destination: { page in
                         coordinator.build(page)
                     })

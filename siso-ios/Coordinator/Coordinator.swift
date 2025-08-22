@@ -144,22 +144,22 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             IntroduceProfileView(delegate: self, userProfile: userProfile)
         case .record:
             RecordProfileView(delegate: self, userProfile: userProfile)
+        case .location:
+            LocationProfileView(delegate: self, userProfile: userProfile)
+        case .religion:
+            ReligionProfileView(delegate: self, userProfile: userProfile)
+        case .smoke:
+            SmokeProfileView(delegate: self, userProfile: userProfile)
+        case .drink:
+            DrinkProfileView(delegate: self, userProfile: userProfile)
+        case .personality:
+            PersonalityProfileView(delegate: self, userProfile: userProfile)
+        case .meeting:
+            MeetingProfileView(delegate: self, userProfile: userProfile)
+        case .profile:
+            ProfileView(delegate: self, userProfile: userProfile)
         case .complete:
             CompleteProfileView(delegate: self)
-        case .location:
-            LocationProfileView(delegate: self)
-        case .religion:
-            ReligionProfileView(delegate: self)
-        case .smoke:
-            SmokeProfileView(delegate: self)
-        case .drink:
-            DrinkProfileView(delegate: self)
-        case .personality:
-            PersonalityProfileView(delegate: self)
-        case .meeting:
-            MeetingProfileView(delegate: self)
-        case .profile:
-            ProfileView(delegate: self)
         }
     }
     
@@ -219,7 +219,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     }
     
     public func pushMyPageToProfile() {
-        pushProfile(.basic)
+        pushProfile(.profile)
     }
     
     public func changeMatchingToAuth() {

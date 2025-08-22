@@ -8,10 +8,12 @@
 import SwiftUI
 
 public struct LocationProfileView: View {
+    @ObservedObject var userProfile: UserProfile
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -72,5 +74,5 @@ public struct LocationProfileView: View {
 }
 
 #Preview {
-    LocationProfileView(delegate: nil)
+    LocationProfileView(delegate: nil, userProfile: .empty)
 }

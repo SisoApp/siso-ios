@@ -70,6 +70,6 @@ public struct CompleteProfileView: View {
 
 #Preview {
     NavigationStack {
-        CompleteProfileView(delegate: nil)
+        CompleteProfileView(delegate: nil,)
     }
 }

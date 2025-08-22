@@ -19,10 +19,15 @@ enum Religion: String, Identifiable, CaseIterable {
 }
 
 public struct ReligionProfileView: View {
+    @ObservedObject var userProfile: UserProfile
+    @State private var religion: String
+    
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
+        self._religion = State(wrappedValue: userProfile.religion)
     }
     
     public var body: some View {
@@ -32,11 +37,7 @@ public struct ReligionProfileView: View {
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            firstButtonStack()
-                .padding(.top, 24)
-                .padding(.bottom, 4)
-            
-            secondButtonStack()
+            religionButtonGroup()
             
             Spacer()
             
@@ -57,59 +58,55 @@ public struct ReligionProfileView: View {
         }
     }
     
-    private func firstButtonStack() -> some View {
-        let religions = Religion.allCases.prefix(Religion.allCases.count / 2)
+    private func religionButtonGroup() -> some View {
+        let first = Religion.allCases.prefix(Religion.allCases.count / 2)
+        let second = Religion.allCases.suffix(Religion.allCases.count / 2)
         
-        return HStack(spacing: 12) {
-            ForEach(religions) { religion in
-                Button {
-                    
-                } label: {
-                    Text(religion.rawValue)
-                        .font(.system(size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.Siso.Gray._90)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 18)
+        return VStack {
+            HStack(spacing: 12) {
+                ForEach(first) { religion in
+                    religionButton(religion.rawValue)
                 }
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.Siso.Gray._20)
-                )
-                .frame(height: 48)
+                Spacer()
+            }
+            .padding(.top, 24)
+            .padding(.bottom, 4)
+            
+            HStack(spacing: 12) {
+                ForEach(second) { religion in
+                    religionButton(religion.rawValue)
+                }
+                Spacer()
             }
         }
     }
     
-    private func secondButtonStack() -> some View {
-        let religions = Religion.allCases.suffix(Religion.allCases.count / 2)
+    private func religionButton(_ religion: String) -> some View {
+        let isContain: Bool = self.religion == religion
         
-        return HStack(spacing: 12) {
-            ForEach(religions) { religion in
-                Button {
-                    
-                } label: {
-                    Text(religion.rawValue)
-                        .font(.system(size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.Siso.Gray._90)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 18)
-                }
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.Siso.Gray._20)
-                )
-                .frame(height: 48)
-            }
+        return Button {
+            self.religion = isContain ? "" : religion
+        } label: {
+            Text(religion)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._90)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 18)
         }
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(isContain ? Color.Siso.Primary._40 : Color.Siso.Gray._20)
+        )
+        .frame(height: 48)
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = true
+        let isActive: Bool = !self.religion.isEmpty
         
         return Button {
-            delegate?.pushProfile(.interest)
+            userProfile.religion = religion
+            delegate?.pop()
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -128,6 +125,6 @@ public struct ReligionProfileView: View {
 
 #Preview {
     NavigationStack {
-        ReligionProfileView(delegate: nil)
+        ReligionProfileView(delegate: nil, userProfile: .empty)
     }
 }

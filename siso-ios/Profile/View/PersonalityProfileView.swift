@@ -8,10 +8,12 @@
 import SwiftUI
 
 public struct PersonalityProfileView: View {
+    @ObservedObject var userProfile: UserProfile
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?) {
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
+        self.userProfile = userProfile
     }
     
     public var body: some View {
@@ -236,6 +238,6 @@ struct RoundedCorner: Shape {
 
 #Preview {
     NavigationStack {
-        PersonalityProfileView(delegate: nil)
+        PersonalityProfileView(delegate: nil, userProfile: .empty)
     }
 }
