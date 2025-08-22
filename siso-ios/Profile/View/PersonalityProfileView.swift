@@ -9,6 +9,11 @@ import SwiftUI
 
 public struct PersonalityProfileView: View {
     @ObservedObject var userProfile: UserProfile
+    @State private var energy: String = ""
+    @State private var information: String = ""
+    @State private var decision: String = ""
+    @State private var lifeStyle: String = ""
+    
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -18,23 +23,9 @@ public struct PersonalityProfileView: View {
     
     public var body: some View {
         VStack {
-            Text("나의 성격유형(MBTI)을\n선택해주세요")
-                .font(.system(size: 24))
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Text("성격유형(MBTI)은 나의 성격을 16가지로\n구분하는 간단한 검사입니다.\n나와 비슷한 성격, 혹은 다른 성격을 가진\n사람을 만나보는 데 도움이 될 수있어요.")
-                .font(.system(size: 18))
-                .foregroundStyle(Color.Siso.Gray._60)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 4)
-            
-            ScrollView {
-                personalityButtonStack()
-            }
-            
+            explainView()
+            personalityButtonGroup()
             Spacer()
-            
             completeButton()
         }
         .padding()
@@ -52,160 +43,110 @@ public struct PersonalityProfileView: View {
         }
     }
     
-    private func personalityButtonStack() -> some View {
-        return VStack {
-            HStack(spacing: 0) {
-                VStack {
-                    Text("E")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("에너지를\n사람 만나서 얻는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Gray._20)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topLeft, .bottomLeft]))
-                )
-                
-                Rectangle()
-                    .fill(Color.Siso.Gray._40)
-                    .frame(width: 1, height: 110)
-                
-                VStack {
-                    Text("I")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("혼자 있을 때\n충전되는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Primary.main)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topRight, .bottomRight]))
-                )
-            }
+    private func explainView() -> some View {
+        return Group {
+            Text("나의 성격유형(MBTI)을\n선택해주세요")
+                .font(.system(size: 24))
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
-            HStack(spacing: 0) {
-                VStack {
-                    Text("S")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("눈앞의 사실\n경험 위주로 보는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Primary.main)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topLeft, .bottomLeft]))
-                )
-                
-                Rectangle()
-                    .fill(Color.Siso.Gray._40)
-                    .frame(width: 1, height: 110)
-                
-                VStack {
-                    Text("N")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("앞으로의 가능성\n큰 그림을 보는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Gray._20)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topRight, .bottomRight]))
-                )
-            }
-            
-            HStack(spacing: 0) {
-                VStack {
-                    Text("T")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("이성적·논리적으로\n판단하는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Gray._20)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topLeft, .bottomLeft]))
-                )
-                
-                Rectangle()
-                    .fill(Color.Siso.Gray._40)
-                    .frame(width: 1, height: 110)
-                
-                VStack {
-                    Text("F")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("사람의 마음·관계까지\n고려하는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Primary.main)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topRight, .bottomRight]))
-                )
-            }
-            
-            HStack(spacing: 0) {
-                VStack {
-                    Text("P")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("즉흥적이고 유연하게\n풀어가는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Primary.main)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topLeft, .bottomLeft]))
-                )
-                
-                Rectangle()
-                    .fill(Color.Siso.Gray._40)
-                    .frame(width: 1, height: 110)
-                
-                VStack {
-                    Text("J")
-                        .font(.system(size: 24))
-                        .fontWeight(.bold)
-                    Text("미리 계획을 세우는 걸\n좋아하는 편")
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .background (
-                    Rectangle()
-                        .fill(Color.Siso.Gray._20)
-                        .clipShape(RoundedCorner(radius: 16, corners: [.topRight, .bottomRight]))
-                )
-            }
+            Text("성격유형(MBTI)은 나의 성격을 16가지로\n구분하는 간단한 검사입니다.\n나와 비슷한 성격, 혹은 다른 성격을 가진\n사람을 만나보는 데 도움이 될 수있어요.")
+                .font(.system(size: 18))
+                .foregroundStyle(Color.Siso.Gray._60)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 4)
         }
-        .padding(.vertical, 30)
+    }
+    
+    private func personalityButtonGroup() -> some View {
+        return ScrollView {
+            VStack {
+                HStack(spacing: 0) {
+                    leftButton(title: "E", subTitle: "에너지를\n사람 만나서 얻는 편", binding: $energy)
+                    seperateLine()
+                    rightButton(title: "I", subTitle: "혼자 있을 때\n충전되는 편", binding: $energy)
+                }
+                
+                HStack(spacing: 0) {
+                    leftButton(title: "S", subTitle: "눈앞의 사실\n경험 위주로 보는 편", binding: $information)
+                    seperateLine()
+                    rightButton(title: "N", subTitle: "앞으로의 가능성\n큰 그림을 보는 편", binding: $information)
+                }
+                
+                HStack(spacing: 0) {
+                    leftButton(title: "T", subTitle: "이성적·논리적으로\n판단하는 편", binding: $decision)
+                    seperateLine()
+                    rightButton(title: "F", subTitle: "사람의 마음·관계까지\n고려하는 편", binding: $decision)
+                }
+                
+                HStack(spacing: 0) {
+                    leftButton(title: "P", subTitle: "즉흥적이고 유연하게\n풀어가는 편", binding: $lifeStyle)
+                    seperateLine()
+                    rightButton(title: "J", subTitle: "미리 계획을 세우는 걸\n좋아하는 편", binding: $lifeStyle)
+                }
+            }
+            .padding(.vertical, 30)
+        }
+    }
+    
+    private func leftButton(title: String, subTitle: String, binding: Binding<String>) -> some View {
+        let isContain: Bool = binding.wrappedValue == title
+        
+        return VStack {
+            Text(title)
+                .font(.system(size: 24))
+                .fontWeight(.bold)
+            Text(subTitle)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 110)
+        .background (
+            Rectangle()
+                .fill(isContain ? Color.Siso.Primary.main : Color.Siso.Gray._20)
+                .clipShape(RoundedCorner(radius: 16, corners: [.topLeft, .bottomLeft]))
+        )
+        .onTapGesture {
+            binding.wrappedValue = isContain ? "" : title
+        }
+    }
+    
+    private func seperateLine() -> some View {
+        return Rectangle()
+            .fill(Color.Siso.Gray._40)
+            .frame(width: 1, height: 110)
+    }
+    
+    private func rightButton(title: String, subTitle: String, binding: Binding<String>) -> some View {
+        let isContain: Bool = binding.wrappedValue == title
+        
+        return VStack {
+            Text(title)
+                .font(.system(size: 24))
+                .fontWeight(.bold)
+            Text(subTitle)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 110)
+        .background (
+            Rectangle()
+                .fill(isContain ? Color.Siso.Primary.main : Color.Siso.Gray._20)
+                .clipShape(RoundedCorner(radius: 16, corners: [.topRight, .bottomRight]))
+        )
+        .onTapGesture {
+            binding.wrappedValue = isContain ? "" : title
+        }
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = true
+        let isActive: Bool = !energy.isEmpty && !information.isEmpty && !decision.isEmpty && !lifeStyle.isEmpty
         
         return Button {
-            delegate?.pushProfile(.interest)
+            let mbti: String = energy + information + decision + lifeStyle
+            userProfile.mbti = mbti
+            delegate?.pop()
+            print(mbti)
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
