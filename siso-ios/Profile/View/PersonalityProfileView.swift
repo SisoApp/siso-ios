@@ -41,6 +41,19 @@ public struct PersonalityProfileView: View {
                     }
             }
         }
+        .onAppear {
+            setMBTI()
+        }
+    }
+    
+    private func setMBTI() {
+        let charArray: [Character] = Array(userProfile.mbti)
+        if charArray.count < 4 { return }
+        
+        energy = charArray[0].description
+        information = charArray[1].description
+        decision = charArray[2].description
+        lifeStyle = charArray[3].description
     }
     
     private func explainView() -> some View {
