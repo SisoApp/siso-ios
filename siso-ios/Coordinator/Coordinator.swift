@@ -186,7 +186,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .main:
             MyPageView(delegate: self)
         case .setting:
-            EmptyView()
+            SettingView(delegate: self)
         case .notification:
             EmptyView()
         }

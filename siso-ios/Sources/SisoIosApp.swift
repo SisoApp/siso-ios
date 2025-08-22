@@ -4,6 +4,7 @@ import auth
 import coordinator
 import profile
 import matching
+import mypage
 
 @main
 struct SisoIosApp: App {
@@ -37,6 +38,9 @@ struct SisoIosApp: App {
                         coordinator.build(page)
                     }
                     .navigationDestination(for: MatchingPage.self, destination: { page in
+                        coordinator.build(page)
+                    })
+                    .navigationDestination(for: MyPage.self, destination: { page in
                         coordinator.build(page)
                     })
                     .sheet(item: $coordinator.profileSheet) { sheet in
