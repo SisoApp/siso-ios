@@ -18,11 +18,13 @@ enum SmokingFrequency: String, Identifiable, CaseIterable {
 
 public struct SmokeProfileView: View {
     @ObservedObject var userProfile: UserProfile
+    @State private var smoking: String
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
+        self._smoking = State(wrappedValue: userProfile.smoking)
     }
     
     public var body: some View {
@@ -38,7 +40,7 @@ public struct SmokeProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 4)
             
-            buttonStack()
+            buttonGroup()
             
             Spacer()
             
@@ -59,35 +61,42 @@ public struct SmokeProfileView: View {
         }
     }
     
-    private func buttonStack() -> some View {
+    private func buttonGroup() -> some View {
         return VStack(alignment: .leading, spacing: 12) {
             ForEach(SmokingFrequency.allCases, id: \.self) { item in
-                Button {
-                    
-                } label: {
-                    Text(item.rawValue)
-                        .font(.system(size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.Siso.Gray._90)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 18)
-                }
-                .frame(height: 48)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.Siso.Gray._20)
-                )
+                smokingButton(item.rawValue)
             }
         }
         .padding(.top, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func completeButton() -> some View {
-        let isActive: Bool = true
+    private func smokingButton(_ title: String) -> some View {
+        let isContain: Bool = self.smoking == title
         
         return Button {
-            delegate?.pushProfile(.interest)
+            self.smoking = isContain ? "" : title
+        } label: {
+            Text(title)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._90)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 18)
+        }
+        .frame(height: 48)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(isContain ? Color.Siso.Primary._40 : Color.Siso.Gray._20)
+        )
+    }
+    
+    private func completeButton() -> some View {
+        let isActive: Bool = !smoking.isEmpty
+        
+        return Button {
+            userProfile.smoking = smoking
+            delegate?.pop()
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

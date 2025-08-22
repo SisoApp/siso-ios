@@ -102,7 +102,7 @@ public struct ReligionProfileView: View {
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = !self.religion.isEmpty
+        let isActive: Bool = !religion.isEmpty
         
         return Button {
             userProfile.religion = religion
