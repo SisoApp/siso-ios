@@ -262,7 +262,7 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.drink)
                 }
             
-            inputView(title: "mbti", item: userProfile.mbti)
+            inputView(title: "MBTI", item: userProfile.mbti)
                 .onTapGesture {
                     delegate?.pushProfile(.personality)
                 }

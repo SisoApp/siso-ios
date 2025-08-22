@@ -17,7 +17,7 @@ enum SmokingFrequency: String, Identifiable, CaseIterable {
 }
 
 public struct SmokeProfileView: View {
-    @ObservedObject var userProfile: UserProfile
+    @ObservedObject private var userProfile: UserProfile
     @State private var smoking: String
     weak var delegate: ProfileCoordinatorDelegate?
     
@@ -29,21 +29,9 @@ public struct SmokeProfileView: View {
     
     public var body: some View {
         VStack {
-            Text("흡연 여부를 알려주시면\n더 잘 맞는 분과 연결해 드려요")
-                .font(.system(size: 24))
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Text("최소 1개 이상 선택해주세요")
-                .font(.system(size: 18))
-                .foregroundStyle(Color.Siso.Gray._60)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 4)
-            
+            explainView()
             buttonGroup()
-            
             Spacer()
-            
             completeButton()
         }
         .padding(EdgeInsets(top: 40, leading: 16, bottom: 0, trailing: 16))
@@ -58,6 +46,21 @@ public struct SmokeProfileView: View {
                         delegate?.pop()
                     }
             }
+        }
+    }
+    
+    private func explainView() -> some View {
+        return Group {
+            Text("흡연 여부를 알려주시면\n더 잘 맞는 분과 연결해 드려요")
+                .font(.system(size: 24))
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text("최소 1개 이상 선택해주세요")
+                .font(.system(size: 18))
+                .foregroundStyle(Color.Siso.Gray._60)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 4)
         }
     }
     
@@ -87,7 +90,7 @@ public struct SmokeProfileView: View {
         .frame(height: 48)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(isContain ? Color.Siso.Primary._40 : Color.Siso.Gray._20)
+                .fill(isContain ? Color.Siso.Primary.main : Color.Siso.Gray._20)
         )
     }
     

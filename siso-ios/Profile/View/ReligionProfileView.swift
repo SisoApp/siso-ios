@@ -19,7 +19,7 @@ enum Religion: String, Identifiable, CaseIterable {
 }
 
 public struct ReligionProfileView: View {
-    @ObservedObject var userProfile: UserProfile
+    @ObservedObject private var userProfile: UserProfile
     @State private var religion: String
     
     weak var delegate: ProfileCoordinatorDelegate?
@@ -32,15 +32,9 @@ public struct ReligionProfileView: View {
     
     public var body: some View {
         VStack(alignment: .leading) {
-            Text("종교가 있나요?")
-                .font(.system(size: 24))
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
+            explainView()
             religionButtonGroup()
-            
             Spacer()
-            
             completeButton()
         }
         .padding(EdgeInsets(top: 40, leading: 16, bottom: 0, trailing: 16))
@@ -56,6 +50,13 @@ public struct ReligionProfileView: View {
                     }
             }
         }
+    }
+    
+    private func explainView() -> some View {
+        return Text("종교가 있나요?")
+            .font(.system(size: 24))
+            .fontWeight(.bold)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func religionButtonGroup() -> some View {
@@ -81,13 +82,13 @@ public struct ReligionProfileView: View {
         }
     }
     
-    private func religionButton(_ religion: String) -> some View {
-        let isContain: Bool = self.religion == religion
+    private func religionButton(_ title: String) -> some View {
+        let isContain: Bool = religion == title
         
         return Button {
-            self.religion = isContain ? "" : religion
+            religion = isContain ? "" : title
         } label: {
-            Text(religion)
+            Text(title)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._90)
@@ -96,7 +97,7 @@ public struct ReligionProfileView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(isContain ? Color.Siso.Primary._40 : Color.Siso.Gray._20)
+                .fill(isContain ? Color.Siso.Primary.main : Color.Siso.Gray._20)
         )
         .frame(height: 48)
     }
