@@ -18,6 +18,7 @@ public struct ProfileView: View {
     @State private var target: String = ""
     @State private var isPlaying: Bool = false
     @State private var religion: String = ""
+    @State private var meetings: [String] = []
     
     weak var delegate: ProfileCoordinatorDelegate?
     
@@ -274,19 +275,19 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "관심사 / 취향 태그", point: "+ 30%")
             
-            tagView(title: "나의 관심사", placehorder: "나의 관심사를 골라주세요")
+            tagView(title: "나의 관심사", placeholder: "나의 관심사를 골라주세요", items: userProfile.interests)
                 .onTapGesture {
                     delegate?.pushProfile(.complete)
                 }
             
-            tagView(title: "매칭 상대와의 관계", placehorder: "어떤 관계를 원하시나요?")
+            tagView(title: "매칭 상대와의 관계", placeholder: "어떤 관계를 원하시나요?", items: userProfile.meeting)
                 .onTapGesture {
                     delegate?.pushProfile(.meeting)
                 }
         }
     }
     
-    private func tagView(title: String, placehorder: String) -> some View {
+    private func tagView(title: String, placeholder: String, items: [String]) -> some View {
         return VStack(spacing: 12) {
             HStack {
                 Text(title)
@@ -298,24 +299,53 @@ public struct ProfileView: View {
                     .foregroundStyle(Color.Siso.Gray._50)
             }
             
-            HStack {
-                Button {
-                    
-                } label: {
-                    Text(placehorder)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color.Siso.Gray._70)
+            Group {
+                if items.count == 0 {
+                    placeholderView(placeholder)
+                } else {
+                    tagListView(items)
                 }
+            }
+        }
+        .padding(.top, 24)
+    }
+    
+    private func placeholderView(_ placeholder: String) -> some View {
+        return HStack {
+            Text(placeholder)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Color.Siso.Gray._70)
                 .padding()
                 .frame(height: 48)
                 .background(
                     RoundedRectangle(cornerRadius: 24)
                         .fill(Color.Siso.Gray._20)
                 )
-                Spacer()
+            Spacer()
+        }
+    }
+    
+    private func tagListView(_ items: [String]) -> some View {
+        return VStack {
+            ForEach(chunked(into: 2, items: items), id: \.self) { chunk in
+                HStack {
+                    ForEach(chunk, id: \.self) { item in
+                        tagButton(item)
+                    }
+                    Spacer()
+                }
             }
         }
-        .padding(.top, 24)
+    }
+    
+    private func tagButton(_ title: String) -> some View {
+        return Text(title)
+            .padding(EdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 18))
+            .frame(height: 48)
+            .fontWeight(.semibold)
+            .foregroundStyle(Color.Siso.Gray._90)
+            .background(Color.Siso.Gray._20)
+            .clipShape(.rect(cornerRadius: 24))
     }
     
     private func textFieldView(title: String, unit: String, binding: Binding<String>) -> some View {
@@ -403,6 +433,12 @@ public struct ProfileView: View {
         .frame(height: 52)
         .background(Color.Siso.Gray._20)
         .clipShape(.rect(cornerRadius: 52 / 2))
+    }
+    
+    private func chunked(into size: Int, items: [String]) -> [[String]] {
+        return stride(from: 0, to: items.count, by: size).map {
+            Array(items[$0..<min($0 + size, items.count)])
+        }
     }
 }
 

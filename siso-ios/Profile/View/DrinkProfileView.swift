@@ -28,12 +28,12 @@ public struct DrinkProfileView: View {
     
     public var body: some View {
         VStack {
-            explainView()
+            informationText()
             buttonGroup()
             Spacer()
             completeButton()
         }
-        .padding(EdgeInsets(top: 40, leading: 16, bottom: 0, trailing: 16))
+        .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
         .navigationTitle("내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -48,7 +48,7 @@ public struct DrinkProfileView: View {
         }
     }
     
-    private func explainView() -> some View {
+    private func informationText() -> some View {
         return Group {
             Text("음주 습관을 알려주세요.\n서로 이해하는 데 도움이 돼요")
                 .font(.system(size: 24))

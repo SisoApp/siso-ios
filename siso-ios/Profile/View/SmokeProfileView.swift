@@ -29,12 +29,12 @@ public struct SmokeProfileView: View {
     
     public var body: some View {
         VStack {
-            explainView()
+            informationText()
             buttonGroup()
             Spacer()
             completeButton()
         }
-        .padding(EdgeInsets(top: 40, leading: 16, bottom: 0, trailing: 16))
+        .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
         .navigationTitle("내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -49,7 +49,7 @@ public struct SmokeProfileView: View {
         }
     }
     
-    private func explainView() -> some View {
+    private func informationText() -> some View {
         return Group {
             Text("흡연 여부를 알려주시면\n더 잘 맞는 분과 연결해 드려요")
                 .font(.system(size: 24))

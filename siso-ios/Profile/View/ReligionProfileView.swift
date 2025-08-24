@@ -32,12 +32,12 @@ public struct ReligionProfileView: View {
     
     public var body: some View {
         VStack(alignment: .leading) {
-            explainView()
+            informationText()
             religionButtonGroup()
             Spacer()
             completeButton()
         }
-        .padding(EdgeInsets(top: 40, leading: 16, bottom: 0, trailing: 16))
+        .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
         .navigationTitle("내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -52,7 +52,7 @@ public struct ReligionProfileView: View {
         }
     }
     
-    private func explainView() -> some View {
+    private func informationText() -> some View {
         return Text("종교가 있나요?")
             .font(.system(size: 24))
             .fontWeight(.bold)
