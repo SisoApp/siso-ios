@@ -11,7 +11,7 @@ import KakaoSDKAuth
 import designSystem
 
 public struct SocialLoginView: View {
-    @StateObject private var vm: SocialLoginView.LoginViewModel = .init()
+    @EnvironmentObject private var vm: SocialLoginView.LoginViewModel
     var delegate: AuthCoordinatorDelegate?
     
     public init(delegate: AuthCoordinatorDelegate?) {
@@ -47,13 +47,21 @@ public struct SocialLoginView: View {
                     
                     loginButton(title: "카카오로 시작하기", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
                         Task {
-                            await vm.kakaoLogin()
-                            
-                            if vm.isLogined {
-                                delegate?.pushAuth(.accept)
+                            await vm.kakaoLogin() { state in
+                                if state == "LOGIN" {
+                                    delegate?.changeAuthToMatching()
+                                } else if state == "REGISTER" {
+                                    delegate?.pushAuth(.accept)
+                                } else {
+                                    print("userState가 ''가 되는 곳")
+                                }
                             }
                         }
-                        
+                    }
+                    loginButton(title: "카카오 로그아웃", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
+                        Task {
+                            await vm.kakaoLogout()
+                        }
                     }
                     loginButton(title: "Apple로 시작하기", icon: "Apple" , bgColor: .black, textColor: .white) {
                         // Apple Login
@@ -63,6 +71,13 @@ public struct SocialLoginView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
+            }
+        }
+        .onChange(of: vm.userState) {
+            if vm.userState == "LOGIN" {
+                delegate?.changeAuthToMatching()
+            } else if vm.userState == "REGISTER" {
+                delegate?.pushAuth(.accept)
             }
         }
     }
