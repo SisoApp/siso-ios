@@ -134,16 +134,6 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     @ViewBuilder
     public func build(_ page: ProfilePage) -> some View {
         switch page {
-        case .basic:
-            BasicProfileView(delegate: self, userProfile: userProfile)
-        case .interest:
-            InterestProfileView(delegate: self, userProfile: userProfile)
-        case .image:
-            ImageProfileView(delegate: self, userProfile: userProfile)
-        case .introduce:
-            IntroduceProfileView(delegate: self, userProfile: userProfile)
-        case .record:
-            RecordProfileView(delegate: self, userProfile: userProfile)
         case .location:
             LocationProfileView(delegate: self, userProfile: userProfile)
         case .religion:
@@ -160,6 +150,8 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
             ProfileView(delegate: self, userProfile: userProfile)
         case .complete:
             CompleteProfileView(delegate: self)
+        case .signUp:
+            SignUpProfileView(delegate: self, userProfile: userProfile)
         }
     }
     
@@ -200,7 +192,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 50_000_000)
             withAnimation(.easeInOut) {
-                pushProfile(.basic)
+                pushProfile(.complete)
             }
         }
         

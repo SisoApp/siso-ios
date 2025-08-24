@@ -12,8 +12,10 @@ public struct ImageHelperSheet: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var selectedImages: [PhotosPickerItem] = []
     
-    public var delegate: ProfileCoordinatorDelegate?
+    public weak var delegate: ProfileCoordinatorDelegate?
     public var completion: ([UIImage]) -> Void
+    private let limit: Int = 5
+    private var available: Int { return limit - userProfile.profileImageUrl.count }
     
     public init(delegate: ProfileCoordinatorDelegate?,
                 userProfile: UserProfile,
@@ -31,13 +33,17 @@ public struct ImageHelperSheet: View {
                 delegate?.dismissProfileSheet()
                 
                 Task {
+                    var images: [UIImage] = []
+                    
                     for item in items {
                         if let data: Data = try? await item.loadTransferable(type: Data.self),
                            let image: UIImage = UIImage(data: data) {
-                            await MainActor.run {
-                                userProfile.profileImageUrl.append(image)
-                            }
+                            images.append(image)
                         }
+                    }
+                    
+                    await MainActor.run {
+                        completion(images)
                     }
                 }
             }
@@ -108,7 +114,7 @@ public struct ImageHelperSheet: View {
     private func galleryButton() -> some View {
         return PhotosPicker(
             selection: $selectedImages,
-            maxSelectionCount: 5
+            maxSelectionCount: available
         ) {
             Text("앨범에서 가져오기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -123,7 +129,7 @@ public struct ImageHelperSheet: View {
     private func skipButton() -> some View {
         return Button {
             delegate?.dismissProfileSheet()
-            delegate?.pushProfile(.introduce)
+            delegate?.pushProfile(.complete)
         } label: {
             Text("건너뛰기")
                 .font(.system(size: 18))

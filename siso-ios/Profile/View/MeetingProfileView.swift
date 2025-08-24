@@ -81,7 +81,7 @@ public struct MeetingProfileView: View {
         let isActive: Bool = true
         
         return Button {
-            delegate?.pushProfile(.interest)
+            delegate?.pushProfile(.complete)
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -30,7 +30,7 @@ struct SisoIosApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.main)
+                coordinator.build(.signUp)
                     .navigationDestination(for: AuthPage.self, destination: { page in
                         coordinator.build(page)
                     })

@@ -275,7 +275,7 @@ public struct ProfileView: View {
             
             tagView(title: "나의 관심사", placehorder: "나의 관심사를 골라주세요")
                 .onTapGesture {
-                    delegate?.pushProfile(.interest)
+                    delegate?.pushProfile(.complete)
                 }
             
             tagView(title: "매칭 상대와의 관계", placehorder: "어떤 관계를 원하시나요?")
