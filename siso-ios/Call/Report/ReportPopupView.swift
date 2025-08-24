@@ -40,13 +40,30 @@ struct ReportPopupView: View {
         if selectedType == .other {
             TextEditor(text: $otherSueReason)
                 .frame(width: .infinity, height: 100)
-                .padding()
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(style: StrokeStyle(lineWidth: 1))
+                        .foregroundStyle(Color.Siso.Gray._30)
                 )
+                .padding()
+            
         }
         
+        Button {
+            print("sue")
+        } label: {
+            Text("신고하기")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.black)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 30)
+                        .foregroundStyle(Color.Siso.Primary._50)
+                )
+                .padding()
+        }
+
         
     }
     private var headerView: some View {
@@ -65,9 +82,9 @@ struct ReportPopupView: View {
             AsyncImage(url: URL(string: urlString)) { image in
                 image
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
                     .clipShape(.circle)
-                    .frame(width: 100 ,height: 100)
+                    .frame(width: 120 ,height: 120)
             } placeholder: {
                 
                 ZStack{
@@ -75,7 +92,7 @@ struct ReportPopupView: View {
                         .foregroundStyle(.white)
                     ProgressView()
                 }
-                .frame(width: 100, height: 100)
+                .frame(width: 120, height: 120)
                 
             }
         }
@@ -92,17 +109,6 @@ struct ReportPopupView: View {
             )
     }
     
-    @ViewBuilder
-    func RadioButton(_ reason: String, isSelected: Binding<Bool>) -> some View {
-        HStack {
-            Image(systemName: isSelected.wrappedValue ? "circle.fill" : "circle")
-            
-            Text(reason)
-            
-            Spacer()
-        }
-    }
-    
     private var radioButtons: some View {
         VStack(alignment: .leading) {
             // UI 목록은 ReportReasonType으로 생성
@@ -110,10 +116,19 @@ struct ReportPopupView: View {
                 Button(action: { self.selectedType = reasonType }) {
                     HStack {
                         Image(systemName: self.selectedType == reasonType ? "largecircle.fill.circle" : "circle")
+                            
                         Text(reasonType.displayText)
+                            .font(.system(size: 18))
+                        
+                        Spacer()
                     }
+                    .foregroundStyle(.black)
+                    .padding()
                 }
             }
+            
+            
+           
         }
     }
 }
