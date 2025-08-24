@@ -52,7 +52,6 @@ public final actor LoginNetworkManager: Sendable {
                 case .success(let token):
                     // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
                     self?.keychain.save(token: token.refreshToken, for: "refreshToken")
-                    print("키체인에 저장!")
                     completionHandler(token.registrationStatus, nil)
                 case .failure(let error):
                     completionHandler("", error)
