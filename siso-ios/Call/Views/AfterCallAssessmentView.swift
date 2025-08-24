@@ -16,53 +16,93 @@ public struct AfterCallAssessmentView: View {
     }
     public var body: some View {
         
-        VStack {
-            profileImageView
+        VStack(spacing: 30) {
+            Spacer()
             
-            HStack {
-                Text("\(op)")
+            VStack{
+                profileImageView
+                
+                HStack {
+                    Text("\(opponentProfile.nickname),")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.black)
+                    Text("\(opponentProfile.age)세")
+                        .foregroundStyle(Color.Siso.Gray._60)
+                        .font(.system(size: 24, weight: .bold))
+                }
+                
             }
             
-            Text("\(opponentProfile.nickname)님과의 통화는 어땠나요?")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.black)
-                .padding()
-            
-            Text("인연 이어가기를 누르면\n메시지를 보내고 상대의\n자세한 정보를 확인할 수 있어요")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.black)
-                .multilineTextAlignment(.center)
-            
-            HStack {
+            VStack {
+                Text("\(opponentProfile.nickname)님과의 통화는 어땠나요?")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.black)
+                    .padding()
                 
-                Button {
-                    print("sue")
-                } label: {
-                    Text("신고하기")
-                        .font(.system(size: 18))
-                        .foregroundStyle(.black)
-                        .padding()
-                }
                 
-                Button {
-                    print("인연 이어가기")
-                } label: {
-                    Text("인연 이어가기")
-                        .font(.system(size: 18))
-                        .foregroundStyle(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background {
-                            RoundedRectangle(cornerRadius: 90)
-                                .foregroundStyle(Color.Siso.Primary._40)
-                        }
-                }
+                HStack {
+                    Button {
+                        print("deny")
+                    } label: {
+                        denyButton
+                    }
 
+                    Button {
+                        print("accept")
+                    } label: {
+                        loveButton
+                    }
+                }
             }
-            .padding()
+            
+            Spacer()
+            
+            Button {
+                print("sue")
+            } label: {
+                Text("신고하기")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.Siso.Gray._60)
+            }
+
+            
         }
     }
     
+    private var denyButton: some View {
+        ZStack {
+            Rectangle()
+                .frame(width: 143, height: 143)
+                .foregroundStyle(.white)
+                .overlay(
+                    // 테두리 역할을 할 둥근 사각형
+                    RoundedRectangle(cornerRadius: 12) // 배경과 같은 값으로 설정
+                        .stroke(Color.Siso.Gray._30, lineWidth: 1)
+                )
+            
+            Image("denylove")
+                .resizable()
+                .frame(width: 60, height: 60)
+        }
+        
+    }
+    
+    private var loveButton: some View {
+        ZStack {
+            Rectangle()
+                .frame(width: 143, height: 143)
+                .foregroundStyle(.white)
+                .overlay(
+                    // 테두리 역할을 할 둥근 사각형
+                    RoundedRectangle(cornerRadius: 12) // 배경과 같은 값으로 설정
+                        .stroke(Color.Siso.Gray._30, lineWidth: 1)
+                )
+            Image("sendlove")
+                .resizable()
+                .frame(width: 60, height: 60)
+        }
+        
+    }
     private var profileImageView: some View {
         ZStack {
             
@@ -71,12 +111,12 @@ public struct AfterCallAssessmentView: View {
                 image
                     .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
                     .scaledToFill() // 2. 프레임을 꽉 채우도록 비율 유지 (프로필 사진에 필수!)
-                    .frame(width: 180, height: 180) // 3. 프레임 크기 지정
+                    .frame(width: 140, height: 140) // 3. 프레임 크기 지정
                     .clipShape(Circle()) // 4. 원형으로 자르기
                 
             } placeholder: {
                 Circle()
-                    .frame(width: 180, height: 180) // 3. 프레임 크기 지정
+                    .frame(width: 140, height: 140) // 3. 프레임 크기 지정
             }
         }
         
