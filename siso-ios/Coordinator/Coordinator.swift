@@ -20,10 +20,12 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
+    var locationViewModel: LocationViewModel
     
-    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel) {
+    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, locationViewModel: LocationViewModel) {
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
+        self.locationViewModel = locationViewModel
         self.matchingViewModel.delegate = self
         CallManager.shared.delegate = self
     }
@@ -135,7 +137,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     public func build(_ page: ProfilePage) -> some View {
         switch page {
         case .location:
-            LocationProfileView(delegate: self, userProfile: userProfile)
+            LocationProfileView(delegate: self, userProfile: userProfile, viewModel: locationViewModel)
         case .religion:
             ReligionProfileView(delegate: self, userProfile: userProfile)
         case .smoke:
@@ -163,7 +165,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
         case .cameraSheet:
             ImagePicker(userProfile: userProfile)
         case .location:
-            LocationProfileSheet(delegate: self)
+            LocationProfileSheet(delegate: self, viewModel: locationViewModel)
         }
     }
     

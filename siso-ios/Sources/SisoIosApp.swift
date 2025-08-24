@@ -11,6 +11,7 @@ struct SisoIosApp: App {
     @StateObject var userProfile: UserProfile
     @StateObject private var coordinator: Coordinator
     @StateObject var matchingViewModel: MatchingViewModel
+    @StateObject var locationViewModel: LocationViewModel
     
     init() {
         let userProfile: UserProfile = UserProfile(
@@ -20,17 +21,24 @@ struct SisoIosApp: App {
         )
         
         let matchingViewModel: MatchingViewModel = .init(cards: [])
+        let locationViewModel: LocationViewModel = .init()
+        
         self._userProfile = StateObject(wrappedValue: userProfile)
        
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
+        self._locationViewModel = StateObject(wrappedValue: locationViewModel)
         
-        self._coordinator = StateObject(wrappedValue: Coordinator(userProfile: userProfile, matchingViewModel: matchingViewModel))
+        self._coordinator = StateObject(wrappedValue: Coordinator(
+            userProfile: userProfile,
+            matchingViewModel: matchingViewModel,
+            locationViewModel: locationViewModel
+        ))
     }
     
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.signUp)
+                coordinator.build(.my)
                     .navigationDestination(for: AuthPage.self, destination: { page in
                         coordinator.build(page)
                     })

@@ -13,6 +13,7 @@ public struct ProfileView: View {
     @State private var age: String = ""
     @State private var introduce: String = ""
     @State private var height: String = ""
+    @State private var weight: String = ""
     @State private var sex: String = ""
     @State private var target: String = ""
     @State private var isPlaying: Bool = false
@@ -227,9 +228,9 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
             
-            textFieldView(title: "키", unit: "cm")
+            textFieldView(title: "키", unit: "cm", binding: $height)
                 .padding(.top, 16)
-            textFieldView(title: "몸무게", unit: "kg")
+            textFieldView(title: "몸무게", unit: "kg", binding: $weight)
                 .padding(.top, 8)
             RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
                 .padding(.top, 16)
@@ -317,7 +318,7 @@ public struct ProfileView: View {
         .padding(.top, 24)
     }
     
-    private func textFieldView(title: String, unit: String) -> some View {
+    private func textFieldView(title: String, unit: String, binding: Binding<String>) -> some View {
         return VStack {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
@@ -325,7 +326,7 @@ public struct ProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             HStack {
-                TextField("", text: $height)
+                TextField("", text: binding)
                     .padding()
                     .frame(width: 80, height: 54)
                     .background(

@@ -9,7 +9,6 @@ import SwiftUI
 import designSystem
 
 enum MyPageInfo: String, CaseIterable, Identifiable {
-    case call = "통화 기록"
     case blacklist = "차단 / 신고한 인연"
     case filter = "매칭 필터 설정"
     
@@ -66,8 +65,8 @@ public struct MyPageView: View {
                     }
             }
             
-            VStack {
-                Text("삼성전자회장이나야")
+            VStack(spacing: 4) {
+                Text("삼성전자회장이나")
                     .font(.system(size: 24))
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -89,7 +88,7 @@ public struct MyPageView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, 16)
+            .padding(.leading)
         }
         .padding(.horizontal, 8)
     }
@@ -155,8 +154,6 @@ public struct MyPageView: View {
                     .padding(.vertical, 8)
                     .onTapGesture {
                         switch item {
-                        case .call:
-                            break
                         case .blacklist:
                             break
                         case .filter:
