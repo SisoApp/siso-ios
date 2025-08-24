@@ -1,148 +1,65 @@
-//
-//  CallManager.swift
-//  siso-ios
-//
-//  Created by jdios on 8/16/25.
-//
-
+// InCallViewModel.swift
 
 import SwiftUI
 import Combine
 import model
-import AgoraRtcKit
 
-
-public class CallViewModel: ObservableObject {
-    
-    // MARK: - Properties
-    public static let shared = CallViewModel()
-    
-    public weak var delegate: CallCoordinatorDelegate?
-    
-    public init( isMuteMode: Bool = false, isSpeakerMode: Bool = false, oppnentProfile: UserProfileServer) {
-        self.isMuteMode = isMuteMode
-        self.isSpeakerMode = isSpeakerMode
-        self.opponentProfile = oppnentProfile
-    }
-    
-    private let agoraManager = AgoraManager.shared
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    public var opponentProfile: UserProfileServer?
-    
-    
+// 이제 싱글톤이 아닌 일반 ObservableObject
+public class InCallViewModel: ObservableObject {
     
     // MARK: - Published Properties
+    @Published var isMuteMode: Bool = false
+    @Published var isSpeakerMode: Bool = false
+    @Published var callDuration: TimeInterval = 0
+    @Published var connectedUserIDs: Set<UInt> = []
     
-    @Published public var connectedUserIDs: Set<UInt> = []
-    // 전화 시간
-    @Published public var callDuration: TimeInterval = 0
-    
-    @Published var isMuteMode = false
-    {
-        willSet {
-            if newValue == true {
-                muteOn()
-            } else {
-                muteOff()
-            }
-        }
-    }
-    @Published var isSpeakerMode = false
-    {
-        willSet {
-            if newValue == true {
-                speakerModeOn()
-            } else {
-                speakerModeOff()
-            }
-        }
-    }
-    @Published public var isCallConnected: Bool = false
-    
-    // 3. init에서 AgoraManager의 Publisher를 구독
-    private init() {
+    // MARK: - Properties
+    let opponentProfile: UserProfileServer
+    private let agoraManager = AgoraManager.shared
+    private var cancellables = Set<AnyCancellable>()
+    private var timer: Timer?
+
+    // View가 생성될 때 상대방 정보를 주입받음
+    init(opponentProfile: UserProfileServer) {
+        self.opponentProfile = opponentProfile
         bindAgoraManager()
     }
+    
+    deinit {
+        print("InCallViewModel deinit")
+        timer?.invalidate()
+    }
+
     private func bindAgoraManager() {
-        agoraManager.didJoinChannelPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.isCallConnected = true
-            }
-            .store(in: &cancellables)
-        
         agoraManager.userDidJoinPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] uid in
                 self?.connectedUserIDs.insert(uid)
-            }
-            .store(in: &cancellables)
-        
-        agoraManager.userDidLeavePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] uid in
-                self?.connectedUserIDs.remove(uid)
-                // 만약 1:1 통화라면, 상대방이 나가면 통화 종료
-                if self?.connectedUserIDs.isEmpty == true {
-                    self?.quitCall()
+                // 상대방이 들어오면 타이머 시작
+                if self?.timer == nil {
+                    self?.startTimer()
                 }
             }
             .store(in: &cancellables)
-        
-        // 채널에서 나갔을 때 상태 초기화
-        agoraManager.didLeaveChannelPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.resetStates()
-            }
-            .store(in: &cancellables)
     }
     
-    private func resetStates() {
-        isCallConnected = false
-        isMuteMode = false
-        isSpeakerMode = false
-        connectedUserIDs.removeAll()
+    // MARK: - Public Methods (UI Actions)
+    
+    func toggleMute() {
+        isMuteMode.toggle()
+        agoraManager.muteLocalAudio(isMuteMode)
     }
     
-    func startCall(channelName: String, token: String? = nil) {
-        // 전화 시작
-        print("CallManager: Starting call for channel \(channelName)")
-        agoraManager.initalizeAndJoinChannel(channelName: channelName, token: token)
-        delegate?.pushCallingView()
+    func toggleSpeaker() {
+        isSpeakerMode.toggle()
+        agoraManager.enableSpeakerphone(isSpeakerMode)
     }
     
-    func quitCall() {
-        print("CallManager: Ending call")
-        // 채널 폭파
-        agoraManager.leaveChannel()
-        // 이전 화면으로 돌아가기
-        delegate?.finishCallAndPopToPreviousView()
-        // 인연 이어가기 팝업 호출
-        delegate?.pushCallInteruptPopup()
-
-    }
+    // MARK: - Private Methods
     
-    func speakerModeOn() {
-        print("speakerPhoneMode")
-        agoraManager.enableSpeakerphone(true)
-    }
-    
-    func speakerModeOff() {
-        print("speakerPhoneModeOff")
-        agoraManager.enableSpeakerphone(false)
-    }
-    
-    func muteOn() {
-        print("MuteModeOn")
-        agoraManager.muteLocalAudio(true)
-    }
-    
-    func muteOff() {
-        print("MuteModeOff")
-        agoraManager.muteLocalAudio(false)
+    private func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.callDuration += 1
+        }
     }
 }
-

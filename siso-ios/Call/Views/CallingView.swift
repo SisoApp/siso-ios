@@ -12,15 +12,15 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 public struct CallingView: View {
    
-    @StateObject var callViewModel: CallViewModel // @StateObject 또는 @ObservedObject
+    @StateObject var inCallViewModel: InCallViewModel
     
     // Coordinator와 통신이 필요하다면 delegate를 유지하고 init에서 주입받습니다.
     var delegate: CallCoordinatorDelegate?
     
-    public init(callViewModel: CallViewModel, delegate: CallCoordinatorDelegate? = nil) {
+    public init(inCallViewModel: InCallViewModel, delegate: CallCoordinatorDelegate? = nil) {
         // StateObject는 뷰가 소유권을 가질 때 사용하므로 init에서 wrappedValue를 설정합니다.
         // 만약 상위 뷰에서 @StateObject로 생성된 ViewModel을 받는다면, 이 뷰는 @ObservedObject를 사용해야 합니다.
-        self._callViewModel = .init(wrappedValue: callViewModel)
+        self._inCallViewModel = .init(wrappedValue: inCallViewModel)
         self.delegate = delegate
     }
     
@@ -28,29 +28,18 @@ public struct CallingView: View {
     
     public var body: some View {
         VStack(spacing: 20) {
-            // 1. opponentProfile이 nil이 아닐 때만 프로필 정보를 표시합니다.
-            if let profile = callViewModel.opponentProfile {
-                
-                // 2. 안전하게 얻은 profile 데이터를 각 뷰 '함수'에 파라미터로 전달합니다.
-                profileImageView(profile: profile)
-                
-                userInfoSection(profile: profile)
-                
-                locationInfoSection(profile: profile)
-                
-                introductionSection(profile: profile)
-                
-                CountdownView() // 이 뷰는 이미 존재한다고 가정합니다.
-                
-                actionButtonsSection()
-                
-            } else {
-                // 3. nil일 경우, 사용자에게 로딩 중임을 알려주는 UI를 표시합니다.
-                Spacer()
-                ProgressView()
-                Text("상대방 정보를 불러오는 중...")
-                Spacer()
-            }
+
+            profileImageView(profile: inCallViewModel.opponentProfile)
+            
+            userInfoSection(profile: inCallViewModel.opponentProfile)
+            
+            locationInfoSection(profile: inCallViewModel.opponentProfile)
+            
+            introductionSection(profile: inCallViewModel.opponentProfile)
+            
+            CountdownView() // 이 뷰는 이미 존재한다고 가정합니다.
+            
+            actionButtonsSection()
         }
         .padding(.vertical)
     }
@@ -147,24 +136,24 @@ public struct CallingView: View {
             } label: {
                 // ViewModel의 상태에 따라 아이콘과 배경색이 바뀝니다.
                 actionButtonContent(
-                    imageName: callViewModel.isMuteMode ? "speaker.slash.fill" : "speaker.slash.fill", // 에셋 이름 확인 필요
-                    text: callViewModel.isMuteMode ? "음소거 해제" : "음소거"
+                    imageName: inCallViewModel.isMuteMode ? "speaker.slash.fill" : "speaker.slash.fill", // 에셋 이름 확인 필요
+                    text: inCallViewModel.isMuteMode ? "음소거 해제" : "음소거"
                 )
                 .frame(width: 80, height: 80)
-                .background(callViewModel.isMuteMode ? Color.Siso.Blue._50 : Color.Siso.Gray._50)
+                .background(inCallViewModel.isMuteMode ? Color.Siso.Blue._50 : Color.Siso.Gray._50)
                 .clipShape(Circle())
             }
             
             // 스피커 버튼
             Button {
-                callViewModel.isSpeakerMode.toggle()
+                inCallViewModel.isSpeakerMode.toggle()
             } label: {
                 actionButtonContent(
                     imageName: "speakericon", // 에셋 이름 확인 필요
                     text: "스피커"
                 )
                 .frame(width: 80, height: 80)
-                .background(callViewModel.isSpeakerMode ? Color.Siso.Blue._50 : Color.Siso.Gray._50)
+                .background(inCallViewModel.isSpeakerMode ? Color.Siso.Blue._50 : Color.Siso.Gray._50)
                 .clipShape(Circle())
             }
         }
@@ -189,10 +178,5 @@ public struct CallingView: View {
 
 // MARK: - Preview
 #Preview {
-    // 1. 샘플 UserProfileServer 데이터 생성
-    // 2. 테스트용 CallViewModel 생성
-    let previewViewModel = CallViewModel( oppnentProfile: UserProfileServer.sampleMessi)
-    
-    // 4. View에 ViewModel을 전달하여 프리뷰
-    CallingView(callViewModel: previewViewModel)
+    CallingView(inCallViewModel: InCallViewModel(opponentProfile: UserProfileServer.sampleMessi))
 }

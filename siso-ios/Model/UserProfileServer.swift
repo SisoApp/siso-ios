@@ -5,7 +5,11 @@
 //  Created by 멘태 on 8/12/25.
 //
 
-public struct UserProfileServer {
+import Foundation
+
+public struct UserProfileServer: Equatable, Identifiable {
+    public let id = UUID()
+    
     public let nickname: String // 닉네임
     public let sex: String // 성별
     public var age: Int // 나이

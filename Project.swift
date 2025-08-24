@@ -123,7 +123,20 @@ let call: Target = .target(
     dependencies: [
         .target(name: "model"),
         .target(name: "matching"),
-        .xcframework(path: .relativeToRoot("Frameworks/AgoraRtcKit.xcframework"))
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraRtcKit.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/aosl.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/Agoraffmpeg.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/Agorafdkaac.xcframework")),
+        
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationLLExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiNoiseSuppressionExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiNoiseSuppressionLLExtension.xcframework")),
+        
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAudioBeautyExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraLipSyncExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraSoundTouch.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraSpatialAudioExtension.xcframework"))
     ]
 )
 

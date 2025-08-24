@@ -12,13 +12,11 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
 public struct ConnectingView: View {
-    @ObservedObject var callViewModel: CallViewModel
-    var delegate: MatchingCoordinatorDelegate?
-    
-    public init(callViewModel: CallViewModel, delegate: MatchingCoordinatorDelegate? = nil) {
-        self.delegate = delegate
-        self._callViewModel = .init(wrappedValue: callViewModel)
-    }
+    let opponentProfile: UserProfileServer
+   
+    public init(opponentProfile: UserProfileServer) {
+            self.opponentProfile = opponentProfile
+        }
     
     // MARK: - Body
     
@@ -27,7 +25,7 @@ public struct ConnectingView: View {
             Spacer()
             
             // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
-            Text("\((callViewModel.opponentProfile?.nickname) ?? "상대방") 님과\n연결중이에요")
+            Text("\(opponentProfile.nickname) 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
@@ -45,6 +43,21 @@ public struct ConnectingView: View {
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             .frame(height: 150) // 콘텐츠에 맞게 높이 조절
+            
+            // 취소 버튼 추가 (사용자 경험을 위해 중요)
+                       Button {
+                           // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
+                           CallManager.shared.endCall(reason: .cancelled)
+                       } label: {
+                           Text("취소")
+                               .font(.headline)
+                               .foregroundColor(.white)
+                               .padding()
+                               .frame(maxWidth: .infinity)
+                               .background(Color.gray)
+                               .cornerRadius(12)
+                       }
+                       .padding()
             
             Spacer()
         }
@@ -79,10 +92,6 @@ public struct ConnectingView: View {
 // MARK: - Preview
 
 #Preview {
-    // 1. 프리뷰를 위해 ViewModel 인스턴스를 생성합니다.
-    let previewViewModel = CallViewModel( oppnentProfile: UserProfileServer.sampleMessi)
-    
-   
     // 4. 완성된 ViewModel을 View에 주입하여 프리뷰를 실행합니다.
-    ConnectingView(callViewModel: previewViewModel)
+    ConnectingView(opponentProfile: UserProfileServer.sampleMessi)
 }

@@ -169,7 +169,7 @@ public struct MatchingCardView: View {
                     .frame(width: 70)
                     .padding(.leading, 5)
             }
-            .frame(width: 100, height: 18)
+            .frame(width: 86, height: 18)
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 20)
@@ -207,9 +207,7 @@ public struct MatchingCardView: View {
                 }
                 .font(.system(size: 18))
                 .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.gray.opacity(0.2))
-                .clipShape(Capsule())
+               
             }
             Spacer()
         }
@@ -221,7 +219,6 @@ public struct MatchingCardView: View {
         Text(cardViewModel.introduction)
             .foregroundStyle(.white)
             .font(.system(size: 18))
-            .lineLimit(2)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .onTapGesture {
@@ -250,7 +247,6 @@ public struct MatchingCardView: View {
             Spacer()
             
             Button {
-                //                delegate?.pushContactingView()
                 cardViewModel.call()
             } label: {
                 RoundedRectangle(cornerRadius: 24)

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import model
 
 public enum CallAgoraActions {
     // MARK: - Core Calling Actions
@@ -32,15 +33,34 @@ public enum CallViewActions {
     
 }
 
-public enum CallState {
-    // 아고라 서버에 들어가 대기하고 있는 상태
-    case connecting
-    // 연결 완료된 상태 - 아고라 서버에 두 사람이 들어와 있는 상태
-    case connected
-    // 전화중인 상태
-    case calling
-    // 전화가 끝나고 팝업이 뜨는 시점
-    case callEnded
-    // 전화 하고 있지 않으며 전화 받을 수 있는 상태
-    case waiting
+public enum CallState: Equatable {
+    // Equatable을 채택하여 상태 변경을 더 쉽게 감지할 수 있습니다.
+    
+    /// 통화 관련 활동이 없는 유휴 상태
+    case idle
+    
+    /// A에게서 전화가 오고 있는 수신 상태 (B의 입장)
+    case receiving(info: IncomingCallInfo)
+    
+    /// B에게 전화를 걸고 있는 발신 상태 (A의 입장)
+    case connecting(info: IncomingCallInfo)
+    
+    /// 통화가 연결되어 진행 중인 상태
+    case inCall(info: IncomingCallInfo)
+    
+    // Equatable 구현
+    public static func == (lhs: CallState, rhs: CallState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle):
+            return true
+        case (.receiving(let lhsInfo), .receiving(let rhsInfo)):
+            return lhsInfo.id == rhsInfo.id
+        case (.connecting(let lhsInfo), .connecting(let rhsInfo)):
+            return lhsInfo.id == rhsInfo.id
+        case (.inCall(let lhsInfo), .inCall(let rhsInfo)):
+            return lhsInfo.id == rhsInfo.id
+        default:
+            return false
+        }
+    }
 }

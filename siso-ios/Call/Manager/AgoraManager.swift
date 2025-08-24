@@ -27,7 +27,7 @@ public final class AgoraManager: NSObject {
     // MARK: - Private Properties
     
     private var agoraEngine: AgoraRtcEngineKit?
-    private let appId: String = "f10b80b198e94370b54198d4f0dbad7b"
+    private let appId: String = "a914eda873c04f09a72ee7bd3e522300"
     
     // MARK: -Lifecycle
     
