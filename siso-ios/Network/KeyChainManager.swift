@@ -14,7 +14,7 @@ import Security
  *
  * 이 클래스는 UserDefaults가 아닌 Keychain을 사용하여 accessToken과 refreshToken을 안전하게 보관합니다.
  */
-public final class KeyChainManager {
+public final class KeyChainManager: Sendable {
     
     public static let shared = KeyChainManager()
     

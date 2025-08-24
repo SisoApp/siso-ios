@@ -7,168 +7,104 @@
 
 import Foundation
 import Alamofire
+import CryptoKit
 
-// MARK: - Models
-public enum SocialLoginType: String, Codable, Sendable {
-    case kakao
-    case apple
-}
 
-// MARK: token의 종류
-public struct Token: Codable {
-    let acessToken: String
-    let refreshToken: String
-}
-
-// MARK: User Model
-public struct User: Sendable, Codable {
-    let socialLogin: SocialLoginType
-    let phoneNumber: String
-    let isOnline: Bool
-    let isNotificationSubscribed: Bool
-    let refreshToken: String
-    let isBlock: Bool
-    let isDeleted: Bool
-    let createdAt: String
-    let updatedAt: String
-}
-
-// MARK: - Network Error
-
-public enum NetworkError: Error {
-    case invalidURL
-    case invalidResponse
-    case decodingError
-    case serverError(String)
-    case unauthorized
-    case unknown(Error)
-}
 
 // MARK: - Network Manager
 
-public final class NetworkManager {
+public final actor LoginNetworkManager: Sendable {
     
-    public static let shared = NetworkManager()
-    private let baseURL = "https://your-server.com/api"
     private let keychain = KeyChainManager.shared
+    private let baseURL: String?
     
-    private init() {}
+    public init() {
+        baseURL = Bundle.main.infoDictionary?["SERVER_URL"] as? String
+    }
     
     // MARK: - Authentication
-    
-    /// 소셜 로그인을 통해 서버에 로그인하고 토큰을 발급받습니다.
-    public func login(with socialLoginType: SocialLoginType, accessToken: String, completion: @escaping (Result<User, NetworkError>) -> Void) {
-        let urlString = "\(baseURL)/auth/login/\(socialLoginType.rawValue)"
+    /// ** MARK: 소셜 로그인을 통해 서버에 로그인하고 토큰을 발급받습니다. Login
+    public func login(at accessToken: String, completionHandler: @escaping(String, AFError?) -> Void) async throws {
+        guard let baseURL = baseURL else { throw AFError.invalidURL(url: "base URL is Not Found") }
+        let urlString = "\(baseURL)/api/auth/kakao"
         
         guard let url = URL(string: urlString) else {
-            completion(.failure(.invalidURL))
-            return
+            throw AFError.invalidURL(url: urlString)
         }
         
-        let parameters: [String : Any] = [
-            "provider": socialLoginType.rawValue,
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/json"
+        ]
+        
+        let parameters: [String: String] = [
             "accessToken": accessToken,
         ]
         
-        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default)
+        AF.request(url,
+                   method: .post,
+                   parameters: parameters,
+                   encoding: JSONEncoding.default,
+                   headers: headers
+            )
             .validate(statusCode: 200..<300)
-            .responseDecodable(of: Token.self) { response in
+            .responseDecodable(of: Token.self) { [weak self] response in
                 switch response.result {
                 case .success(let token):
                     // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
-                    self.keychain.save(token: token.refreshToken, for: "refreshToken")
-                    // 3. 새로 받은 accessToken으로 사용자 프로필 정보를 가져옴
-                    self.fetchUserProfile(completion: completion)
-                    
+                    self?.keychain.save(token: token.refreshToken, for: "refreshToken")
+                    print("키체인에 저장!")
+                    completionHandler(token.registrationStatus, nil)
                 case .failure(let error):
-                    // 401 에러(Unauthorized)를 별도로 처리하면 더 좋습니다.
-                    if response.response?.statusCode == 401 {
-                        completion(.failure(.unauthorized))
-                    } else {
-                        completion(.failure(.serverError(error.localizedDescription)))
-                    }
+                    completionHandler("", error)
+                    return
                 }
             }
     }
     
-    /// 저장된 리프레시 토큰을 사용하여 자동으로 로그인합니다.
-    /// 중간에 서버통신 코드 있어야 할 듯
-    public func autoLogin(completion: @escaping (Result<User, NetworkError>) -> Void) {
+    /// ** MARK: 저장된 리프레시 토큰을 사용하여 자동으로 로그인합니다.
+    public func autoLogin() async throws -> Result<RefreshResult, AFError> {
         guard let refreshToken = keychain.get(for: "refreshToken") else {
-            completion(.failure(.unauthorized))
-            return
+            return .failure(.invalidURL(url: "refreshToken -> nil"))
         }
         
-        // 4. 새로 구현된 refreshToken 함수를 호출
-        self.refreshToken { result in
-            switch result {
-            case .success:
-                // 토큰 갱신 성공 시, 사용자 프로필 정보를 가져옴
-                self.fetchUserProfile(completion: completion)
-            case .failure(let error):
-                completion(.failure(error))
-            }
+        print("refreshToken : \(refreshToken)")
+        
+        do {
+            /// refreshToken을 가지고 서버에 보내서 비교
+            /// 만료되었다면 다시 로그인 시키고 아직 만료까지 남아있다면 토근 재발급 해서 갱신하기
+            let res = try await getRefreshToken(refreshToken: refreshToken)
+            
+            return .success(res)
+        } catch {
+            return .failure(.sessionInvalidated(error: error))
         }
     }
     
-    /// 리프레시 토큰으로 새로운 액세스 토큰을 발급받습니다.
-    public func refreshToken(completion: @escaping (Result<Void, NetworkError>) -> Void) {
-        let urlString = "\(baseURL)/auth/refresh"
+    /// ** MARK: 리프레시 토큰으로 새로운 액세스 토큰을 발급받습니다. -> 재발급
+    public func getRefreshToken(refreshToken: String) async throws -> RefreshResult {
+        guard let baseURL = baseURL else { throw AFError.invalidURL(url: "base URL is Not Found") }
+        let urlString = "\(baseURL)/api/auth/refresh"
         
-        guard let url = URL(string: urlString), let refreshToken = keychain.get(for: "refreshToken") else {
-            completion(.failure(.invalidURL))
-            return
+        guard let url = URL(string: urlString) else {
+            throw AFError.invalidURL(url: urlString)
         }
         
         let headers: HTTPHeaders = ["Authorization": "Bearer \(refreshToken)"]
         
-        AF.request(url, method: .post, headers: headers)
+        let response = try await AF.request(url, method: .post, headers: headers)
             .validate(statusCode: 200..<300)
-            .responseDecodable(of: Token.self) { response in
-                switch response.result {
-                case .success(let token):
-                    // 새로 받은 토큰들을 다시 저장
-                    self.keychain.save(token: token.refreshToken, for: "refreshToken")
-                    completion(.success(()))
-                case .failure:
-                    // 리프레시 실패는 보통 리프레시 토큰 만료를 의미하므로 unauthorized 처리
-                    completion(.failure(.unauthorized))
-                }
-            }
+            .serializingDecodable(AutoLoginResponse.self)
+            .value
+        
+        // 새로 받은 토큰을 다시 저장
+        keychain.save(token: response.token.refreshToken, for: "refreshToken")
+        
+        return RefreshResult(user: response.user, registrationStatus: response.token.registrationStatus)
     }
     
     /// 로그아웃하고 모든 토큰을 삭제합니다.
     public func logout() {
         // 5. KeyChainManager를 호출하여 모든 토큰 삭제
         keychain.clearAllTokens()
-    }
-    
-    // MARK: - User Profile
-    
-    /// 사용자 프로필 정보를 가져옵니다.
-    public func fetchUserProfile(completion: @escaping (Result<User, NetworkError>) -> Void) {
-        let urlString = "\(baseURL)/users/me"
-        
-        guard let url = URL(string: urlString), let accessToken = keychain.get(for: "accessToken") else {
-            completion(.failure(.unauthorized)) // accessToken이 없으면 unauthorized
-            return
-        }
-        
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
-        
-        AF.request(url, method: .get, headers: headers)
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: User.self) { response in
-                switch response.result {
-                case .success(let user):
-                    completion(.success(user))
-                case .failure:
-                    if response.response?.statusCode == 401 {
-                        completion(.failure(.unauthorized))
-                    } else {
-                        completion(.failure(.decodingError))
-                    }
-                }
-            }
     }
 }
