@@ -11,7 +11,7 @@ import model // UserProfileServer 모델을 사용하기 위해 import
 import designSystem // Color.Siso 등을 사용하기 위해 import
 
 public struct CallingView: View {
-   
+    
     @StateObject var inCallViewModel: InCallViewModel
     
     // Coordinator와 통신이 필요하다면 delegate를 유지하고 init에서 주입받습니다.
@@ -27,17 +27,66 @@ public struct CallingView: View {
     // MARK: - Body
     
     public var body: some View {
-        VStack(spacing: 20) {
-
-            profileImageView(profile: inCallViewModel.opponentProfile)
+        VStack {
             
-            userInfoSection(profile: inCallViewModel.opponentProfile)
+            HStack {
+                profileImageView(profile: inCallViewModel.opponentProfile)
+                VStack(alignment: .leading, spacing: 0){
+                    Text("\(inCallViewModel.opponentProfile.nickname)")
+                        .font(.system(size: 24, weight: .bold))
+                    HStack {
+                        Text("\(inCallViewModel.opponentProfile.age)세")
+                            .font(.system(size: 22, weight: .medium))
+                        locationInfoSection(profile: inCallViewModel.opponentProfile)
+                    }
+                    
+                }
+            }
             
-            locationInfoSection(profile: inCallViewModel.opponentProfile)
+            Spacer()
             
-            introductionSection(profile: inCallViewModel.opponentProfile)
+            VStack {
+                Text("남은시간")
+                
+                Text(inCallViewModel.remainTime)
+                    .font(.system(size: 32, weight: .bold))
+                
+                Button {
+                    // 통화 시간 연장 (결제 필요함)
+                    print("tap")
+                } label: {
+                    
+                    Text("통화 연장하기")
+                        .font(.system(size: 18, weight: .semibold))
+                    
+                        .padding(.vertical)
+                        .padding(.horizontal, 30)
+                        .foregroundStyle(.black)
+                        .background
+                    {
+                        // 삼항 연산자를 사용한 버전
+                        inCallViewModel.remainingSeconds < 60.0 ?
+                        
+                        // 참일 때 (60초 미만): 배경 채우기
+                        AnyView(RoundedRectangle(cornerRadius: 30)
+                            .fill(Color.Siso.Primary._40))
+                        :
+                        // 거짓일 때 (60초 이상): 흰 배경 + 테두리
+                        AnyView(RoundedRectangle(cornerRadius: 30)
+                            .fill(Color.white) // 배경을 흰색으로 채우고
+                            .overlay( // 그 위에 테두리를 겹쳐 그린다
+                                RoundedRectangle(cornerRadius: 30)
+                                    .stroke(Color.Siso.Primary._40, lineWidth: 2)
+                                    )
+                        )
+                    }
+                    
+                }
+                
+            }
             
-            CountdownView() // 이 뷰는 이미 존재한다고 가정합니다.
+            Spacer()
+            commonInterestView(profile: inCallViewModel.opponentProfile)
             
             actionButtonsSection()
         }
@@ -45,28 +94,30 @@ public struct CallingView: View {
     }
     
     // MARK: - View Components (Functions)
-    
+    @ViewBuilder
     private func profileImageView(profile: UserProfileServer) -> some View {
-        TabView {
-            // profileImageUrls가 비어있을 경우를 대비
-            if profile.profileImageUrls.isEmpty {
-                placeholderImage
-            } else {
-                ForEach(profile.profileImageUrls, id: \.self) { urlString in
-                    AsyncImage(url: URL(string: urlString)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        ProgressView()
-                    }
+        // profileImageUrls가 비어있을 경우를 대비
+        if profile.profileImageUrls.isEmpty {
+            placeholderImage
+        } else {
+            let urlString = profile.profileImageUrls.first!
+            AsyncImage(url: URL(string: urlString)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(.circle)
+                    .frame(width: 100 ,height: 100)
+            } placeholder: {
+                
+                ZStack{
+                    Rectangle()
+                        .foregroundStyle(.white)
+                    ProgressView()
                 }
+                .frame(width: 100, height: 100)
+                
             }
         }
-        .frame(height: 250)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .tabViewStyle(.page(indexDisplayMode: .automatic))
-        .padding(.horizontal)
     }
     
     /// 이미지가 없을 때 표시할 플레이스홀더
@@ -101,6 +152,7 @@ public struct CallingView: View {
             Image("locationicon_inverse") // 에셋 이름 확인 필요
             Text(profile.location) // UserProfileServer에 location이 옵셔널로 있다고 가정
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
             Spacer()
         }
         .padding(.horizontal)
@@ -116,6 +168,26 @@ public struct CallingView: View {
             .padding(.horizontal)
     }
     
+    private func commonInterestView(profile: UserProfileServer) -> some View {
+        HStack {
+            Text("공통 관심사")
+                .font(.system(size: 18, weight: .medium))
+                .padding(5)
+                .overlay( // 그 위에 테두리를 겹쳐 그린다
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(Color.Siso.Primary._40, lineWidth: 2)
+                        )
+                .frame(width: 100)
+               
+            ForEach(profile.interestTags, id: \.self) { interest in
+                Text("#\(interest)")
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+        }
+        .padding(.horizontal)
+    }
+    
     /// 하단 액션 버튼 (통화 종료, 음소거, 스피커) 뷰
     private func actionButtonsSection() -> some View {
         HStack(spacing: 16) {
@@ -124,24 +196,26 @@ public struct CallingView: View {
                 // Singleton 대신 주입받은 viewModel의 메서드를 호출합니다.
                 //callViewModel.endCall()
             } label: {
-                actionButtonContent(imageName: "quitcallicon", text: "통화 종료")
-                    .frame(width: 80, height: 80)
-                    .background(Color.Siso.Red._60)
-                    .clipShape(Circle())
+                
+                actionButtonContent(imageName: "endcall", text: "통화 종료", condition: false)
+                    .frame(width: 104, height: 96)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
             }
             
             // 음소거 버튼
             Button {
-                //callViewModel.toggleMute()
+                inCallViewModel.isMuteMode.toggle()
             } label: {
                 // ViewModel의 상태에 따라 아이콘과 배경색이 바뀝니다.
                 actionButtonContent(
-                    imageName: inCallViewModel.isMuteMode ? "speaker.slash.fill" : "speaker.slash.fill", // 에셋 이름 확인 필요
-                    text: inCallViewModel.isMuteMode ? "음소거 해제" : "음소거"
+                    imageName: inCallViewModel.isMuteMode ? "Volume-off 1" : "Volume-off", // 에셋 이름 확인 필요
+                    text: inCallViewModel.isMuteMode ? "음소거" : "음소거",
+                    condition: inCallViewModel.isMuteMode
                 )
-                .frame(width: 80, height: 80)
-                .background(inCallViewModel.isMuteMode ? Color.Siso.Blue._50 : Color.Siso.Gray._50)
-                .clipShape(Circle())
+                .frame(width: 104, height: 96)
+                .background(inCallViewModel.isMuteMode ? Color.Siso.Gray._50 : Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
             }
             
             // 스피커 버튼
@@ -149,19 +223,20 @@ public struct CallingView: View {
                 inCallViewModel.isSpeakerMode.toggle()
             } label: {
                 actionButtonContent(
-                    imageName: "speakericon", // 에셋 이름 확인 필요
-                    text: "스피커"
+                    imageName: inCallViewModel.isSpeakerMode ? "Volume-up1" :"Volume-up",
+                    text: "스피커",
+                    condition: inCallViewModel.isSpeakerMode
                 )
-                .frame(width: 80, height: 80)
-                .background(inCallViewModel.isSpeakerMode ? Color.Siso.Blue._50 : Color.Siso.Gray._50)
-                .clipShape(Circle())
+                .frame(width: 104, height: 96)
+                .background(inCallViewModel.isSpeakerMode ? Color.Siso.Blue._50 : Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
         .padding(.horizontal)
     }
     
     /// 액션 버튼의 내부 UI를 재사용하기 위한 헬퍼 뷰
-    private func actionButtonContent(imageName: String, text: String) -> some View {
+    private func actionButtonContent(imageName: String, text: String, condition: Bool) -> some View {
         VStack(spacing: 4) {
             Image(imageName) // quitcallicon, speaker.slash.fill, speakericon
                 .resizable()
@@ -169,9 +244,9 @@ public struct CallingView: View {
                 .frame(width: 32, height: 32)
             
             Text(text)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(condition ? .white : .black)
         }
-        .foregroundStyle(.white)
     }
 }
 
