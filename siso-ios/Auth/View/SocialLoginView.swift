@@ -58,11 +58,6 @@ public struct SocialLoginView: View {
                             }
                         }
                     }
-                    loginButton(title: "카카오 로그아웃", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
-                        Task {
-                            await vm.kakaoLogout()
-                        }
-                    }
                     loginButton(title: "Apple로 시작하기", icon: "Apple" , bgColor: .black, textColor: .white) {
                         // Apple Login
                     }
