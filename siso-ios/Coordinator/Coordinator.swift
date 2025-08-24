@@ -175,7 +175,7 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     @ViewBuilder
     public func build(_ page: MyPage) -> some View {
         switch page {
-        case .main:
+        case .my:
             MyPageView(delegate: self)
         case .setting:
             SettingView(delegate: self)

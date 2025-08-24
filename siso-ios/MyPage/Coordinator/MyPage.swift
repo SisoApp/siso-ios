@@ -6,7 +6,7 @@
 //
 
 public enum MyPage: String, Identifiable, Hashable {
-    case main, setting, notification
+    case my, setting, notification
     
     public var id: String { return self.rawValue }
 }
