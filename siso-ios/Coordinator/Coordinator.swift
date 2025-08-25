@@ -1,18 +1,34 @@
-//
-//  Coordinator.swift
-//  auth
-//
-//  Created by 멘태 on 8/13/25.
-//
-
 import SwiftUI
 import Foundation
 import auth
 import profile
 import matching
-import mypage
+import network
 
-public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoordinatorDelegate, MatchingCoordinatorDelegate, MyPageCoordinatorDelegate {
+public enum IntegrationPage: Hashable {
+    // Auth
+    case login
+    case accept
+    case welcome
+    
+    // Matching
+    case home
+    case beCalled
+    case chat
+    case contacting
+    case calling
+    
+    // Profile
+    case basic
+    case interest
+    case image
+    case introduce
+    case record
+    case complete
+}
+
+@MainActor
+public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
@@ -20,17 +36,17 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
-    var locationViewModel: LocationViewModel
+    var authViewModel: SocialLoginView.LoginViewModel
     
-    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, locationViewModel: LocationViewModel) {
+    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel) {
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
-        self.locationViewModel = locationViewModel
+        self.authViewModel = authViewModel
         self.matchingViewModel.delegate = self
         CallManager.shared.delegate = self
     }
     
-    // Common
+    // ** Common
     public func pop() {
         path.removeLast()
     }
@@ -38,36 +54,21 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
     public func popToRoot() {
         path.removeLast(path.count - 1)
     }
-    
-    // Auth Page
-    public func pushAuth(_ page: AuthPage) {
-        path.append(page)
-    }
-    
+
     @ViewBuilder
-    public func build(_ page: AuthPage) -> some View {
+    public func build(_ page: IntegrationPage) -> some View {
         switch page {
+        // Auth
         case .login:
             SocialView(delegate: self)
         case .accept:
             AcceptanceView(delegate: self)
         case .welcome:
             WelcomeView(delegate: self)
-        }
-    }
-    
-    // Matching Page
-    public func pushMatching(_ page: MatchingPage) {
-        path.append(page)
-    }
-    
-    @ViewBuilder
-    public func build(_ page: MatchingPage) -> some View {
-        switch page {
+        // Matching
         case .home:
             MatchingMainView(viewModel: matchingViewModel, delegate: self)
                 .navigationBarBackButtonHidden(true)
-            
         case .beCalled:
             if let nowWatching = matchingViewModel.nowWatching {
                 MatchingCalledView(cardViewModel: nowWatching)
@@ -85,138 +86,19 @@ public class Coordinator: ObservableObject, AuthCoordinatorDelegate, ProfileCoor
                 MatchingCallingView(cardViewModel: nowWatching, callManager: CallManager())
                     .navigationBarBackButtonHidden(true)
             }
-        }
-    }
-    public func popToMainView() {
-        print("poptoMain")
-    }
-    
-    public func pushContactingView() {
-        print("contactingView로 진행합니다")
-        path.append(MatchingPage.contacting)
-    }
-    
-    public func pushCallingView() { // 전화중 (이야기중)
-        path.append(MatchingPage.calling)
-    }
-    
-    public func pushChatView() { // 채팅 하기 누른경우
-        path.append(MatchingPage.chat)
-    }
-    
-    public func pushCallInteruptPopup() { 
-        matchingSheet = .afterCallPopup
-    }
-    
-    public func pushFullScreenProfileImageView() {
-        print("작성예정")
-    }
-  
-    @ViewBuilder
-    public func build(_ sheet: MatchingSheet) -> some View {
-        switch sheet {
-        case .afterCallPopup:
-            AfterCallPopup(cardViewModel: matchingViewModel.cards[0])
-        }
-    }
-    
-    // Profile Page
-    public func pushProfile(_ page: ProfilePage) {
-        path.append(page)
-    }
-    
-    public func presentProfile(sheet: ProfileSheet) {
-        profileSheet = sheet
-    }
-    
-    public func dismissProfileSheet() {
-        profileSheet = nil
-    }
-    
-    @ViewBuilder
-    public func build(_ page: ProfilePage) -> some View {
-        switch page {
-        case .location:
-            LocationProfileView(delegate: self, userProfile: userProfile, viewModel: locationViewModel)
-        case .religion:
-            ReligionProfileView(delegate: self, userProfile: userProfile)
-        case .smoke:
-            SmokeProfileView(delegate: self, userProfile: userProfile)
-        case .drink:
-            DrinkProfileView(delegate: self, userProfile: userProfile)
-        case .personality:
-            PersonalityProfileView(delegate: self, userProfile: userProfile)
-        case .meeting:
-            MeetingProfileView(delegate: self, userProfile: userProfile)
-        case .profile:
-            ProfileView(delegate: self, userProfile: userProfile)
+        // Profile
+        case .basic:
+            BasicProfileView(delegate: self, userProfile: userProfile)
+        case .interest:
+            InterestProfileView(delegate: self, userProfile: userProfile)
+        case .image:
+            ImageProfileView(delegate: self, userProfile: userProfile)
+        case .introduce:
+            IntroduceProfileView(delegate: self, userProfile: userProfile)
+        case .record:
+            RecordProfileView(delegate: self, userProfile: userProfile)
         case .complete:
             CompleteProfileView(delegate: self)
-        case .signUp:
-            SignUpProfileView(delegate: self, userProfile: userProfile)
         }
-    }
-    
-    @ViewBuilder
-    public func build(sheet: ProfileSheet) -> some View {
-        switch sheet {
-        case .imageHelper(let completion):
-            ImageHelperSheet(delegate: self, userProfile: userProfile, completion: completion)
-        case .cameraSheet:
-            ImagePicker(userProfile: userProfile)
-        case .location:
-            LocationProfileSheet(delegate: self, viewModel: locationViewModel)
-        }
-    }
-    
-    // MyPage
-    public func pushMyPage(_ page: MyPage) {
-        path.append(page)
-    }
-    
-    @ViewBuilder
-    public func build(_ page: MyPage) -> some View {
-        switch page {
-        case .my:
-            MyPageView(delegate: self)
-        case .setting:
-            SettingView(delegate: self)
-        case .notification:
-            EmptyView()
-        }
-    }
-    
-    // Flow
-    public func changeAuthToProfile() {
-        stackID = UUID()
-        path = NavigationPath()
-        
-        Task { @MainActor in
-            try await Task.sleep(nanoseconds: 50_000_000)
-            withAnimation(.easeInOut) {
-                pushProfile(.complete)
-            }
-        }
-        
-    }
-    
-    public func changeProfileToMatching() {
-        stackID = UUID()
-        path = NavigationPath()
-        
-        Task { @MainActor in
-            try await Task.sleep(nanoseconds: 50_000_000)
-            withAnimation(.easeInOut) {
-                pushMatching(.home)
-            }
-        }
-    }
-    
-    public func pushMyPageToProfile() {
-        pushProfile(.profile)
-    }
-    
-    public func changeMatchingToAuth() {
-        
     }
 }

@@ -4,51 +4,41 @@ import auth
 import coordinator
 import profile
 import matching
-import mypage
 
 @main
 struct SisoIosApp: App {
     @StateObject var userProfile: UserProfile
     @StateObject private var coordinator: Coordinator
+    
     @StateObject var matchingViewModel: MatchingViewModel
-    @StateObject var locationViewModel: LocationViewModel
+    @StateObject var authVM: SocialLoginView.LoginViewModel
     
     init() {
-        let userProfile: UserProfile = UserProfile(
+        let userProfile = UserProfile(
             nickname: "", age: "", sex: "", targetSex: "",
-            profileImageUrl: [], interests: [], introduce: "",
-            religion: "", smoking: "", drinking: "", meeting: [], mbti: "", location: ""
+            profileImageUrl: [], interests: [], introduce: ""
         )
-        
-        let matchingViewModel: MatchingViewModel = .init(cards: [])
-        let locationViewModel: LocationViewModel = .init()
-        
+        let matchingViewModel = MatchingViewModel(cards: [])
+        let authViewModel = SocialLoginView.LoginViewModel()
+
         self._userProfile = StateObject(wrappedValue: userProfile)
-       
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
-        self._locationViewModel = StateObject(wrappedValue: locationViewModel)
-        
-        self._coordinator = StateObject(wrappedValue: Coordinator(
-            userProfile: userProfile,
-            matchingViewModel: matchingViewModel,
-            locationViewModel: locationViewModel
-        ))
+        self._authVM = StateObject(wrappedValue: authViewModel)
+
+        self._coordinator = StateObject(
+            wrappedValue: Coordinator(
+                userProfile: userProfile,
+                matchingViewModel: matchingViewModel,
+                authViewModel: authViewModel
+            )
+        )
     }
     
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.my)
-                    .navigationDestination(for: AuthPage.self, destination: { page in
-                        coordinator.build(page)
-                    })
-                    .navigationDestination(for: ProfilePage.self) { page in
-                        coordinator.build(page)
-                    }
-                    .navigationDestination(for: MatchingPage.self, destination: { page in
-                        coordinator.build(page)
-                    })
-                    .navigationDestination(for: MyPage.self, destination: { page in
+                coordinator.start()
+                    .navigationDestination(for: IntegrationPage.self, destination: { page in
                         coordinator.build(page)
                     })
                     .sheet(item: $coordinator.profileSheet) { sheet in
@@ -59,6 +49,7 @@ struct SisoIosApp: App {
                     }
             }
             .id(coordinator.stackID)
+            // .onAppear 로직을 Coordinator의 InitialView로 옮겼으므로 제거합니다.
         }
     }
 }
