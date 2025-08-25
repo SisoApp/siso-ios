@@ -4,6 +4,7 @@ import auth
 import profile
 import matching
 import network
+import mypage
 
 public enum IntegrationPage: Hashable {
     // Auth
@@ -28,6 +29,12 @@ public enum IntegrationPage: Hashable {
     case meeting
     case profile
     case signUp
+    case interest
+    
+    // MyPage
+    case my
+    case setting
+    case notification
 }
 
 @MainActor
@@ -110,6 +117,16 @@ public class Coordinator: ObservableObject {
             ProfileView(delegate: self, userProfile: userProfile)
         case .signUp:
             SignUpProfileView(delegate: self, userProfile: userProfile)
+        case .interest:
+            InterestProfileView(delegate: self, userProfile: userProfile)
+            
+        // MyPage
+        case .my:
+            MyPageView(delegate: self)
+        case .setting:
+            SettingView(delegate: self)
+        case .notification:
+            NotificationView(delegate: self)
         }
     }
 }
