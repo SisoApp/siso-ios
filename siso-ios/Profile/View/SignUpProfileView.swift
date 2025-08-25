@@ -29,24 +29,14 @@ public struct SignUpProfileView: View {
     public var body: some View {
         VStack {
             progressView()
-            
-            switch currentPage {
-            case .basic:
-                BasicProfileView(currentPage: $currentPage, userProfile: userProfile)
-            case .interest:
-                InterestProfileView(currentPage: $currentPage, userProfile: userProfile)
-            case .image:
-                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
-            case .introduce:
-                IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
-            case .voice:
-                RecordProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
-            }
+            registerView()
         }
         .navigationTitle("내 정보 입력")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
+        .animation(.easeInOut, value: currentPage)
     }
+    
     
     private func progressView() -> some View {
         return VStack(spacing: 0) {
@@ -80,6 +70,23 @@ public struct SignUpProfileView: View {
             .fill(page <= currentPage.rawValue ? Color.Siso.Primary.main :  Color.Siso.Gray._30)
             .frame(height: 4)
             .padding(.horizontal, 4.5)
+    }
+    
+    private func registerView() -> some View {
+        return Group {
+            switch currentPage {
+            case .basic:
+                BasicProfileView(currentPage: $currentPage, userProfile: userProfile)
+            case .interest:
+                InterestProfileView(currentPage: $currentPage, userProfile: userProfile)
+            case .image:
+                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
+            case .introduce:
+                IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
+            case .voice:
+                RecordProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
+            }
+        }
     }
 }
 

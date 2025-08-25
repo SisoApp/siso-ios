@@ -29,6 +29,7 @@ public struct InterestProfileView: View {
             nextButton()
             skipButton()
         }
+        .background(.white)
         .padding(.horizontal)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
