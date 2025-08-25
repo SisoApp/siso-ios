@@ -9,37 +9,37 @@ import SwiftUI
 
 public struct BasicProfileView: View {
     @ObservedObject private var userProfile: UserProfile
+    
+    @Binding private var currentPage: SignUpProfilePage
+    @State private var nickname: String = ""
+    @State private var age: String = ""
+    @State private var sex: String = ""
+    @State private var targetSex: String = ""
+    
     @FocusState private var nicknameFocus: Bool
     @FocusState private var ageFocus: Bool
     
-    public var delegate: ProfileCoordinatorDelegate?
-    
     private var isActive: Bool {
-        return !userProfile.nickname.isEmpty &&
-                !userProfile.age.isEmpty &&
-                !userProfile.sex.isEmpty &&
-                !userProfile.targetSex.isEmpty
+        return !nickname.isEmpty && !age.isEmpty &&
+                !sex.isEmpty && !targetSex.isEmpty
     }
     
     private var isScroll: Bool {
         return nicknameFocus || ageFocus
     }
     
-    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
-        self.delegate = delegate
+    public init(currentPage: Binding<SignUpProfilePage>, userProfile: UserProfile) {
+        self._currentPage = currentPage
         self.userProfile = userProfile
     }
     
     public var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 0) {
-                    ProfileHeaderView(
-                        currentPage: 1,
-                        title: "기본 정보를 입력해주세요"
-                    )
+                    informationText()
                     
-                    textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $userProfile.nickname)
+                    textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $nickname)
                         .focused($nicknameFocus)
                         .submitLabel(.done)
                         .onChange(of: userProfile.nickname) { _, newValue in
@@ -50,44 +50,44 @@ public struct BasicProfileView: View {
                             ageFocus = true
                         }
                     
-                    textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $userProfile.age)
+                    textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $age)
                         .focused($ageFocus)
                         .keyboardType(.numbersAndPunctuation)
                         .submitLabel(.done)
-                        .onChange(of: userProfile.age) { _, newValue in
+                        .onChange(of: age) { _, newValue in
                             let filtered: String = newValue.filter { "0123456790".contains($0) }
-                            userProfile.age = String(filtered.prefix(2))
+                            age = String(filtered.prefix(2))
                         }
                         .onSubmit {
                             hideKeyboard()
                         }
-                    
-                    
-                    // 라디오 버튼에서 선택한 값을 저장해야함
-                    
-                    RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $userProfile.sex)
+                    RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
                     
                     RadioButtonView(
                         title: "매칭 성별",
                         subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
                         options: ["동성", "이성"],
-                        binding: $userProfile.targetSex
+                        binding: $targetSex
                     )
-                    
-                    
                 }
                 .onTapGesture {
                     nicknameFocus = false
                     ageFocus = false
                 }
             }
+            .scrollDisabled(!isScroll)
+            
+            Spacer()
+            nextButton()
         }
-        .scrollDisabled(!isScroll)
-        .navigationTitle("내 정보 입력")
-        .navigationBarBackButtonHidden()
-        .navigationBarTitleDisplayMode(.inline)
-        
-        nextButton()
+        .padding(.horizontal)
+    }
+    
+    private func informationText() -> some View {
+        return Text("기본 정보를 입력해주세요")
+            .font(.title2)
+            .bold()
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func textFieldView(field: String, placeholder: String, binding: Binding<String>) -> some View {
@@ -115,7 +115,7 @@ public struct BasicProfileView: View {
                 }
             }
         }
-        .padding(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
+        .padding(.top, 24)
     }
     
     private func RadioButtonView(title: String, subTitle: String? = nil, options: [String], binding: Binding<String>) -> some View {
@@ -164,12 +164,17 @@ public struct BasicProfileView: View {
                 Spacer()
             }
         }
-        .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
+        .padding(.top)
     }
     
     private func nextButton() -> some View {
         return Button {
-            delegate?.pushProfile(.interest)
+            userProfile.nickname = nickname
+            userProfile.age = age
+            userProfile.sex = sex
+            userProfile.targetSex = targetSex
+            
+            currentPage = .interest
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -182,7 +187,6 @@ public struct BasicProfileView: View {
         }
         .disabled(!isActive)
         .frame(height: 54)
-        .padding(.horizontal)
         .padding(.bottom, 8)
     }
     
@@ -194,6 +198,6 @@ public struct BasicProfileView: View {
 
 #Preview {
     NavigationStack {
-        BasicProfileView(delegate: nil, userProfile: .empty)
+        BasicProfileView(currentPage: .constant(.basic), userProfile: .empty)
     }
 }

@@ -10,53 +10,54 @@ import designSystem
 
 public struct ImageProfileView: View {
     @ObservedObject private var userProfile: UserProfile
+    @Binding var currentPage: SignUpProfilePage
+    private var images: [UIImage] = [] // 이미지 등록을 건너뛸 때 초기 값으로 복구하기 위한 초기값 저장 변수
     
     weak var delegate: ProfileCoordinatorDelegate?
-    private let maxCount: Int = 5
+    private let limit: Int = 5
     
     public init(delegate: ProfileCoordinatorDelegate?,
+                currentPage: Binding<SignUpProfilePage>,
                 userProfile: UserProfile) {
         self.delegate = delegate
+        self._currentPage = currentPage
         self.userProfile = userProfile
+        self.images = userProfile.profileImageUrl
     }
     
     public var body: some View {
         VStack(spacing: 0) {
-            ProfileHeaderView(
-                currentPage: 3,
-                title: "나를 표현하는 사진을 보여주세요",
-                subTitle: "최소 1장 이상 선택해주세요\n정보는 나중에 수정할 수 있어요"
-            )
-            
+            informationText()
             mainImageView()
             subImageView()
-            
             Spacer()
-            
             addButton()
-            
-            Group {
-                if userProfile.profileImageUrl.count > 0 {
-                    nextButton()
-                } else {
-                    skipButton()
-                }
-            }
+            bottomButton()
         }
-        .navigationTitle("내 정보 입력")
-        .navigationBarBackButtonHidden()
-        .navigationBarTitleDisplayMode(.inline)
+        .padding(.horizontal)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        delegate?.pop()
+                        currentPage = .interest
                     }
             }
         }
-        .onAppear {
-            print(Thread.isMainThread)
+    }
+    
+    private func informationText() -> some View {
+        return Group {
+            Text("나를 표현하는 사진을 보여주세요")
+                .font(.title2)
+                .bold()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text("최소 1장 이상 선택해주세요\n정보는 나중에 수정할 수 있어요")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(Color.Siso.Gray._60)
+                .lineSpacing(9)
+                .padding(.top, 8)
         }
     }
     
@@ -103,7 +104,7 @@ public struct ImageProfileView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
-            .padding(EdgeInsets(top: 44, leading: 16, bottom: 0, trailing: 16))
+            .padding(.top, 44)
         }
     }
     
@@ -154,35 +155,45 @@ public struct ImageProfileView: View {
             }
         }
         .padding(.top, 8)
-        .padding(.horizontal)
     }
     
     private func addButton() -> some View {
-        let isActive: Bool = userProfile.profileImageUrl.count > 0
+        let isActive: Bool = userProfile.profileImageUrl.count >= 0 && userProfile.profileImageUrl.count < 5
         
         return Button {
             delegate?.presentProfile(sheet: .imageHelper({ images in
                 delegate?.dismissProfileSheet()
-                self.userProfile.profileImageUrl = images
+                userProfile.profileImageUrl.append(contentsOf: images)
             }))
         } label: {
-            Text("사진 추가하기 (\(userProfile.profileImageUrl.count)/\(maxCount))")
+            Text("사진 추가하기 (\(userProfile.profileImageUrl.count)/\(limit))")
                 .frame(maxWidth: .infinity, maxHeight: 54)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
+                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._20)
                 .clipShape(.rect(cornerRadius: 27))
                 .animation(.smooth, value: isActive)
         }
-        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .disabled(!isActive)
+    }
+    
+    private func bottomButton() -> some View {
+        return Group {
+            if userProfile.profileImageUrl.count > 0 {
+                nextButton()
+            } else {
+                skipButton()
+            }
+        }
     }
     
     private func nextButton() -> some View {
         let isActive: Bool = userProfile.profileImageUrl.count > 0
         
         return Button {
-            delegate?.pushProfile(.introduce)
+            currentPage = .introduce
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -194,28 +205,25 @@ public struct ImageProfileView: View {
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
-        .padding(.top, 8)
-        .padding(.horizontal)
     }
     
     private func skipButton() -> some View {
         return Button {
-            delegate?.pushProfile(.introduce)
+            userProfile.profileImageUrl = images // 정보 갱신 x, 초기 값으로 복구
+            currentPage = .introduce
         } label: {
             Text("건너뛰기")
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(height: 54)
-        .padding(.top, 8)
-        .padding(.horizontal)
     }
 }
 
 #Preview {
     NavigationStack {
-        ImageProfileView(delegate: nil, userProfile: .empty)
+        ImageProfileView(delegate: nil, currentPage: .constant(.image) , userProfile: .empty)
     }
 }

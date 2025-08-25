@@ -12,8 +12,10 @@ public struct ImageHelperSheet: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var selectedImages: [PhotosPickerItem] = []
     
-    public var delegate: ProfileCoordinatorDelegate?
+    public weak var delegate: ProfileCoordinatorDelegate?
     public var completion: ([UIImage]) -> Void
+    private let limit: Int = 5
+    private var available: Int { return limit - userProfile.profileImageUrl.count }
     
     public init(delegate: ProfileCoordinatorDelegate?,
                 userProfile: UserProfile,
@@ -31,66 +33,23 @@ public struct ImageHelperSheet: View {
                 delegate?.dismissProfileSheet()
                 
                 Task {
+                    var images: [UIImage] = []
+                    
                     for item in items {
                         if let data: Data = try? await item.loadTransferable(type: Data.self),
                            let image: UIImage = UIImage(data: data) {
-                            await MainActor.run {
-                                userProfile.profileImageUrl.append(image)
-                            }
+                            images.append(image)
                         }
+                    }
+                    
+                    await MainActor.run {
+                        completion(images)
                     }
                 }
             }
     }
     
     private func bottomSheet() -> some View {
-        func imageExample(name: String) -> some View {
-            return Image(name)
-                .resizable()
-                .scaledToFit()
-        }
-        
-        func cameraButton() -> some View {
-            return Button {
-                delegate?.presentProfile(sheet: .cameraSheet)
-            } label: {
-                Text("카메라로 사진찍기")
-                    .frame(maxWidth: .infinity, maxHeight: 54)
-                    .font(.system(size: 18))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.black)
-                    .background(Color.Siso.Primary.main)
-                    .clipShape(.rect(cornerRadius: 27))
-            }
-        }
-        
-        func galleryButton() -> some View {
-            return PhotosPicker(
-                selection: $selectedImages,
-                maxSelectionCount: 5
-            ) {
-                Text("앨범에서 가져오기")
-                    .frame(maxWidth: .infinity, maxHeight: 54)
-                    .font(.system(size: 18))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.black)
-                    .background(Color.Siso.Primary.main)
-                    .clipShape(.rect(cornerRadius: 27))
-                }
-        }
-        
-        func skipButton() -> some View {
-            return Button {
-                delegate?.dismissProfileSheet()
-                delegate?.pushProfile(.introduce)
-            } label: {
-                Text("건너뛰기")
-                    .font(.system(size: 18))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color.Siso.Gray._50)
-            }
-        }
-        
         return VStack(spacing: 0) {
             HStack {
                 Text("사진 업로드 도움말")
@@ -130,6 +89,53 @@ public struct ImageHelperSheet: View {
         }
         .background(.white)
         .clipShape(.rect(cornerRadius: 12))
+    }
+    
+    private func imageExample(name: String) -> some View {
+        return Image(name)
+            .resizable()
+            .scaledToFit()
+    }
+    
+    private func cameraButton() -> some View {
+        return Button {
+            delegate?.presentProfile(sheet: .cameraSheet)
+        } label: {
+            Text("카메라로 사진찍기")
+                .frame(maxWidth: .infinity, maxHeight: 54)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+                .background(Color.Siso.Primary.main)
+                .clipShape(.rect(cornerRadius: 27))
+        }
+    }
+    
+    private func galleryButton() -> some View {
+        return PhotosPicker(
+            selection: $selectedImages,
+            maxSelectionCount: available
+        ) {
+            Text("앨범에서 가져오기")
+                .frame(maxWidth: .infinity, maxHeight: 54)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+                .background(Color.Siso.Primary.main)
+                .clipShape(.rect(cornerRadius: 27))
+            }
+    }
+    
+    private func skipButton() -> some View {
+        return Button {
+            delegate?.dismissProfileSheet()
+            delegate?.pushProfile(.complete)
+        } label: {
+            Text("건너뛰기")
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+        }
     }
 }
 

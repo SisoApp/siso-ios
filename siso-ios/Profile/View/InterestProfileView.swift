@@ -10,55 +10,65 @@ import designSystem
 
 public struct InterestProfileView: View {
     @ObservedObject private var userProfile: UserProfile
+    @State private var interests: [String] = []
+    @Binding var currentPage: SignUpProfilePage
     
-    public var delegate: ProfileCoordinatorDelegate?
     private let viewModel: InterestProfileViewModel = InterestProfileViewModel()
     
-    public init(delegate: ProfileCoordinatorDelegate?,
+    public init(currentPage: Binding<SignUpProfilePage>,
                 userProfile: UserProfile) {
-        self.delegate = delegate
+        self._currentPage = currentPage
         self.userProfile = userProfile
+        self._interests = State(wrappedValue: userProfile.interests)
     }
     
     public var body: some View {
         VStack(spacing: 0) {
-            ProfileHeaderView(
-                currentPage: 2,
-                title: "나의 관심사를 선택해주세요",
-                subTitle: "최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요\n정보는 나중에 수정할 수 있어요"
-            )
-            
+            informationText()
             interestButtonScrollView()
             nextButton()
             skipButton()
         }
-        .navigationTitle("내 정보 입력")
-        .navigationBarBackButtonHidden()
-        .navigationBarTitleDisplayMode(.inline)
+        .padding(.horizontal)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        delegate?.pop()
+                        currentPage = .basic
                     }
             }
         }
     }
     
+    private func informationText() -> some View {
+        return Group {
+            Text("나의 관심을 선택해주세요")
+                .font(.title2)
+                .bold()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text("최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(Color.Siso.Gray._60)
+                .lineSpacing(9)
+                .padding(.top, 8)
+        }
+    }
+    
     private func interestButton(_ title: String) -> some View {
-        let isActive: Bool = userProfile.interests.contains(title)
+        let isActive: Bool = interests.contains(title)
         
         return Button {
             if isActive {
-                guard let index = userProfile.interests.firstIndex(of: title) else { return }
-                userProfile.interests.remove(at: index)
+                guard let index: Int = interests.firstIndex(of: title) else { return }
+                interests.remove(at: index)
             } else {
-                userProfile.interests.append(title)
+                interests.append(title)
             }
         } label: {
             Text(title)
-                .padding(EdgeInsets(top: 8, leading: 24, bottom: 8, trailing: 24))
+                .padding(EdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 18))
                 .frame(height: 48)
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._90)
@@ -72,12 +82,13 @@ public struct InterestProfileView: View {
             VStack(spacing: 12) {
                 ForEach(InterestType.allCases, id: \.self) { type in
                     Text(type.id)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.system(size: 18))
                         .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundStyle(Color.Siso.Gray._50)
                         .padding(.top, 12)
                     
-                    ForEach(viewModel.chucked(type, into: 3), id: \.self) { chunk in
+                    ForEach(viewModel.chucked(type, into: 2), id: \.self) { chunk in
                         HStack {
                             ForEach(chunk, id: \.self) { item in
                                 interestButton(item)
@@ -87,16 +98,16 @@ public struct InterestProfileView: View {
                     }
                 }
             }
-            .padding(.top, 12)
-            .padding(.horizontal)
+            .padding(.vertical, 12)
         }
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = userProfile.interests.count > 2
+        let isActive: Bool = interests.count > 2
         
         return Button {
-            delegate?.pushProfile(.image)
+            userProfile.interests = interests
+            currentPage = .image
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -107,26 +118,26 @@ public struct InterestProfileView: View {
                 .clipShape(.rect(cornerRadius: 27))
                 .animation(.smooth, value: isActive)
         }
+        .padding(.bottom, 8)
         .disabled(!isActive)
-        .padding(.horizontal)
     }
     
     private func skipButton() -> some View {
         return Button {
-            delegate?.pushProfile(.image)
+            currentPage = .image
         } label: {
             Text("건너뛰기")
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .top)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(8)
+        .frame(height: 54)
     }
 }
 
 #Preview {
     NavigationStack {
-        InterestProfileView(delegate: nil, userProfile: .empty)
+        InterestProfileView(currentPage: .constant(.interest), userProfile: .empty)
     }
 }
