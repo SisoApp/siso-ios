@@ -6,7 +6,6 @@ import matching
 import network
 
 extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
-    
     // ** Page Conversion
     private func toIntegrationPage(_ page: ProfilePage) -> IntegrationPage {
         switch page {
@@ -32,15 +31,7 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
     }
     
     public func changeProfileToMatching() {
-        stackID = UUID()
-        path = NavigationPath()
-        
-        Task { @MainActor in
-            try await Task.sleep(nanoseconds: 50_000_000)
-            withAnimation(.easeInOut) {
-                popToMainView()
-            }
-        }
+        path.append(IntegrationPage.home)
     }
     
     public func presentProfile(sheet: ProfileSheet) {
