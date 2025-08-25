@@ -61,6 +61,7 @@ public struct IntroduceProfileView: View {
                 .foregroundStyle(.black)
             }
         }
+        .padding(.top, 60)
         .padding(.horizontal)
     }
     

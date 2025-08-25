@@ -31,6 +31,7 @@ public struct RecordProfileView: View {
             Spacer()
             bottomView()
         }
+        .padding(.top, 60)
         .padding(.horizontal)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

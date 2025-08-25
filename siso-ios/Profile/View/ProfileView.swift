@@ -33,30 +33,33 @@ public struct ProfileView: View {
     }
     
     public var body: some View {
-        ScrollView {
-            VStack {
-                profileImage()
-                nicknameView()
-                ageView()
-                introduceView()
-                basicInfoSection()
-                additionalInfoSection()
-                tagSection()
-                
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("내 정보 수정")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Image(systemName: "chevron.backward")
-                        .foregroundStyle(Color.Siso.Gray._90)
-                        .onTapGesture {
-                            delegate?.pop()
-                        }
+        VStack {
+            ScrollView {
+                VStack {
+                    profileImage()
+                    nicknameView()
+                    ageView()
+                    introduceView()
+                    basicInfoSection()
+                    additionalInfoSection()
+                    tagSection()
+                    Spacer()
                 }
+                .padding()
+                
+            }
+            completeButton()
+        }
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Image(systemName: "chevron.backward")
+                    .foregroundStyle(Color.Siso.Gray._90)
+                    .onTapGesture {
+                        delegate?.pop()
+                    }
             }
         }
     }
@@ -349,6 +352,7 @@ public struct ProfileView: View {
             HStack {
                 TextField("", text: binding)
                     .focused(isFocused)
+                    .keyboardType(.numberPad)
                     .padding()
                     .frame(width: 80, height: 54)
                     .background(
@@ -426,6 +430,23 @@ public struct ProfileView: View {
         .frame(height: 52)
         .background(Color.Siso.Gray._20)
         .clipShape(.rect(cornerRadius: 52 / 2))
+    }
+    
+    private func completeButton() -> some View {
+        return Button {
+            delegate?.pop()
+        } label: {
+            Text("완료하기")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+                .background(Color.Siso.Primary.main)
+                .clipShape(.rect(cornerRadius: 27))
+        }
+        .frame(height: 54)
+        .padding(.bottom, 38)
+        .padding(.horizontal)
     }
     
     private func chunked(into size: Int, items: [String]) -> [[String]] {

@@ -80,6 +80,7 @@ public struct BasicProfileView: View {
             Spacer()
             nextButton()
         }
+        .padding(.top, 60)
         .padding(.horizontal)
         .background(.white)
     }
@@ -176,7 +177,7 @@ public struct BasicProfileView: View {
             userProfile.sex = sex
             userProfile.targetSex = targetSex
             
-            currentPage = .interest
+            currentPage = .image
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
