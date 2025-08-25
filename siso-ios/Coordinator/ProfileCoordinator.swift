@@ -10,12 +10,15 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
     // ** Page Conversion
     private func toIntegrationPage(_ page: ProfilePage) -> IntegrationPage {
         switch page {
-        case .basic: return .basic
-        case .interest: return .interest
-        case .image: return .image
-        case .introduce: return .introduce
-        case .record: return .record
         case .complete: return .complete
+        case .location: return .location
+        case .religion: return .religion
+        case .smoke: return .smoke
+        case .drink: return .drink
+        case .personality: return .personality
+        case .meeting: return .meeting
+        case .profile: return .profile
+        case .signUp: return .signUp
         }
     }
 
@@ -55,6 +58,8 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
             ImageHelperSheet(delegate: self, userProfile: userProfile, completion: completion)
         case .cameraSheet:
             ImagePicker(userProfile: userProfile)
+        case .location:
+            LocationProfileSheet(delegate: self, viewModel: locationViewModel)
         }
     }
 }

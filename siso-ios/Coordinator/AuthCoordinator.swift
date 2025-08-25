@@ -29,7 +29,7 @@ extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 50_000_000)
             withAnimation(.easeInOut) {
-                pushProfile(.basic)
+                pushProfile(.signUp)
             }
         }
     }

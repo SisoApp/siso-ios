@@ -19,12 +19,15 @@ public enum IntegrationPage: Hashable {
     case calling
     
     // Profile
-    case basic
-    case interest
-    case image
-    case introduce
-    case record
     case complete
+    case location
+    case religion
+    case smoke
+    case drink
+    case personality
+    case meeting
+    case profile
+    case signUp
 }
 
 @MainActor
@@ -37,11 +40,13 @@ public class Coordinator: ObservableObject {
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
     var authViewModel: SocialLoginView.LoginViewModel
+    var locationViewModel: LocationViewModel
     
-    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel) {
+    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel, locationViewModel: LocationViewModel) {
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
         self.authViewModel = authViewModel
+        self.locationViewModel = locationViewModel
         self.matchingViewModel.delegate = self
         CallManager.shared.delegate = self
     }
@@ -87,18 +92,24 @@ public class Coordinator: ObservableObject {
                     .navigationBarBackButtonHidden(true)
             }
         // Profile
-        case .basic:
-            BasicProfileView(delegate: self, userProfile: userProfile)
-        case .interest:
-            InterestProfileView(delegate: self, userProfile: userProfile)
-        case .image:
-            ImageProfileView(delegate: self, userProfile: userProfile)
-        case .introduce:
-            IntroduceProfileView(delegate: self, userProfile: userProfile)
-        case .record:
-            RecordProfileView(delegate: self, userProfile: userProfile)
         case .complete:
             CompleteProfileView(delegate: self)
+        case .location:
+            LocationProfileView(delegate: self, userProfile: userProfile, viewModel: locationViewModel)
+        case .religion:
+            ReligionProfileView(delegate: self, userProfile: userProfile)
+        case .smoke:
+            SmokeProfileView(delegate: self, userProfile: userProfile)
+        case .drink:
+            DrinkProfileView(delegate: self, userProfile: userProfile)
+        case .personality:
+            PersonalityProfileView(delegate: self, userProfile: userProfile)
+        case .meeting:
+            MeetingProfileView(delegate: self, userProfile: userProfile)
+        case .profile:
+            ProfileView(delegate: self, userProfile: userProfile)
+        case .signUp:
+            SignUpProfileView(delegate: self, userProfile: userProfile)
         }
     }
 }
