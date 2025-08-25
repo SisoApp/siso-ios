@@ -11,6 +11,7 @@ import KakaoSDKAuth
 
 public struct SocialView: View {
     public var delegate: AuthCoordinatorDelegate?
+    private var vm: SocialLoginView.LoginViewModel = .init()
     
     public init(delegate: AuthCoordinatorDelegate?) {
         self.delegate = delegate
@@ -31,6 +32,7 @@ public struct SocialView: View {
                     _ = AuthController.handleOpenUrl(url: url)
                 }
             })
+            .environmentObject(vm)
     }
 }
 

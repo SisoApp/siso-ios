@@ -55,6 +55,9 @@ public struct ImageProfileView: View {
                     }
             }
         }
+        .onAppear {
+            print(Thread.isMainThread)
+        }
     }
     
     private func mainImageView() -> some View {
@@ -105,55 +108,53 @@ public struct ImageProfileView: View {
     }
     
     private func subImageView() -> some View {
-        return GeometryReader { geo in
-            let width =  (geo.size.width - (8 * 3 + 16 * 2)) / 4
-            
-            HStack(spacing: 8) {
-                ForEach(1...4, id: \.self) { index in
-                    let isExist: Bool =
-                    userProfile.profileImageUrl.count > index
-                    
-                    ZStack(alignment: .topTrailing) {
-                        Group {
-                            if isExist {
-                                Image(uiImage: userProfile.profileImageUrl[index])
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: width, height: width)
+        let size =  (UIScreen.main.bounds.width - (8 * 3 + 16 * 2)) / 4
+        
+        return HStack(spacing: 8) {
+            ForEach(1...4, id: \.self) { index in
+                let isExist: Bool =
+                userProfile.profileImageUrl.count > index
+                
+                ZStack(alignment: .topTrailing) {
+                    Group {
+                        if isExist {
+                            Image(uiImage: userProfile.profileImageUrl[index])
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: size, height: size)
+                                .background(Color.Siso.Gray._20)
+                                .clipped()
+                                .clipShape(.rect(cornerRadius: 12))
+                            
+                            Button {
+                                userProfile.profileImageUrl.remove(at: index)
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .fontWeight(.bold)
+                                    .frame(width: 28, height: 28)
+                                    .foregroundStyle(Color.Siso.Gray._60)
                                     .background(Color.Siso.Gray._20)
+                                    .clipShape(.rect(cornerRadius: 14))
                                     .clipped()
-                                    .clipShape(.rect(cornerRadius: 12))
-                                
-                                Button {
-                                    userProfile.profileImageUrl.remove(at: index)
-                                } label: {
-                                    Image(systemName: "xmark")
-                                        .fontWeight(.bold)
-                                        .frame(width: 28, height: 28)
-                                        .foregroundStyle(Color.Siso.Gray._60)
-                                        .background(Color.Siso.Gray._20)
-                                        .clipShape(.rect(cornerRadius: 14))
-                                        .clipped()
-                                        .offset(y: -9)
-                                        .overlay {
-                                            Circle()
-                                                .stroke(Color.Siso.Gray._5, lineWidth: 3)
-                                                .offset(y: -9)
-                                        }
-                                }
-                            } else {
-                                Image("Camera")
-                                    .frame(width: width, height: width)
-                                    .background(Color.Siso.Gray._20)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .offset(y: -9)
+                                    .overlay {
+                                        Circle()
+                                            .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                            .offset(y: -9)
+                                    }
                             }
+                        } else {
+                            Image("Camera")
+                                .frame(width: size, height: size)
+                                .background(Color.Siso.Gray._20)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
                 }
             }
-            .padding(.top, 8)
-            .padding(.horizontal)
         }
+        .padding(.top, 8)
+        .padding(.horizontal)
     }
     
     private func addButton() -> some View {
@@ -172,13 +173,6 @@ public struct ImageProfileView: View {
                 .foregroundStyle(.black)
                 .background(Color.Siso.Primary.main)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            Color.Siso.Primary._80,
-                            lineWidth: 1
-                        )
-                }
                 .animation(.smooth, value: isActive)
         }
         .padding(.horizontal)
@@ -197,13 +191,6 @@ public struct ImageProfileView: View {
                 .foregroundStyle(.black)
                 .background(Color.Siso.Primary.main)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            Color.Siso.Primary._80,
-                            lineWidth: 1
-                        )
-                }
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)

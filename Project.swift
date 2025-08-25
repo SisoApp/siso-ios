@@ -35,7 +35,16 @@ let sisoApp: Target = .target(
             ]),
             "NSCameraUsageDescription": "프로필 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
             "NSPhotoLibraryUsageDescription": "사진을 업로드하기 위해 갤러리 접근 권한이 필요합니다.",
-            "NSMicrophoneUsageDescription": "녹음을 위해 마이크 접근 권한이 필요합니다"
+            "NSMicrophoneUsageDescription": "녹음을 위해 마이크 접근 권한이 필요합니다",
+            "SERVER_URL": "$(SERVER_URL)",
+            "NSAppTransportSecurity": [
+                "NSExceptionDomains": [
+                    "13.124.11.3": [
+                        "NSExceptionAllowsInsecureHTTPLoads": true,
+                        "NSIncludesSubdomains": true,
+                    ]
+                ]
+            ]
         ]
     ),
     sources: ["siso-ios/Sources/**",],
@@ -91,7 +100,11 @@ let network: Target = .target(
     product: .staticLibrary,
     bundleId: "\(bundleId).network",
     deploymentTargets: .iOS("17.0"),
-    infoPlist: .default,
+    infoPlist: .extendingDefault(
+        with: [
+            "SERVER_URL": "$(SERVER_URL)"
+        ]
+    ),
     sources: ["siso-ios/Network/**"],
     dependencies: [
         .external(name: "Alamofire")

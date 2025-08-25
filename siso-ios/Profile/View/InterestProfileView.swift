@@ -105,13 +105,6 @@ public struct InterestProfileView: View {
                 .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
                 .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
                 .clipShape(.rect(cornerRadius: 27))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 27)
-                        .stroke(
-                            isActive ? Color.Siso.Primary._80 : Color.Siso.Gray._40,
-                            lineWidth: 1
-                        )
-                }
                 .animation(.smooth, value: isActive)
         }
         .disabled(!isActive)
