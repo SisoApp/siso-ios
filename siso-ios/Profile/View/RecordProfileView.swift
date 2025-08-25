@@ -14,13 +14,15 @@ public struct RecordProfileView: View {
     @StateObject private var viewModel: RecordProfileViewModel
     @Binding var currentPage: SignUpProfilePage
     
+    let mode: ProfileMode
     weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(delegate: ProfileCoordinatorDelegate?, currentPage: Binding<SignUpProfilePage>, userProfile: UserProfile) {
+    public init(delegate: ProfileCoordinatorDelegate?, currentPage: Binding<SignUpProfilePage>, userProfile: UserProfile, mode: ProfileMode) {
         self.delegate = delegate
         self._currentPage = currentPage
         self.userProfile = userProfile
         self._viewModel = StateObject(wrappedValue: RecordProfileViewModel(userProfile: userProfile))
+        self.mode = mode
     }
     
     public var body: some View {
@@ -33,12 +35,20 @@ public struct RecordProfileView: View {
         }
         .padding(.top, 60)
         .padding(.horizontal)
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        currentPage = .introduce
+                        switch mode {
+                        case .signUp:
+                            currentPage = .introduce
+                        case .edit:
+                            delegate?.pop()
+                        }
                     }
             }
         }
@@ -130,23 +140,34 @@ public struct RecordProfileView: View {
     }
     
     private func skipButton() -> some View {
-        return Button {
-            delegate?.pushProfile(.complete)
-        } label: {
-            Text("건너뛰기")
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        let isActive: Bool = mode == .signUp
+        
+        return Group {
+            if isActive {
+                Button {
+                    delegate?.pushProfile(.complete)
+                } label: {
+                    Text("건너뛰기")
+                        .font(.system(size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(height: 54)
+            }
         }
-        .frame(height: 54)
     }
     
     private func nextButton() -> some View {
         let isActive: Bool = viewModel.nextButtonIsActive
         
         return Button {
-            delegate?.pushProfile(.complete)
+            switch mode {
+            case .signUp:
+                delegate?.pushProfile(.complete)
+            case .edit:
+                delegate?.pop()
+            }
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -182,6 +203,6 @@ public struct RecordProfileView: View {
 
 #Preview {
     NavigationStack {
-        RecordProfileView(delegate: nil, currentPage: .constant(.voice), userProfile: .empty)
+        RecordProfileView(delegate: nil, currentPage: .constant(.voice), userProfile: .empty, mode: .signUp)
     }
 }

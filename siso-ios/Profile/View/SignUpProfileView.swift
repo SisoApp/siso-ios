@@ -70,7 +70,7 @@ public struct SignUpProfileView: View {
             case .introduce:
                 IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
             case .voice:
-                RecordProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
+                RecordProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile, mode: .signUp)
             }
         }
     }

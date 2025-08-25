@@ -28,6 +28,9 @@ public struct InterestProfileView: View {
         }
         .background(.white)
         .padding(.horizontal)
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")

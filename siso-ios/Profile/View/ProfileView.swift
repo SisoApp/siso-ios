@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+public enum ProfileMode {
+    case signUp, edit
+}
+
 public struct ProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var nickname: String = ""
@@ -125,39 +129,8 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._50)
                 .padding(.top)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack {
-                HStack {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .resizable()
-                        .foregroundStyle(.white)
-                        .frame(width: 15, height: 15)
-                        .onTapGesture {
-                            isPlaying.toggle()
-                        }
-                    
-                    waveFormView(count: 30, height: 44)
-                    
-                    Text("00:15")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal)
-                .background(
-                    RoundedRectangle(cornerRadius: 44 / 2)
-                        .fill(Color.Siso.Gray._60)
-                )
-                
-                Spacer()
-                
-                Image("pencil")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .offset(x: -15)
-            }
-            .padding(.top, 8)
+  
+            recordView()
             
             ZStack {
                 RoundedRectangle(cornerRadius: 16)
@@ -185,6 +158,41 @@ public struct ProfileView: View {
             }
             .padding(.top)
         }
+    }
+    
+    private func recordView() -> some View {
+        return HStack {
+            HStack {
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .resizable()
+                    .foregroundStyle(.white)
+                    .frame(width: 15, height: 15)
+                    .onTapGesture {
+                        isPlaying.toggle()
+                    }
+                
+                waveFormView(count: 30, height: 44)
+                
+                Text("00:15")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 44 / 2)
+                    .fill(Color.Siso.Gray._60)
+            )
+            
+            Image("pencil")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .onTapGesture {
+                    delegate?.pushProfile(.voice)
+                }
+        }
+        .padding(.top, 8)
     }
     
     private func waveFormView(count: Int, height: CGFloat) -> some View {
@@ -271,7 +279,7 @@ public struct ProfileView: View {
             
             tagView(title: "나의 관심사", placeholder: "나의 관심사를 골라주세요", items: userProfile.interests)
                 .onTapGesture {
-                    delegate?.pushProfile(.complete)
+                    delegate?.pushProfile(.interest)
                 }
             
             tagView(title: "매칭 상대와의 관계", placeholder: "어떤 관계를 원하시나요?", items: userProfile.meeting)
@@ -445,7 +453,6 @@ public struct ProfileView: View {
                 .clipShape(.rect(cornerRadius: 27))
         }
         .frame(height: 54)
-        .padding(.bottom, 38)
         .padding(.horizontal)
     }
     
