@@ -41,7 +41,7 @@ struct SisoIosApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                coordinator.build(.my) // coordinator.start()
+                coordinator.start()
                     .navigationDestination(for: IntegrationPage.self, destination: { page in
                         coordinator.build(page)
                     })
