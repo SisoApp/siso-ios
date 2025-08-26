@@ -74,16 +74,14 @@ public struct MeetingProfileView: View {
     
     private func meetingButtonScrollView() -> some View {
         return ScrollView {
-            ForEach(viewModel.chucked(into: 2), id: \.self) { chunk in
-                HStack {
-                    ForEach(chunk, id: \.self) { meeting in
-                        meetingButton(meeting)
-                    }
-                    Spacer()
+            TagGroup {
+                ForEach(viewModel.meetings, id: \.self) { item in
+                    meetingButton(item)
                 }
             }
         }
         .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func completeButton() -> some View {

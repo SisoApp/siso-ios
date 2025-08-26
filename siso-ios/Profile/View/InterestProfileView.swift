@@ -89,12 +89,9 @@ public struct InterestProfileView: View {
                         .foregroundStyle(Color.Siso.Gray._50)
                         .padding(.top, 12)
                     
-                    ForEach(viewModel.chucked(type, into: 2), id: \.self) { chunk in
-                        HStack {
-                            ForEach(chunk, id: \.self) { item in
-                                interestButton(item)
-                            }
-                            Spacer()
+                    TagGroup {
+                        ForEach(viewModel.getInterests(type), id: \.self) { item in
+                            interestButton(item)
                         }
                     }
                 }

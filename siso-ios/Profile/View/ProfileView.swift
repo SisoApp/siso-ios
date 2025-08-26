@@ -337,16 +337,12 @@ public struct ProfileView: View {
     }
     
     private func tagListView(_ items: [String]) -> some View {
-        return VStack {
-            ForEach(chunked(into: 2, items: items), id: \.self) { chunk in
-                HStack {
-                    ForEach(chunk, id: \.self) { item in
-                        tagButton(item)
-                    }
-                    Spacer()
-                }
+        return TagGroup {
+            ForEach(items, id: \.self) { item in
+                tagButton(item)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func tagButton(_ title: String) -> some View {
@@ -473,12 +469,6 @@ public struct ProfileView: View {
         .padding(.bottom, 8)
     }
     
-    private func chunked(into size: Int, items: [String]) -> [[String]] {
-        return stride(from: 0, to: items.count, by: size).map {
-            Array(items[$0..<min($0 + size, items.count)])
-        }
-    }
-    
     private func hideKeyboard() {
         ageFocus = false
         introduceFocus = false
@@ -486,6 +476,7 @@ public struct ProfileView: View {
         weightFocus = false
     }
 }
+
 
 #Preview {
     NavigationStack {
