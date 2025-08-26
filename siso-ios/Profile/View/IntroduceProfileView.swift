@@ -61,6 +61,7 @@ public struct IntroduceProfileView: View {
                 .foregroundStyle(.black)
             }
         }
+        .padding(.top, 60)
         .padding(.horizontal)
     }
     
@@ -87,6 +88,7 @@ public struct IntroduceProfileView: View {
         return ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color.Siso.Gray._20)
+                .stroke(isFocused ? Color.Siso.Primary._60 : .clear)
                 .frame(height: 206)
             
             if introduce.isEmpty && !isFocused {

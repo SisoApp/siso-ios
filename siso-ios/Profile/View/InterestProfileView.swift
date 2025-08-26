@@ -11,15 +11,13 @@ import designSystem
 public struct InterestProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var interests: [String] = []
-    @Binding var currentPage: SignUpProfilePage
     
     private let viewModel: InterestProfileViewModel = InterestProfileViewModel()
+    weak var delegate: ProfileCoordinatorDelegate?
     
-    public init(currentPage: Binding<SignUpProfilePage>,
-                userProfile: UserProfile) {
-        self._currentPage = currentPage
+    public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
+        self.delegate = delegate
         self.userProfile = userProfile
-        self._interests = State(wrappedValue: userProfile.interests)
     }
     
     public var body: some View {
@@ -27,15 +25,18 @@ public struct InterestProfileView: View {
             informationText()
             interestButtonScrollView()
             nextButton()
-            skipButton()
         }
+        .background(.white)
         .padding(.horizontal)
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        currentPage = .basic
+                        delegate?.pop()
                     }
             }
         }
@@ -107,7 +108,7 @@ public struct InterestProfileView: View {
         
         return Button {
             userProfile.interests = interests
-            currentPage = .image
+            delegate?.pop()
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -121,23 +122,10 @@ public struct InterestProfileView: View {
         .padding(.bottom, 8)
         .disabled(!isActive)
     }
-    
-    private func skipButton() -> some View {
-        return Button {
-            currentPage = .image
-        } label: {
-            Text("건너뛰기")
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .frame(height: 54)
-    }
 }
 
 #Preview {
     NavigationStack {
-        InterestProfileView(currentPage: .constant(.interest), userProfile: .empty)
+        InterestProfileView(delegate: nil, userProfile: .empty)
     }
 }

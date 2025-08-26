@@ -5,6 +5,7 @@ import auth
 import profile
 import matching
 import network
+import mypage
 import model
 import call
 
@@ -20,12 +21,22 @@ public enum IntegrationPage: Hashable {
     case profileWriteDemand
     
     // Profile
-    case basic
-    case interest
-    case image
-    case introduce
-    case record
     case complete
+    case location
+    case religion
+    case smoke
+    case drink
+    case personality
+    case meeting
+    case profile
+    case signUp
+    case interest
+    case voice
+    
+    // MyPage
+    case my
+    case setting
+    case notification
 }
 
 @MainActor
@@ -43,11 +54,14 @@ public class Coordinator: ObservableObject {
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
     var authViewModel: SocialLoginView.LoginViewModel
+    var locationViewModel: LocationViewModel
     var nowWatching: CardViewModel?
-    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel) {
+  
+    public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel, locationViewModel: LocationViewModel) {
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
         self.authViewModel = authViewModel
+        self.locationViewModel = locationViewModel
         self.matchingViewModel.delegate = self
     }
     
@@ -70,8 +84,7 @@ public class Coordinator: ObservableObject {
             AcceptanceView(delegate: self)
         case .welcome:
             WelcomeView(delegate: self)
-            
-            
+           
             // Matching
         case .home:
             MatchingMainView(viewModel: matchingViewModel, delegate: self)
@@ -82,21 +95,38 @@ public class Coordinator: ObservableObject {
         case .profileWriteDemand:
             ProfileDemandingView(delegate: self, matchingViewModel: matchingViewModel)
                 .navigationBarBackButtonHidden(true)
-       
-            // Profile
-        case .basic:
-            BasicProfileView(delegate: self, userProfile: userProfile)
-        case .interest:
-            InterestProfileView(delegate: self, userProfile: userProfile)
-        case .image:
-            ImageProfileView(delegate: self, userProfile: userProfile)
-        case .introduce:
-            IntroduceProfileView(delegate: self, userProfile: userProfile)
-        case .record:
-            RecordProfileView(delegate: self, userProfile: userProfile)
+          
+        // Profile
         case .complete:
             CompleteProfileView(delegate: self)
-       
+        case .location:
+            LocationProfileView(delegate: self, userProfile: userProfile, viewModel: locationViewModel)
+        case .religion:
+            ReligionProfileView(delegate: self, userProfile: userProfile)
+        case .smoke:
+            SmokeProfileView(delegate: self, userProfile: userProfile)
+        case .drink:
+            DrinkProfileView(delegate: self, userProfile: userProfile)
+        case .personality:
+            PersonalityProfileView(delegate: self, userProfile: userProfile)
+        case .meeting:
+            MeetingProfileView(delegate: self, userProfile: userProfile)
+        case .profile:
+            ProfileView(delegate: self, userProfile: userProfile)
+        case .signUp:
+            SignUpProfileView(delegate: self, userProfile: userProfile)
+        case .interest:
+            InterestProfileView(delegate: self, userProfile: userProfile)
+        case .voice:
+            RecordProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit)
+            
+        // MyPage
+        case .my:
+            MyPageView(delegate: self)
+        case .setting:
+            SettingView(delegate: self)
+        case .notification:
+            NotificationView(delegate: self)
         }
     }
 }

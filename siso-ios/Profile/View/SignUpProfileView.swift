@@ -8,9 +8,8 @@
 import SwiftUI
 import designSystem
 
-public enum SignUpProfilePage: Int {
+public enum SignUpProfilePage: Int, CaseIterable {
     case basic = 1
-    case interest
     case image
     case introduce
     case voice
@@ -29,40 +28,19 @@ public struct SignUpProfileView: View {
     public var body: some View {
         VStack {
             progressView()
-            
-            switch currentPage {
-            case .basic:
-                BasicProfileView(currentPage: $currentPage, userProfile: userProfile)
-            case .interest:
-                InterestProfileView(currentPage: $currentPage, userProfile: userProfile)
-            case .image:
-                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
-            case .introduce:
-                IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
-            case .voice:
-                RecordProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
-            }
+            registerView()
         }
         .navigationTitle("내 정보 입력")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
+        .animation(.easeInOut, value: currentPage)
     }
     
+    
     private func progressView() -> some View {
-        return VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                circleView(page: 1)
-                lineView(page: 2)
-                circleView(page: 2)
-                lineView(page: 3)
-                circleView(page: 3)
-                lineView(page: 4)
-                circleView(page: 4)
-                lineView(page: 5)
-                circleView(page: 5)
-            }
-            .padding()
-        }
+        return ProgressView(value: Double(currentPage.rawValue), total: Double(SignUpProfilePage.allCases.count))
+            .tint(Color.Siso.Primary._50)
+            .frame(height: 5)
     }
     
     private func circleView(page: Int) -> some View {
@@ -80,6 +58,21 @@ public struct SignUpProfileView: View {
             .fill(page <= currentPage.rawValue ? Color.Siso.Primary.main :  Color.Siso.Gray._30)
             .frame(height: 4)
             .padding(.horizontal, 4.5)
+    }
+    
+    private func registerView() -> some View {
+        return Group {
+            switch currentPage {
+            case .basic:
+                BasicProfileView(currentPage: $currentPage, userProfile: userProfile)
+            case .image:
+                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
+            case .introduce:
+                IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
+            case .voice:
+                RecordProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile, mode: .signUp)
+            }
+        }
     }
 }
 

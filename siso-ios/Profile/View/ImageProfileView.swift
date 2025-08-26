@@ -34,13 +34,14 @@ public struct ImageProfileView: View {
             addButton()
             bottomButton()
         }
+        .padding(.top, 60)
         .padding(.horizontal)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        currentPage = .interest
+                        currentPage = .introduce
                     }
             }
         }

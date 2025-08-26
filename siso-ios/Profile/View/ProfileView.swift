@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+public enum ProfileMode {
+    case signUp, edit
+}
+
 public struct ProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var nickname: String = ""
@@ -20,6 +24,11 @@ public struct ProfileView: View {
     @State private var religion: String = ""
     @State private var meetings: [String] = []
     
+    @FocusState private var ageFocus: Bool
+    @FocusState private var introduceFocus: Bool
+    @FocusState private var heightFocus: Bool
+    @FocusState private var weightFocus: Bool
+    
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -28,30 +37,33 @@ public struct ProfileView: View {
     }
     
     public var body: some View {
-        ScrollView {
-            VStack {
-                profileImage()
-                nicknameView()
-                ageView()
-                introduceView()
-                basicInfoSection()
-                additionalInfoSection()
-                tagSection()
-                
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("내 정보 수정")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Image(systemName: "chevron.backward")
-                        .foregroundStyle(Color.Siso.Gray._90)
-                        .onTapGesture {
-                            delegate?.pop()
-                        }
+        VStack {
+            ScrollView {
+                VStack {
+                    profileImage()
+                    nicknameView()
+                    ageView()
+                    introduceView()
+                    basicInfoSection()
+                    additionalInfoSection()
+                    tagSection()
+                    Spacer()
                 }
+                .padding()
+                
+            }
+            completeButton()
+        }
+        .navigationTitle("내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Image(systemName: "chevron.backward")
+                    .foregroundStyle(Color.Siso.Gray._90)
+                    .onTapGesture {
+                        delegate?.pop()
+                    }
             }
         }
     }
@@ -102,23 +114,8 @@ public struct ProfileView: View {
     
     private func ageView() -> some View {
         return VStack {
-            Text("나이")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
             HStack {
-                Text("50")
-                    .font(.system(size: 24, weight: .bold))
-                    .padding()
-                    .frame(height: 54)
-                    .background(
-                        RoundedRectangle(cornerRadius: 54 / 2)
-                            .fill(Color.Siso.Gray._20)
-                    )
-                Text("세")
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color.Siso.Gray._50)
+                textFieldView(title: "나이", unit: "세", binding: $age, isFocused: $ageFocus)
                 Spacer()
             }
         }
@@ -132,47 +129,17 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._50)
                 .padding(.top)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack {
-                HStack {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .resizable()
-                        .foregroundStyle(.white)
-                        .frame(width: 15, height: 15)
-                        .onTapGesture {
-                            isPlaying.toggle()
-                        }
-                    
-                    waveFormView(count: 30, height: 44)
-                    
-                    Text("00:15")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal)
-                .background(
-                    RoundedRectangle(cornerRadius: 44 / 2)
-                        .fill(Color.Siso.Gray._60)
-                )
-                
-                Spacer()
-                
-                Image("pencil")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .offset(x: -15)
-            }
-            .padding(.top, 8)
+  
+            recordView()
             
             ZStack {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.Siso.Gray._20)
-                    
+                    .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
                     .frame(height: 195)
                 
                 TextEditor(text: $introduce)
+                    .focused($introduceFocus)
                     .background(.clear)
                     .scrollContentBackground(.hidden)
                     .font(.system(size: 20, weight: .semibold))
@@ -191,6 +158,41 @@ public struct ProfileView: View {
             }
             .padding(.top)
         }
+    }
+    
+    private func recordView() -> some View {
+        return HStack {
+            HStack {
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .resizable()
+                    .foregroundStyle(.white)
+                    .frame(width: 15, height: 15)
+                    .onTapGesture {
+                        isPlaying.toggle()
+                    }
+                
+                waveFormView(count: 30, height: 44)
+                
+                Text("00:15")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 44 / 2)
+                    .fill(Color.Siso.Gray._60)
+            )
+            
+            Image("pencil")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .onTapGesture {
+                    delegate?.pushProfile(.voice)
+                }
+        }
+        .padding(.top, 8)
     }
     
     private func waveFormView(count: Int, height: CGFloat) -> some View {
@@ -229,9 +231,9 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
             
-            textFieldView(title: "키", unit: "cm", binding: $height)
+            textFieldView(title: "키", unit: "cm", binding: $height, isFocused: $heightFocus)
                 .padding(.top, 16)
-            textFieldView(title: "몸무게", unit: "kg", binding: $weight)
+            textFieldView(title: "몸무게", unit: "kg", binding: $weight, isFocused: $weightFocus)
                 .padding(.top, 8)
             RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
                 .padding(.top, 16)
@@ -277,7 +279,7 @@ public struct ProfileView: View {
             
             tagView(title: "나의 관심사", placeholder: "나의 관심사를 골라주세요", items: userProfile.interests)
                 .onTapGesture {
-                    delegate?.pushProfile(.complete)
+                    delegate?.pushProfile(.interest)
                 }
             
             tagView(title: "매칭 상대와의 관계", placeholder: "어떤 관계를 원하시나요?", items: userProfile.meeting)
@@ -348,7 +350,7 @@ public struct ProfileView: View {
             .clipShape(.rect(cornerRadius: 24))
     }
     
-    private func textFieldView(title: String, unit: String, binding: Binding<String>) -> some View {
+    private func textFieldView(title: String, unit: String, binding: Binding<String>, isFocused: FocusState<Bool>.Binding) -> some View {
         return VStack {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
@@ -357,11 +359,14 @@ public struct ProfileView: View {
             
             HStack {
                 TextField("", text: binding)
+                    .focused(isFocused)
+                    .keyboardType(.numberPad)
                     .padding()
                     .frame(width: 80, height: 54)
                     .background(
                         RoundedRectangle(cornerRadius: 54 / 2)
                             .fill(Color.Siso.Gray._20)
+                            .stroke(isFocused.wrappedValue ? Color.Siso.Primary._60 : .clear)
                     )
                 Text(unit)
                     .font(.system(size: 20))
@@ -433,6 +438,22 @@ public struct ProfileView: View {
         .frame(height: 52)
         .background(Color.Siso.Gray._20)
         .clipShape(.rect(cornerRadius: 52 / 2))
+    }
+    
+    private func completeButton() -> some View {
+        return Button {
+            delegate?.pop()
+        } label: {
+            Text("완료하기")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+                .background(Color.Siso.Primary.main)
+                .clipShape(.rect(cornerRadius: 27))
+        }
+        .frame(height: 54)
+        .padding(.horizontal)
     }
     
     private func chunked(into size: Int, items: [String]) -> [[String]] {

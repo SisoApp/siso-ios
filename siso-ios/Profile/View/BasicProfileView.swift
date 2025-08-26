@@ -39,7 +39,7 @@ public struct BasicProfileView: View {
                 VStack(spacing: 0) {
                     informationText()
                     
-                    textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $nickname)
+                    textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $nickname, isFocused: nicknameFocus)
                         .focused($nicknameFocus)
                         .submitLabel(.done)
                         .onChange(of: userProfile.nickname) { _, newValue in
@@ -50,7 +50,7 @@ public struct BasicProfileView: View {
                             ageFocus = true
                         }
                     
-                    textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $age)
+                    textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $age, isFocused: ageFocus)
                         .focused($ageFocus)
                         .keyboardType(.numbersAndPunctuation)
                         .submitLabel(.done)
@@ -80,7 +80,9 @@ public struct BasicProfileView: View {
             Spacer()
             nextButton()
         }
+        .padding(.top, 60)
         .padding(.horizontal)
+        .background(.white)
     }
     
     private func informationText() -> some View {
@@ -90,7 +92,7 @@ public struct BasicProfileView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func textFieldView(field: String, placeholder: String, binding: Binding<String>) -> some View {
+    private func textFieldView(field: String, placeholder: String, binding: Binding<String>, isFocused: Bool) -> some View {
         return VStack {
             Text(field)
                 .fontWeight(.semibold)
@@ -100,6 +102,7 @@ public struct BasicProfileView: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 27)
                     .fill(Color.Siso.Gray._20)
+                    .stroke(isFocused ? Color.Siso.Primary._60 : .clear)
                     .frame(height: 54)
                 
                 HStack {
@@ -174,7 +177,7 @@ public struct BasicProfileView: View {
             userProfile.sex = sex
             userProfile.targetSex = targetSex
             
-            currentPage = .interest
+            currentPage = .image
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
