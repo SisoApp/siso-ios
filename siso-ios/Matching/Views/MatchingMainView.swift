@@ -44,6 +44,9 @@ public struct MatchingMainView: View {
         }
         .onAppear(){
             viewModel.injectDelegateToCards()
+            if !viewModel.isProfileWriteDemanded {
+                delegate?.pushMatching(.profileWriteDemand)
+            }
             
         }
     }
