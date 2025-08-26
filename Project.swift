@@ -207,7 +207,7 @@ let coordinator: Target = .target(
         .target(name: "matching"),
         .target(name: "profile"),
         .target(name: "call"),
-        .target(name: "model")
+        .target(name: "model"),
         .target(name: "mypage")
     ]
 )
