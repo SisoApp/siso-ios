@@ -39,7 +39,6 @@ public extension SocialLoginView {
                         self.userState = refreshResult.registrationStatus
                     }
                 case .failure(let failure):
-                    print("autoLogin fail Error: \(failure)")
                     if failure.responseCode == 401 {
                         alertMessage = "로그인 세션이 만료되었습니다. 다시 로그인 해주세요."
                         showAlert = true
@@ -65,7 +64,9 @@ public extension SocialLoginView {
                     try await networkManager.login(at: token) { [weak self] state, err in
                         self?.userState = state
                         completion(state)
+                        
                         guard let err = err else { return }
+                        
                         if let statusCode = err.responseCode {
                             switch statusCode {
                                 case 404:
@@ -75,8 +76,10 @@ public extension SocialLoginView {
                                     self?.alertMessage = "\(String(describing: err.errorDescription))"
                                     self?.showAlert = true
                             }
+                        } else {
+                            self?.alertMessage = "\(String(describing: err.errorDescription))"
+                            self?.showAlert = true
                         }
-                        
                     }
                 } catch {
                     print("카카오 로그인 -> 서버로 통신 login 함수 throws err : \(error)")
