@@ -23,17 +23,17 @@ public class CardViewModel: ObservableObject, Identifiable  {
     }
     
     public let uuid: UUID = UUID()
-    var nickname: String = ""
-    var age: Int = 0
-    var isOnline: Bool = true
-    var interestTags: [String] = []
-    var profileImages: [URL] = []
-    var voiceSample: URL?
-    var introduction: String = ""
-    var location: String = ""
-   // let backgroundImage: UIImage
+    public var nickname: String = ""
+    public var age: Int = 0
+    public var isOnline: Bool = true
+    public var interestTags: [String] = []
+    public var profileImages: [URL] = []
+    public var voiceSample: URL?
+    public var introduction: String = ""
+    public var location: String = ""
+    // let backgroundImage: UIImage
     
-    init(nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String, location: String) {
+    public init(nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String, location: String) {
         self.nickname = nickname
         self.age = age
         self.isOnline = isOnline
@@ -48,26 +48,14 @@ public class CardViewModel: ObservableObject, Identifiable  {
     func call() { // 화면전환 필요함
         print("call button tapped")
         print(delegate == nil)
-        delegate?.pushContactingView()
+        //delegate?.pushContactingView()
         homeCardDelegate?.cardViewModelDidRequestCall(on: self)
         
     }
     
     func chat() {
         print("chat button tapped")
-        delegate?.pushChatView()
-        
     }
-    
-    func callMade() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            print("call made")
-            CallManager.shared.startCall()
-        }
-        
-    }
-    
-    
 }
 extension CardViewModel {
     static let testModel: CardViewModel = .init(

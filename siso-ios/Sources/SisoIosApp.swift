@@ -45,11 +45,10 @@ struct SisoIosApp: App {
                         coordinator.build(sheet: sheet)
                     }
                     .sheet(item: $coordinator.matchingSheet) { sheet in
-                        coordinator.build(sheet)
+                        coordinator.build(sheet: sheet)
                     }
             }
             .id(coordinator.stackID)
-            // .onAppear 로직을 Coordinator의 InitialView로 옮겼으므로 제거합니다.
         }
     }
 }

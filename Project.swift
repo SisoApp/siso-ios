@@ -31,8 +31,8 @@ let sisoApp: Target = .target(
                 "kakaokompassauth",
             ],
             "UIAppFonts": .array([
-                               .string("JejuMyeongjoOTF.otf"),
-                           ]),
+                .string("JejuMyeongjoOTF.otf"),
+            ]),
             "NSCameraUsageDescription": "프로필 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
             "NSPhotoLibraryUsageDescription": "사진을 업로드하기 위해 갤러리 접근 권한이 필요합니다.",
             "NSMicrophoneUsageDescription": "녹음을 위해 마이크 접근 권한이 필요합니다",
@@ -56,7 +56,9 @@ let sisoApp: Target = .target(
         .target(name: "profile"),
         .target(name: "mypage"),
         .target(name: "coordinator"),
-        .target(name: "designSystem")
+        .target(name: "designSystem"),
+        .target(name: "call"),
+        .target(name: "chat")
     ]
 )
 
@@ -119,6 +121,48 @@ let matching: Target = .target(
     infoPlist: .default,
     sources: ["siso-ios/Matching/**"],
     dependencies: [
+        .target(name: "model"),
+        
+    ]
+)
+
+let call: Target = .target(
+    name: "call",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).call",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Call/**"],
+    dependencies: [
+        .target(name: "model"),
+        .target(name: "matching"),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraRtcKit.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/aosl.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/Agoraffmpeg.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/Agorafdkaac.xcframework")),
+        
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationLLExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiNoiseSuppressionExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiNoiseSuppressionLLExtension.xcframework")),
+        
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAudioBeautyExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraLipSyncExtension.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraSoundTouch.xcframework")),
+        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraSpatialAudioExtension.xcframework"))
+    ]
+)
+
+let chat: Target = .target(
+    name: "chat",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).chat",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Chat/**"],
+    dependencies: [
         .target(name: "model")
     ]
 )
@@ -162,6 +206,8 @@ let coordinator: Target = .target(
         .target(name: "auth"),
         .target(name: "matching"),
         .target(name: "profile"),
+        .target(name: "call"),
+        .target(name: "model")
         .target(name: "mypage")
     ]
 )
@@ -214,6 +260,8 @@ let project = Project(
         myPage,
         coordinator,
         designSystem,
-        model
+        model,
+        chat,
+        call
     ]
 )

@@ -31,9 +31,15 @@ public struct MatchingCardView: View {
             
             locationInfoSection
             
-            userInfoSection
+            HStack{
+                userInfoSection
+                    .fixedSize()
+                Spacer()
+                voicePlayerSection
+                    
+            }
+            .padding(.horizontal)
             
-            voicePlayerSection
             
             interestTagsSection
             
@@ -44,7 +50,7 @@ public struct MatchingCardView: View {
             Spacer()
         }
         .background {
-            backgroundView
+           // backgroundView
         }
         
     }
@@ -124,7 +130,7 @@ public struct MatchingCardView: View {
                 .frame(width: 10, height: 10)
             
             Text(statusText)
-                .foregroundStyle(.white)
+                .foregroundStyle(.black)
         }
     }
     
@@ -136,19 +142,18 @@ public struct MatchingCardView: View {
                 Text("\(cardViewModel.age)세")
             }
             .font(.system(size: 24, weight: .bold, design: .default))
-            .foregroundStyle(.white)
+            .foregroundStyle(.black)
             
             Spacer()
         }
-        .padding(.horizontal)
     }
     
     /// 위치 정보를 표시하는 뷰
     private var locationInfoSection: some View {
         HStack {
-            Image("locationicon")
+            Image("locationicon_inverse")
             Text(cardViewModel.location)
-                .foregroundStyle(.white) // 배경이 어두울 것을 가정
+                .foregroundStyle(.black) // 배경이 어두울 것을 가정
             Spacer()
         }
         .padding(.horizontal)
@@ -158,23 +163,22 @@ public struct MatchingCardView: View {
     private var voicePlayerSection: some View {
         let isCurrentlyPlayingThisCard = audioPlayer.isPlaying && audioPlayer.currentlyPlayingURL == cardViewModel.voiceSample
         return HStack {
-            HStack {
+            HStack(spacing: -15) {
                 let systemName = cardViewModel.voiceSample != nil ? (audioPlayer.isPlaying ? "pause.fill" : "play.fill") : "play.slash"
                 
                 Image(systemName: systemName)
                     .foregroundStyle(.white)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 24, height: 24)
                 
-                WaveformView(count: 10, height: 14, isPlaying: .constant(isCurrentlyPlayingThisCard))
+                WaveformView(count: 6, height: 20, isPlaying: .constant(isCurrentlyPlayingThisCard))
                     .frame(width: 70)
                     .padding(.leading, 5)
             }
-            .frame(width: 100, height: 18)
-            .padding()
+            .frame(width: 76, height: 44)
+            .padding(.horizontal, 5)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(.white)
-                    .opacity(0.3)
+                    .fill(Color.Siso.Gray._70)
             )
             .onTapGesture {
                 guard let voiceURL = cardViewModel.voiceSample else { return }
@@ -189,9 +193,8 @@ public struct MatchingCardView: View {
                     audioPlayer.play(from: voiceURL)
                 }
             }
-            Spacer()
         }
-        .padding(.horizontal)
+        
     }
     
     /// 관심사 태그들을 표시하는 뷰
@@ -201,15 +204,11 @@ public struct MatchingCardView: View {
             ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in // 태그가 너무 많으면 잘릴 수 있으므로 prefix 사용 고려
                 HStack(spacing: 2) {
                     Text("#")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                     Text(interest)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                 }
                 .font(.system(size: 18))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.gray.opacity(0.2))
-                .clipShape(Capsule())
             }
             Spacer()
         }
@@ -219,9 +218,8 @@ public struct MatchingCardView: View {
     /// 자기소개 텍스트를 표시하는 뷰
     private var introductionSection: some View {
         Text(cardViewModel.introduction)
-            .foregroundStyle(.white)
+            .foregroundStyle(.black)
             .font(.system(size: 18))
-            .lineLimit(2)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .onTapGesture {
@@ -236,8 +234,8 @@ public struct MatchingCardView: View {
                 cardViewModel.chat()
             } label: {
                 RoundedRectangle(cornerRadius: 24)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
-                    .foregroundStyle(Color.Siso.Blue._50)
+                    .frame(maxWidth: 80, maxHeight: 80)
+                    .foregroundStyle(Color.Siso.Gray._40)
                     .overlay {
                         Image("envelopeicon")
                             .resizable()
@@ -250,7 +248,6 @@ public struct MatchingCardView: View {
             Spacer()
             
             Button {
-                //                delegate?.pushContactingView()
                 cardViewModel.call()
             } label: {
                 RoundedRectangle(cornerRadius: 24)
@@ -287,6 +284,6 @@ public struct MatchingCardView: View {
         introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
         location: "인천 미추홀구"
     )
-    //MatchingCardView(cardViewModel: cardViewModel)
+    MatchingCardView(cardViewModel: cardViewModel, audioPlayer: AudioPlayerManager())
     
 }

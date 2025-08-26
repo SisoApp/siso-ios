@@ -28,9 +28,9 @@ import AVFoundation
 
 public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     public var nowWatching: CardViewModel? = nil
-    
-    
     public weak var delegate: MatchingCoordinatorDelegate?
+    
+    var isProfileWriteDemanded: Bool = false
     
     public init(delegate: MatchingCoordinatorDelegate? = nil, cards: [CardViewModel]) {
         self.delegate = delegate

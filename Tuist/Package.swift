@@ -2,16 +2,18 @@
 import PackageDescription
 
 #if TUIST
-    import struct ProjectDescription.PackageSettings
+import struct ProjectDescription.PackageSettings
 
-    let packageSettings = PackageSettings(
-        // Customize the product types for specific package product
-        // Default is .staticFramework
-        productTypes: [
-            "Alamofire" : .framework,
-            "KakaoOpenSDK" : .framework
-        ]
-    )
+let packageSettings = PackageSettings(
+    // Customize the product types for specific package product
+    // Default is .staticFramework
+    productTypes: [
+        "Alamofire" : .framework,
+        "KakaoOpenSDK" : .framework,
+      //  "RtcBasic": .framework
+       
+    ]
+)
 #endif
 
 let package = Package(
@@ -23,5 +25,6 @@ let package = Package(
             url: "https://github.com/kakao/kakao-ios-sdk.git",
             exact: "2.24.6"
         ),
+//        .package(url: "https://github.com/AgoraIO/AgoraRtcEngine_iOS.git", from: "4.5.2") 
     ]
 )
