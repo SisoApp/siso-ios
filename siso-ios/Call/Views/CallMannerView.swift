@@ -9,14 +9,18 @@ import SwiftUI
 import designSystem
 
 // 발신자의 첫 화면
-struct CallMannerView: View {
+public struct CallMannerView: View {
+    public init(delegate: CallCoordinatorDelegate? = nil) {
+        self.delegate = delegate
+    }
+    
     var delegate: CallCoordinatorDelegate?
-    let mannerSettings: [(String, String)] = [
+    private let mannerSettings: [(String, String)] = [
         ("1", "상대방의 이름, 연락처, 주소 등\n개인정보는 묻지 않아요."),
         ("2", "욕설, 정치·종교 논쟁 등\n무례한 질문은 금지예요."),
         ("3", "마음이 맞지 않더라도,\n예의를 지켜주세요."),
     ]
-    var body: some View {
+    public var body: some View {
         VStack {
             Text("🤝 전화 시작 전 약속")
                 .font(.system(size: 24, weight: .bold))

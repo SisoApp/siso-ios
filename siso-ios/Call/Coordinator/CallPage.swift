@@ -7,28 +7,77 @@
 
 import Foundation
 import model
-public enum CallPage: String, Identifiable, Hashable {
-    case connecting, calling, called
+public enum CallPage: Identifiable, Hashable, Equatable {
+    case manner
+    case connecting(opponentProfile: UserProfileServer)
+    case calling(viewModel: InCallViewModel) // ViewModel은 Hashable/Equatable을 준수해야 합니다.
+    case incomingCall(callInfo: IncomingCallInfo)
+    case reportFeedbackPopup
     
-    public var id: String {self.rawValue}
-}
-
-public enum CallSheet: Identifiable, Equatable {
-    
-    case afterCallPopup(opponent: UserProfileServer)
-    
-    // Identifiable 프로토콜을 준수하기 위한 id 프로퍼티
     public var id: String {
         switch self {
-        case .afterCallPopup(let opponent):
-            // Equatable을 위해 opponent의 고유한 값(예: nickname 또는 id)을 사용
-            return "afterCallPopup_\(opponent.nickname)"
+        case .manner: return "manner"
+        case .connecting: return "connecting"
+        case .calling: return "calling"
+        case .incomingCall: return "incomingCall"
+        case .reportFeedbackPopup: return "reportFeedbackPopup"
         }
     }
+    public func hash(into hasher: inout Hasher) {
+          hasher.combine(self.id) // 각 케이스의 기본 해시값은 id로 통일
+          switch self {
+          // 연관값이 있는 경우, 연관값의 고유 ID도 함께 해싱합니다.
+          case .connecting(let opponentProfile):
+              hasher.combine(opponentProfile.id)
+          case .calling(let viewModel):
+              hasher.combine(viewModel.id) // ViewModel이 Identifiable 하다고 가정
+          case .incomingCall(let callInfo):
+              hasher.combine(callInfo.id)
+          default:
+              break // 연관값 없는 케이스는 id 해싱만으로 충분
+          }
+      }
+    public static func == (lhs: CallPage, rhs: CallPage) -> Bool {
+           switch (lhs, rhs) {
+           case (.manner, .manner),
+                (.reportFeedbackPopup, .reportFeedbackPopup):
+               return true
+           case (.connecting(let lhsProfile), .connecting(let rhsProfile)):
+               return lhsProfile.id == rhsProfile.id
+           case (.calling(let lhsVM), .calling(let rhsVM)):
+               return lhsVM === rhsVM // 클래스는 참조(===)로 비교
+           case (.incomingCall(let lhsInfo), .incomingCall(let rhsInfo)):
+               return lhsInfo.id == rhsInfo.id
+           default:
+               return false
+           }
+       }
+}
+
+// CallSheet도 동일하게 수정합니다.
+public enum CallSheet: Identifiable, Hashable {
+    case report(opponentProfile: UserProfileServer)
+    
+    public var id: String {
+        switch self {
+        case .report:
+            return "report"
+        }
+    }
+    
+    // Hashable & Equatable 구현
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.id)
+        switch self {
+        case .report(let opponentProfile):
+            hasher.combine(opponentProfile.id)
+        }
+    }
+    
     public static func == (lhs: CallSheet, rhs: CallSheet) -> Bool {
         switch (lhs, rhs) {
-        case (.afterCallPopup(let lhsOpponent), .afterCallPopup(let rhsOpponent)):
-            return lhsOpponent.nickname == rhsOpponent.nickname
+        case (.report(let lhsProfile), .report(let rhsProfile)):
+            return lhsProfile.id == rhsProfile.id
         }
     }
 }

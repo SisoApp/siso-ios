@@ -79,10 +79,14 @@ public struct AfterCallAssessmentView: View {
                     RoundedRectangle(cornerRadius: 12) // 배경과 같은 값으로 설정
                         .stroke(Color.Siso.Gray._30, lineWidth: 1)
                 )
+            VStack{
+                Image("denylove")
+                    .resizable()
+                    .frame(width: 60, height: 60)
+                Text("다른 인연 찾기")
+                    .foregroundStyle(.black)
+            }
             
-            Image("denylove")
-                .resizable()
-                .frame(width: 60, height: 60)
         }
         
     }
@@ -97,9 +101,14 @@ public struct AfterCallAssessmentView: View {
                     RoundedRectangle(cornerRadius: 12) // 배경과 같은 값으로 설정
                         .stroke(Color.Siso.Gray._30, lineWidth: 1)
                 )
-            Image("sendlove")
-                .resizable()
-                .frame(width: 60, height: 60)
+            VStack {
+                Image("sendlove")
+                    .resizable()
+                    .frame(width: 60, height: 60)
+                Text("인연 이어가기")
+                    .foregroundStyle(.black)
+            }
+           
         }
         
     }

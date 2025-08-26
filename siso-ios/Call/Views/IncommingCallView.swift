@@ -11,29 +11,30 @@ import matching
 import model
 
 
-public struct CalledView: View {
+public struct IncommingCallView: View {
     // ViewModel 대신, 필요한 데이터 모델을 직접 받습니다.
-        let callInfo: IncomingCallInfo
-        
-        public init(callInfo: IncomingCallInfo) {
-            self.callInfo = callInfo
-        }
+    let callInfo: IncomingCallInfo
+    var delegate: CallCoordinatorDelegate
+    public init(callInfo: IncomingCallInfo, delegate: CallCoordinatorDelegate) {
+        self.callInfo = callInfo
+        self.delegate = delegate
+    }
     
     // MARK: - Body
     
     public var body: some View {
         VStack(spacing: 24) {
-                   // 이제 옵셔널이 아닌 `callInfo`에서 직접 데이터를 사용합니다.
-                   let profile = callInfo.opponentProfile
-                   
-                   callFromSection(profile: profile)
-                   profileImageAnimatedView(profile: profile)
-                   userInfoSection(profile: profile)
-                   interestTagsSection(profile: profile)
-                   introductionSection(profile: profile)
-                   actionButtonsSection() // profile 전달 불필요
-               }
-               .padding(.vertical)
+            // 이제 옵셔널이 아닌 `callInfo`에서 직접 데이터를 사용합니다.
+            let profile = callInfo.opponentProfile
+            
+            callFromSection(profile: profile)
+            profileImageAnimatedView(profile: profile)
+            userInfoSection(profile: profile)
+            interestTagsSection(profile: profile)
+            introductionSection(profile: profile)
+            actionButtonsSection() // profile 전달 불필요
+        }
+        .padding(.vertical)
     }
     
     // MARK: - View Components (Functions)
@@ -87,17 +88,17 @@ public struct CalledView: View {
     /// 관심사 태그들을 표시하는 뷰
     private func interestTagsSection(profile: UserProfileServer) -> some View {
         // 태그가 많을 경우를 대비해 스크롤 뷰를 사용하고, 최대 5개까지만 표시
-            HStack {
-                ForEach(profile.interestTags.prefix(5), id: \.self) { interest in
-                    Text("#\(interest)")
-                        .font(.system(size: 16, weight: .medium))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.15))
-                        .clipShape(Capsule())
-                }
+        HStack {
+            ForEach(profile.interestTags.prefix(5), id: \.self) { interest in
+                Text("#\(interest)")
+                    .font(.system(size: 16, weight: .medium))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.gray.opacity(0.15))
+                    .clipShape(Capsule())
             }
-            .padding(.horizontal)
+        }
+        .padding(.horizontal)
     }
     
     /// 자기소개 텍스트를 표시하는 뷰
@@ -137,7 +138,7 @@ public struct CalledView: View {
             
             // "전화 연결" (수락) 버튼
             Button {
-               // TODO: 전화 수락 로직 연결 (예: delegate?.acceptCall(channelName: ...))
+                // TODO: 전화 수락 로직 연결 (예: delegate?.acceptCall(channelName: ...))
                 CallManager.shared.acceptCall()
             } label: {
                 VStack(spacing: 4) {

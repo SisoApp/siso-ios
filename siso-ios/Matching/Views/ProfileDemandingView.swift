@@ -20,6 +20,8 @@ public struct ProfileDemandingView: View {
     
     public var body: some View {
         ZStack {
+            Color.black
+                .opacity(0.6)
             VStack {
                 HStack {
                     Spacer()
@@ -71,6 +73,7 @@ public struct ProfileDemandingView: View {
                     
                     Button {
                         delegate.pop()
+                        matchingViewModel.isProfileWriteDemanded = true
                     } label: {
                         Text("닫기")
                             .font(.system(size: 18, weight: .semibold))
@@ -81,10 +84,6 @@ public struct ProfileDemandingView: View {
                 }
             }
         }
-        .background(
-            Color.black
-                .opacity(0.6)
-        )
-        
     }
 }
+

@@ -6,7 +6,9 @@ import model
 import Foundation
 
 // 이제 싱글톤이 아닌 일반 ObservableObject
-public class InCallViewModel: ObservableObject {
+public class InCallViewModel: ObservableObject, Identifiable {
+    
+    public let id = UUID()
     
     // MARK: - Published Properties
     @Published var isMuteMode: Bool = false

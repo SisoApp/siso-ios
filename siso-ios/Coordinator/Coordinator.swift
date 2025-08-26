@@ -9,7 +9,8 @@ import mypage
 import model
 import call
 
-public enum IntegrationPage: Hashable {
+public enum IntegrationPage {
+    
     // Auth
     case login
     case accept
@@ -37,6 +38,16 @@ public enum IntegrationPage: Hashable {
     case my
     case setting
     case notification
+    
+    // Call
+    case manner
+    // connecting 케이스는 상대방 프로필 정보가 필요합니다.
+    case connecting(opponentProfile: UserProfileServer)
+    // calling 케이스는 InCallViewModel이 필요합니다.
+    case calling(viewModel: InCallViewModel)
+    // incomingCall 케이스는 IncomingCallInfo가 필요합니다.
+    case incomingCall(callInfo: IncomingCallInfo)
+    case reportFeedbackPopup
 }
 
 @MainActor
@@ -56,7 +67,7 @@ public class Coordinator: ObservableObject {
     var authViewModel: SocialLoginView.LoginViewModel
     var locationViewModel: LocationViewModel
     var nowWatching: CardViewModel?
-  
+    
     public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel, locationViewModel: LocationViewModel) {
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
@@ -84,7 +95,7 @@ public class Coordinator: ObservableObject {
             AcceptanceView(delegate: self)
         case .welcome:
             WelcomeView(delegate: self)
-           
+            
             // Matching
         case .home:
             TabView {
@@ -93,13 +104,13 @@ public class Coordinator: ObservableObject {
                     .tabItem {
                         Label("둘러보기", systemImage: "house")
                     }
-
+                
                 Text("대화 뷰")
                     .navigationBarBackButtonHidden(true)
                     .tabItem {
                         Label("대화", systemImage: "ellipsis.message")
                     }
-
+                
                 Text("내 정보")
                     .navigationBarBackButtonHidden(true)
                     .tabItem {
@@ -113,8 +124,8 @@ public class Coordinator: ObservableObject {
         case .profileWriteDemand:
             ProfileDemandingView(delegate: self, matchingViewModel: matchingViewModel)
                 .navigationBarBackButtonHidden(true)
-          
-        // Profile
+            
+            // Profile
         case .complete:
             CompleteProfileView(delegate: self)
         case .location:
@@ -138,23 +149,124 @@ public class Coordinator: ObservableObject {
         case .voice:
             RecordProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit)
             
-        // MyPage
+            // MyPage
         case .my:
             MyPageView(delegate: self)
         case .setting:
             SettingView(delegate: self)
         case .notification:
             NotificationView(delegate: self)
+            
+            // Call
+        case .manner:
+            CallMannerView(delegate: self)
+        case .connecting(let opponentProfile):
+            ConnectingView(opponentProfile: opponentProfile)
+        case .calling(let viewModel):
+            CallingView(inCallViewModel: viewModel,
+                        delegate: self)
+        case .incomingCall(let info):
+            IncommingCallView(callInfo: info,
+                              delegate: self)
+        case .reportFeedbackPopup:
+            ReportFeedBackView(delegate: self)
+            
+        }
+    }
+    
+    #Preview {
+        // Preview용 UserProfile
+        @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
+        
+        // TabView 테스트
+        NavigationStack(path: $coordinator.path) {
+            coordinator.build(.home)
         }
     }
 }
 
-#Preview {
-    // Preview용 UserProfile
-    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
+extension IntegrationPage: Equatable, Hashable {
+    // Equatable 프로토콜 구현 (==)
+    public static func == (lhs: IntegrationPage, rhs: IntegrationPage) -> Bool {
+        switch (lhs, rhs) {
+        case (.login, .login), (.accept, .accept), (.home, .home), (.manner, .manner), (.reportFeedbackPopup, .reportFeedbackPopup):
+            return true // 연관값 없는 케이스들
+        case (.connecting(let lhsProfile), .connecting(let rhsProfile)):
+            return lhsProfile.id == rhsProfile.id // id로 비교
+        case (.calling(let lhsVM), .calling(let rhsVM)):
+            return lhsVM === rhsVM // ViewModel은 클래스이므로 인스턴스 자체를 비교 (===)
+        case (.incomingCall(let lhsInfo), .incomingCall(let rhsInfo)):
+            return lhsInfo.id == rhsInfo.id // 정보의 고유 ID로 비교
+        default:
+            return false // 다른 모든 조합은 false
+        }
+    }
     
-    // TabView 테스트
-    NavigationStack(path: $coordinator.path) {
-        coordinator.build(.home)
+    // Hashable 프로토콜 구현 (hash)
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+            // Auth
+        case .login:
+            hasher.combine("login")
+        case .accept:
+            hasher.combine("accept")
+        case .welcome:
+            hasher.combine("welcome")
+            
+            // Matching
+        case .home:
+            hasher.combine("home")
+        case .tutorial:
+            hasher.combine("tutorial")
+        case .profileWriteDemand:
+            hasher.combine("profileWriteDemand")
+            
+            // Profile
+        case .complete:
+            hasher.combine("complete")
+        case .location:
+            hasher.combine("location")
+        case .religion:
+            hasher.combine("religion")
+        case .smoke:
+            hasher.combine("smoke")
+        case .drink:
+            hasher.combine("drink")
+        case .personality:
+            hasher.combine("personality")
+        case .meeting:
+            hasher.combine("meeting")
+        case .profile:
+            hasher.combine("profile")
+        case .signUp:
+            hasher.combine("signUp")
+        case .interest:
+            hasher.combine("interest")
+        case .voice:
+            hasher.combine("voice")
+            
+            // MyPage
+        case .my:
+            hasher.combine("my")
+        case .setting:
+            hasher.combine("setting")
+        case .notification:
+            hasher.combine("notification")
+            
+            // Call (연관값이 있는 경우)
+        case .manner:
+            hasher.combine("manner")
+        case .connecting(let opponentProfile):
+            hasher.combine("connecting")
+            hasher.combine(opponentProfile.id) // 연관값의 고유 식별자를 해싱
+        case .calling(let viewModel):
+            hasher.combine("calling")
+            hasher.combine(viewModel.id) // ViewModel의 고유 식별자를 해싱
+        case .incomingCall(let callInfo):
+            hasher.combine("incomingCall")
+            hasher.combine(callInfo.id) // callInfo의 고유 식별자를 해싱
+        case .reportFeedbackPopup:
+            hasher.combine("reportFeedbackPopup")
+        }
     }
 }
