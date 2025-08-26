@@ -20,5 +20,9 @@ public protocol CallCoordinatorDelegate: AnyObject {
     
     // 전화 끝나고 인연 이어가기 선택 팝업
     func pushKeepConnectionPopup()
+    
+    func pop()
+    
+    func popToRoot()
 }
 

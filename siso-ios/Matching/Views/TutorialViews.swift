@@ -8,28 +8,39 @@
 import SwiftUI
 import designSystem
 
-struct TutorialViews: View {
-    @State var selectedTabIndex: Int = 0
-    var body: some View {
+public struct TutorialViews: View {
+    @State public var selectedTabIndex: Int = 0
+    public var delegate: MatchingCoordinatorDelegate
+    public init(selectedTabIndex: Int = 0, delegate: MatchingCoordinatorDelegate) {
+        self.selectedTabIndex = selectedTabIndex
+        self.delegate = delegate
+    }
+    public var body: some View {
         ZStack {
-          
-                TabView(selection: $selectedTabIndex) {
-                    TutorialView1()
-                        .tag(0)
-                    TutorialView2()
-                        .tag(1)
-                    TutorialView3()
-                        .tag(2)
-                }
-                .tabViewStyle(.page)
+            
+            TabView(selection: $selectedTabIndex) {
+                TutorialView1()
+                    .tag(0)
+                TutorialView2()
+                    .tag(1)
+                TutorialView3()
+                    .tag(2)
+            }
+            .tabViewStyle(.page)
             VStack {
                 Spacer()
                 
                 VStack{
                     Button {
-                        selectedTabIndex += 1
+                        if selectedTabIndex == 2 {
+                            delegate.pushMatching(.home)
+                        } else {
+                            selectedTabIndex += 1
+                        }
+                       
                     } label: {
-                        Text("계속하기")
+                        let text = selectedTabIndex == 2 ? "시작하기" : "다음으로"
+                        Text(text)
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(.black)
                             .padding()
@@ -41,7 +52,7 @@ struct TutorialViews: View {
                     }
                     
                     Button {
-                        print("Jump to main")
+                        delegate.pushMatching(.home)
                     } label: {
                         Text("건너뛰기")
                             .font(.system(size: 18, weight: .semibold))
@@ -53,7 +64,7 @@ struct TutorialViews: View {
                 .padding()
                 .background(.white)
                 
-
+                
             }
         }
     }
@@ -84,7 +95,7 @@ public struct TutorialView2: View {
                 .frame(maxWidth: .infinity)
             Spacer()
         }
-       
+        
     }
 }
 
@@ -101,7 +112,3 @@ public struct TutorialView3: View {
         }
     }
 }
-
-#Preview(body: {
-    TutorialViews()
-})

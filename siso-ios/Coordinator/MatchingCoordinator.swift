@@ -6,53 +6,46 @@ import matching
 import network
 
 extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
+   
     
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: MatchingPage) -> IntegrationPage {
         switch page {
-        case .home: return .home
-        case .beCalled: return .beCalled
-        case .chat: return .chat
-        case .contacting: return .contacting
-        case .calling: return .calling
+        case .tutorial: return .home
+        case .home: return .tutorial
+        case .profileWriteDemand: return .profileWriteDemand
         }
     }
     
     // MARK: MatchingCoordinator Delegate Method
-    public func popToMainView() {
-        print("poptoMain")
+   
+    public func pushMatching(_ page: MatchingPage) {
+        path.append(toIntegrationPage(page))
     }
     
-    public func pushCallInteruptPopup() {
-        matchingSheet = .afterCallPopup
-    }
-    
-    public func buildMatchingView(_ page: MatchingPage) -> AnyView {
-        AnyView(build(toIntegrationPage(page)))
-    }
-    
-    public func pushContactingView() {
-        path.append(toIntegrationPage(MatchingPage.contacting))
-    }
-    
-    public func pushCallingView() {
-        path.append(toIntegrationPage(MatchingPage.calling))
-    }
-    
-    public func pushChatView() {
-        path.append(toIntegrationPage(MatchingPage.chat))
+    public func changeMatchingToCall() {
+        stackID = UUID()
+        path = NavigationPath()
+        Task { @MainActor in
+            try await Task.sleep(nanoseconds: 50_000_000)
+            withAnimation(.easeInOut) {
+                
+            }
+        }
     }
     
     public func changeMatchingToAuth() {
-        
+        path.removeLast(path.count)
+        stackID = UUID() // NavigationStack을 강제로 새로고침
     }
     
-    
     @ViewBuilder
-    public func build(_ sheet: MatchingSheet) -> some View {
+    public func build(sheet: MatchingSheet) -> some View {
         switch sheet {
-        case .afterCallPopup:
-            AfterCallPopup(cardViewModel: matchingViewModel.cards[0])
+        case .fullScreenProfile:
+            if let nowWatching = nowWatching {
+                FullScreenProfileView(cardViewModel: nowWatching)
+            }
         }
     }
 }

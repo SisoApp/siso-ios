@@ -1,9 +1,12 @@
 import SwiftUI
 import Foundation
+import Combine
 import auth
 import profile
 import matching
 import network
+import model
+import call
 
 public enum IntegrationPage: Hashable {
     // Auth
@@ -13,10 +16,8 @@ public enum IntegrationPage: Hashable {
     
     // Matching
     case home
-    case beCalled
-    case chat
-    case contacting
-    case calling
+    case tutorial
+    case profileWriteDemand
     
     // Profile
     case basic
@@ -32,21 +33,17 @@ public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
     @Published public var path: NavigationPath = NavigationPath()
     @Published public var profileSheet: ProfileSheet?
-    // ✅ 1. 어떤 '종류'의 통화 모달을 띄울지 결정 (사용자의 CallPage enum 사용)
-    @Published public var activeCallPage: CallPage?
-    
-    // ✅ 2. 통화 모달에 필요한 '데이터'를 저장
-    @Published public var activeCallInfo: IncomingCallInfo?
-    
-    // ✅ 3. 통화 후 팝업을 위한 Sheet 상태 (사용자의 CallSheet enum 사용, 기존과 동일)
+    @Published public var matchingSheet: MatchingSheet?
+    @Published public var callPage: CallPage?
     @Published public var callSheet: CallSheet?
+    @Published public var activeCallInfo: IncomingCallInfo?
     private let callManager = CallManager.shared
     private var cancellables = Set<AnyCancellable>()
     // 내 프로파일
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
     var authViewModel: SocialLoginView.LoginViewModel
-    
+    var nowWatching: CardViewModel?
     public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel) {
         self.userProfile = userProfile
         self.matchingViewModel = matchingViewModel
@@ -62,39 +59,31 @@ public class Coordinator: ObservableObject {
     public func popToRoot() {
         path.removeLast(path.count - 1)
     }
-
+    
     @ViewBuilder
     public func build(_ page: IntegrationPage) -> some View {
         switch page {
-        // Auth
+            // Auth
         case .login:
             SocialView(delegate: self)
         case .accept:
             AcceptanceView(delegate: self)
         case .welcome:
             WelcomeView(delegate: self)
-        // Matching
+            
+            
+            // Matching
         case .home:
             MatchingMainView(viewModel: matchingViewModel, delegate: self)
                 .navigationBarBackButtonHidden(true)
-        case .beCalled:
-            if let nowWatching = matchingViewModel.nowWatching {
-                MatchingCalledView(cardViewModel: nowWatching)
-                    .navigationBarBackButtonHidden(true)
-            }
-        case .chat:
-            EmptyView()
-        case .contacting:
-            if let nowWatching = matchingViewModel.nowWatching {
-                MatchingContactingView(cardViewModel: nowWatching)
-                    .navigationBarBackButtonHidden(true)
-            }
-        case .calling:
-            if let nowWatching = matchingViewModel.nowWatching {
-                MatchingCallingView(cardViewModel: nowWatching, callManager: CallManager())
-                    .navigationBarBackButtonHidden(true)
-            }
-        // Profile
+        case .tutorial:
+            TutorialViews(selectedTabIndex: 0, delegate: self)
+                .navigationBarBackButtonHidden(true)
+        case .profileWriteDemand:
+            ProfileDemandingView(delegate: self, matchingViewModel: matchingViewModel)
+                .navigationBarBackButtonHidden(true)
+       
+            // Profile
         case .basic:
             BasicProfileView(delegate: self, userProfile: userProfile)
         case .interest:
@@ -107,6 +96,7 @@ public class Coordinator: ObservableObject {
             RecordProfileView(delegate: self, userProfile: userProfile)
         case .complete:
             CompleteProfileView(delegate: self)
+       
         }
     }
 }

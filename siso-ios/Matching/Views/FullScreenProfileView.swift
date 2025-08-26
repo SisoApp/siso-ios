@@ -7,9 +7,12 @@
 
 import SwiftUI
 
-struct FullScreenProfileView: View {
+public struct FullScreenProfileView: View {
+    public init(cardViewModel: CardViewModel) {
+        self.cardViewModel = cardViewModel
+    }
     @ObservedObject var cardViewModel: CardViewModel
-    var body: some View {
+    public var body: some View {
         ZStack {
             TabView {
                 ForEach(cardViewModel.profileImages,id: \.self) { url in

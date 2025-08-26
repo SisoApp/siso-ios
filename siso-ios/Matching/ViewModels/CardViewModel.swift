@@ -48,15 +48,13 @@ public class CardViewModel: ObservableObject, Identifiable  {
     func call() { // 화면전환 필요함
         print("call button tapped")
         print(delegate == nil)
-        delegate?.pushContactingView()
+        //delegate?.pushContactingView()
         homeCardDelegate?.cardViewModelDidRequestCall(on: self)
         
     }
     
     func chat() {
         print("chat button tapped")
-        delegate?.pushChatView()
-        
     }
 }
 extension CardViewModel {

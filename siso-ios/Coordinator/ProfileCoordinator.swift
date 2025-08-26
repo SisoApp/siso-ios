@@ -35,7 +35,7 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 50_000_000)
             withAnimation(.easeInOut) {
-                popToMainView()
+                //TODO: 홈으로 보내기
             }
         }
     }

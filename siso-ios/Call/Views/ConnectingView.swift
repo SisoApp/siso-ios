@@ -49,13 +49,22 @@ public struct ConnectingView: View {
                            // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
                            CallManager.shared.endCall(reason: .cancelled)
                        } label: {
-                           Text("취소")
-                               .font(.headline)
-                               .foregroundColor(.white)
-                               .padding()
-                               .frame(maxWidth: .infinity)
-                               .background(Color.gray)
-                               .cornerRadius(12)
+                           ZStack {
+                               RoundedRectangle(cornerRadius: 24)
+                                   .fill(Color.Siso.Gray._5)
+                                   .stroke(Color.Siso.Gray._30, lineWidth: 1)
+                           }
+                           VStack {
+                               Image("endcall")
+                                   .resizable()
+                                   .scaledToFit()
+                                   .frame(width: 40, height: 40)
+                               Text("전화 종료")
+                                   .font(.headline)
+                                   .foregroundColor(.black)
+                                   .padding()
+                           }
+                          
                        }
                        .padding()
             
@@ -67,6 +76,41 @@ public struct ConnectingView: View {
     }
     
     // MARK: - Subviews
+    @ViewBuilder
+    private func profileImageView(profile: UserProfileServer) -> some View {
+        // profileImageUrls가 비어있을 경우를 대비
+        if profile.profileImageUrls.isEmpty {
+            placeholderImage
+        } else {
+            let urlString = profile.profileImageUrls.first!
+            AsyncImage(url: URL(string: urlString)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(.circle)
+                    .frame(width: 100 ,height: 100)
+            } placeholder: {
+                
+                ZStack{
+                    Rectangle()
+                        .foregroundStyle(.white)
+                    ProgressView()
+                }
+                .frame(width: 100, height: 100)
+                
+            }
+        }
+    }
+    /// 이미지가 없을 때 표시할 플레이스홀더
+    private var placeholderImage: some View {
+        Rectangle()
+            .fill(Color.gray.opacity(0.2))
+            .overlay(
+                Image(systemName: "photo.on.rectangle.angled")
+                    .font(.largeTitle)
+                    .foregroundColor(.gray)
+            )
+    }
     
     // 2. 팁 내용을 배열로 관리하여 유지보수를 쉽게 합니다.
     private let tips = [

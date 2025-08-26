@@ -8,10 +8,17 @@
 import Foundation
 
 public enum MatchingPage: String, Identifiable, Hashable {
-    case home, chat, connecting
+    
+    case tutorial, profileWriteDemand, home
     
     public var id: String {self.rawValue}
     
     
+}
+
+public enum MatchingSheet: String, Identifiable, Hashable {
+    case fullScreenProfile
+    
+    public var id: String {self.rawValue}
 }
 
