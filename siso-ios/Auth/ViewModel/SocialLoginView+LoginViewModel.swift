@@ -22,7 +22,7 @@ public extension SocialLoginView {
     class LoginViewModel: ObservableObject, LoginProtocol {
         
         @Published public var token: String? // accessToken
-        @Published public var userState: String = ""
+        @Published public var userState: String = "LOGIN"
         @Published public var showAlert: Bool = false
         @Published public var alertMessage = ""
         

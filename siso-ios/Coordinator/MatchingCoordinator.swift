@@ -20,6 +20,7 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
     // MARK: MatchingCoordinator Delegate Method
    
     public func pushMatching(_ page: MatchingPage) {
+        print("Push Matching \(page)")
         path.append(toIntegrationPage(page))
     }
     

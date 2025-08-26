@@ -12,12 +12,12 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 public struct CallingView: View {
     
-    @StateObject var inCallViewModel: InCallViewModel
+    @StateObject var inCallViewModel: CallViewModel
     
     // Coordinator와 통신이 필요하다면 delegate를 유지하고 init에서 주입받습니다.
     var delegate: CallCoordinatorDelegate?
     
-    public init(inCallViewModel: InCallViewModel, delegate: CallCoordinatorDelegate? = nil) {
+    public init(inCallViewModel: CallViewModel, delegate: CallCoordinatorDelegate? = nil) {
         // StateObject는 뷰가 소유권을 가질 때 사용하므로 init에서 wrappedValue를 설정합니다.
         // 만약 상위 뷰에서 @StateObject로 생성된 ViewModel을 받는다면, 이 뷰는 @ObservedObject를 사용해야 합니다.
         self._inCallViewModel = .init(wrappedValue: inCallViewModel)
@@ -253,5 +253,5 @@ public struct CallingView: View {
 
 // MARK: - Preview
 #Preview {
-    CallingView(inCallViewModel: InCallViewModel(opponentProfile: UserProfileServer.sampleMessi))
+    CallingView(inCallViewModel: CallViewModel(opponentProfile: UserProfileServer.sampleMessi))
 }

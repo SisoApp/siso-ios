@@ -7,9 +7,12 @@
 
 import SwiftUI
 import designSystem
+import model
 
 // 발신자의 첫 화면
 public struct CallMannerView: View {
+    var opponentProfile = UserProfileServer.sampleMessi
+    
     public init(delegate: CallCoordinatorDelegate? = nil) {
         self.delegate = delegate
     }
@@ -40,6 +43,7 @@ public struct CallMannerView: View {
             
             Button {
                 print("확인했어요 전화 시작")
+                delegate?.pushCall(.connecting(opponentProfile: opponentProfile))
             } label: {
                 Text("확인했어요")
                     .font(.system(size: 18))

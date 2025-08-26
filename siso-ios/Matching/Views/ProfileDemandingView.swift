@@ -9,9 +9,9 @@ import SwiftUI
 import designSystem
 
 public struct ProfileDemandingView: View {
-    
+    @Environment(\.dismiss) var dismiss // 이 줄을 추가합니다.
     @ObservedObject var matchingViewModel: MatchingViewModel
-    public var delegate: MatchingCoordinatorDelegate
+    public var delegate: MatchingCoordinatorDelegate?
     
     public init(delegate: MatchingCoordinatorDelegate, matchingViewModel: MatchingViewModel) {
         self.delegate = delegate
@@ -26,9 +26,7 @@ public struct ProfileDemandingView: View {
                 HStack {
                     Spacer()
                     Button {
-                        delegate.pop()
-                        
-                        
+                        dismiss()
                     } label: {
                         Image(systemName: "xmark")
                             .resizable()
@@ -72,8 +70,8 @@ public struct ProfileDemandingView: View {
                     }
                     
                     Button {
-                        delegate.pop()
                         matchingViewModel.isProfileWriteDemanded = true
+                        dismiss()
                     } label: {
                         Text("닫기")
                             .font(.system(size: 18, weight: .semibold))
@@ -83,7 +81,8 @@ public struct ProfileDemandingView: View {
                     }
                 }
             }
+            .frame(width: 283, height: 474)
+            .background(.white)
         }
     }
 }
-

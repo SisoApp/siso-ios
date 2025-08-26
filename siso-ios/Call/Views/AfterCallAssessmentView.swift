@@ -118,20 +118,17 @@ public struct AfterCallAssessmentView: View {
             AsyncImage(url: URL(string: opponentProfile.profileImageUrls.first ?? "testimg")){ image in
                 
                 image
-                    .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
-                    .scaledToFill() // 2. 프레임을 꽉 채우도록 비율 유지 (프로필 사진에 필수!)
-                    .frame(width: 140, height: 140) // 3. 프레임 크기 지정
-                    .clipShape(Circle()) // 4. 원형으로 자르기
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 140, height: 140)
+                    .clipShape(Circle()) 
                 
             } placeholder: {
                 Circle()
                     .frame(width: 140, height: 140) // 3. 프레임 크기 지정
             }
         }
-        
-        
     }
-    
 }
 
 

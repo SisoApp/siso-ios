@@ -44,7 +44,7 @@ public enum IntegrationPage {
     // connecting 케이스는 상대방 프로필 정보가 필요합니다.
     case connecting(opponentProfile: UserProfileServer)
     // calling 케이스는 InCallViewModel이 필요합니다.
-    case calling(viewModel: InCallViewModel)
+    case calling(viewModel: CallViewModel)
     // incomingCall 케이스는 IncomingCallInfo가 필요합니다.
     case incomingCall(callInfo: IncomingCallInfo)
     case reportFeedbackPopup
@@ -174,15 +174,7 @@ public class Coordinator: ObservableObject {
         }
     }
     
-    #Preview {
-        // Preview용 UserProfile
-        @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
-        
-        // TabView 테스트
-        NavigationStack(path: $coordinator.path) {
-            coordinator.build(.home)
-        }
-    }
+    
 }
 
 extension IntegrationPage: Equatable, Hashable {
@@ -268,5 +260,14 @@ extension IntegrationPage: Equatable, Hashable {
         case .reportFeedbackPopup:
             hasher.combine("reportFeedbackPopup")
         }
+    }
+}
+#Preview {
+    // Preview용 UserProfile
+    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
+    
+    // TabView 테스트
+    NavigationStack(path: $coordinator.path) {
+        coordinator.build(.home)
     }
 }

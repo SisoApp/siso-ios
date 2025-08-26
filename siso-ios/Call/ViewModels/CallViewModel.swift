@@ -6,7 +6,7 @@ import model
 import Foundation
 
 // 이제 싱글톤이 아닌 일반 ObservableObject
-public class InCallViewModel: ObservableObject, Identifiable {
+public class CallViewModel: ObservableObject, Identifiable {
     
     public let id = UUID()
     
@@ -21,7 +21,7 @@ public class InCallViewModel: ObservableObject, Identifiable {
     
     
     // MARK: - Properties
-    let opponentProfile: UserProfileServer
+    var opponentProfile: UserProfileServer
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
     private var timer: Timer?

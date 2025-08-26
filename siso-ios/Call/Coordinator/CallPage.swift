@@ -10,7 +10,7 @@ import model
 public enum CallPage: Identifiable, Hashable, Equatable {
     case manner
     case connecting(opponentProfile: UserProfileServer)
-    case calling(viewModel: InCallViewModel) // ViewModel은 Hashable/Equatable을 준수해야 합니다.
+    case calling(viewModel: CallViewModel) // ViewModel은 Hashable/Equatable을 준수해야 합니다.
     case incomingCall(callInfo: IncomingCallInfo)
     case reportFeedbackPopup
     
