@@ -16,7 +16,13 @@ public class UserProfile: ObservableObject {
         targetSex: "",
         profileImageUrl: [],
         interests: [],
-        introduce: ""
+        introduce: "",
+        religion: "",
+        smoking: "",
+        drinking: "",
+        meeting: [],
+        mbti: "",
+        location: ""
     )
     
     @Published var nickname: String // 닉네임
@@ -27,9 +33,17 @@ public class UserProfile: ObservableObject {
     @Published var interests: [String] // 관심사
     @Published var introduce: String // 자기소개
     @Published var voice: Bool // 목소리
+    @Published var religion: String // 종교
+    @Published var smoking: String // 흡연
+    @Published var drinking: String // 음주
+    @Published var meeting: [String] // 모임
+    @Published var mbti: String // mbti
+    @Published var location: String // 지역
     
-    public init(nickname: String, age: String, sex: String, targetSex: String,
-         profileImageUrl: [UIImage], interests: [String], introduce: String) {
+    public init(nickname: String, age: String, sex: String,
+                targetSex: String, profileImageUrl: [UIImage],
+                interests: [String], introduce: String, religion: String,
+                smoking: String, drinking: String, meeting: [String], mbti: String, location: String) {
         self.nickname = nickname
         self.age = age
         self.sex = sex
@@ -38,5 +52,11 @@ public class UserProfile: ObservableObject {
         self.interests = interests
         self.introduce = introduce
         self.voice = false
+        self.religion = religion
+        self.smoking = smoking
+        self.drinking = drinking
+        self.meeting = meeting
+        self.mbti = mbti
+        self.location = location
     }
 }

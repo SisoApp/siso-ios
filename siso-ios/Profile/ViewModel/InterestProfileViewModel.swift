@@ -13,10 +13,10 @@ enum InterestType: String, Identifiable, CaseIterable {
     var id: String { self.rawValue }
 }
 
-struct InterestProfileViewModel {
-    let cultures: [String] = ["음악감상", "사진촬영", "서예", "글쓰기", "악기연주", "노래부르기", "댄스"]
-    let exercises: [String] = ["등산", "낚시", "골프", "자전거타기", "캠핑", "수영"]
-    let hobbies: [String] = ["독서", "여행", "뜨개질", "맛집", "명상","와인", "인테리어", "식물"]
+class InterestProfileViewModel {
+    let cultures: [String] = ["#음악감상🎧", "#사진촬영📸", "#서예🖌️", "#글쓰기✍️", "#악기연주🎸", "#영화감상🎬", "#전시관람🖼️", "#클래식감상🎻", "#노래부르기🎤", "#댄스💃🕺"]
+    let exercises: [String] = ["#등산⛰️", "#낚시🎣", "#요가🧘‍♀️", "#골프⛳️", "#자전거🚴‍♀️", "#캠핑🏕️", "#수영🏊‍♂️", "#바둑♟️", "#볼링🎳", "#탁구🏓", "#꽃꽂이💐", "#드라이브🚗"]
+    let hobbies: [String] = ["#독서📚", "#베이킹🧁", "#뜨개질🧶", "#원예🌿", "#여행✈️","#맛집🍽️", "#명상🧘", "#와인🍷", "#요리🍳", "#인테리어🪟"]
     
     func chucked(_ type: InterestType, into size: Int) -> [[String]] {
         var array: [String] = []
