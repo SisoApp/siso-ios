@@ -87,8 +87,26 @@ public class Coordinator: ObservableObject {
            
             // Matching
         case .home:
-            MatchingMainView(viewModel: matchingViewModel, delegate: self)
-                .navigationBarBackButtonHidden(true)
+            TabView {
+                MatchingMainView(viewModel: matchingViewModel, delegate: self)
+                    .navigationBarBackButtonHidden(true)
+                    .tabItem {
+                        Label("둘러보기", systemImage: "house")
+                    }
+
+                Text("대화 뷰")
+                    .navigationBarBackButtonHidden(true)
+                    .tabItem {
+                        Label("대화", systemImage: "ellipsis.message")
+                    }
+
+                Text("내 정보")
+                    .navigationBarBackButtonHidden(true)
+                    .tabItem {
+                        Label("내 정보", systemImage: "person")
+                    }
+            }
+            .tint(Color.Siso.Primary._100)
         case .tutorial:
             TutorialViews(selectedTabIndex: 0, delegate: self)
                 .navigationBarBackButtonHidden(true)
@@ -128,5 +146,15 @@ public class Coordinator: ObservableObject {
         case .notification:
             NotificationView(delegate: self)
         }
+    }
+}
+
+#Preview {
+    // Preview용 UserProfile
+    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
+    
+    // TabView 테스트
+    NavigationStack(path: $coordinator.path) {
+        coordinator.build(.home)
     }
 }
