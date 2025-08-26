@@ -5,6 +5,7 @@
 //  Created by 멘태 on 8/24/25.
 //
 import Combine
+import CoreLocation
 
 enum Province: String, Identifiable, CaseIterable {
     case seoul = "서울"
@@ -28,10 +29,18 @@ enum Province: String, Identifiable, CaseIterable {
     var id: String { rawValue }
 }
 
-final public class LocationViewModel: ObservableObject {
+final public class LocationViewModel: NSObject, ObservableObject {
     @Published var location: String = ""
+    private var locationManager: CLLocationManager
     
-    public init() {}
+    public override init() {
+        locationManager = CLLocationManager()
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        
+        super.init()
+        
+        locationManager.delegate = self
+    }
     
     func getCities(_ province: Province) -> [String] {
         switch province {
@@ -75,5 +84,58 @@ final public class LocationViewModel: ObservableObject {
         case .jeju:
             return ["서귀포시", "제주시"]
         }
+    }
+}
+
+extension LocationViewModel: CLLocationManagerDelegate {
+    func checkAuthorizationStatus() throws {
+        guard locationManager.authorizationStatus == .authorizedWhenInUse else {
+            locationManager.requestWhenInUseAuthorization()
+            return
+        }
+    }
+    
+    func getLocation() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.requestLocation()
+        default:
+            print("위치 권한 오류")
+        }
+    }
+    
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = locationManager.authorizationStatus
+        
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
+            locationManager.requestLocation()
+        }
+    }
+    
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            let geoCoder: CLGeocoder = CLGeocoder()
+            
+            geoCoder.reverseGeocodeLocation(location) { placemarks, error in
+                if let error = error {
+                    print("\(error.localizedDescription)")
+                    return
+                }
+                
+                if let placemark = placemarks?.first {
+                    let address: [String] = placemark.description.components(separatedBy: " ")
+                    let province: String = address[3].prefix(2).description
+                    let city: String = address[4].dropLast().description
+                    
+                    self.location = "\(province) \(city)"
+                }
+            }
+        }
+    }
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("위치 가져오기 실패: \(error.localizedDescription)")
     }
 }

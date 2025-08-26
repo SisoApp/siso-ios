@@ -73,6 +73,9 @@ public struct LocationProfileView: View {
                 Text("현재 위치로 설정하기")
                     .font(.system(size: 18))
                     .foregroundStyle(Color.Siso.Gray._50)
+                    .onTapGesture {
+                        viewModel.getLocation()
+                    }
                 
                 Spacer()
             }

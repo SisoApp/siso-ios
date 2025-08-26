@@ -44,7 +44,8 @@ let sisoApp: Target = .target(
                         "NSIncludesSubdomains": true,
                     ]
                 ]
-            ]
+            ],
+            "NSLocationWhenInUseUsageDescription": "현재 위치를 가져오기 위해 위치 접근 권한이 필요합니다."
         ]
     ),
     sources: ["siso-ios/Sources/**",],
