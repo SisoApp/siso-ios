@@ -39,7 +39,7 @@ struct InitialView: View {
                 authVM.userState = ""
             }
         } message: {
-            Text("로그인 세션이 만료되었습니다. 다시 로그인 해주세요")
+            Text(authVM.alertMessage)
         }
     }
     
