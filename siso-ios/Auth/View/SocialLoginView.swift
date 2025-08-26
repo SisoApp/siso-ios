@@ -52,7 +52,7 @@ public struct SocialLoginView: View {
                                     delegate?.changeAuthToMatching()
                                 } else if state == "REGISTER" {
                                     delegate?.pushAuth(.accept)
-                                } else {
+                                } else if state.isEmpty {
                                     print("userState가 ''가 되는 곳")
                                 }
                             }
@@ -74,6 +74,14 @@ public struct SocialLoginView: View {
             } else if vm.userState == "REGISTER" {
                 delegate?.pushAuth(.accept)
             }
+        }
+        .alert("오류", isPresented: $vm.showAlert) {
+            Button("확인") {
+                // 로그인 화면으로 전환
+                vm.userState = ""
+            }
+        } message: {
+            Text(vm.alertMessage)
         }
     }
     
