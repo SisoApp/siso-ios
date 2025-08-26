@@ -31,11 +31,13 @@ enum Province: String, Identifiable, CaseIterable {
 
 final public class LocationViewModel: NSObject, ObservableObject {
     @Published var location: String = ""
+    @Published var isLoading: Bool = false
+    
     private var locationManager: CLLocationManager
     
     public override init() {
         locationManager = CLLocationManager()
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         
         super.init()
         
@@ -100,6 +102,7 @@ extension LocationViewModel: CLLocationManagerDelegate {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .authorizedAlways, .authorizedWhenInUse:
+            isLoading = true 
             locationManager.requestLocation()
         default:
             print("위치 권한 오류")
@@ -110,11 +113,14 @@ extension LocationViewModel: CLLocationManagerDelegate {
         let status = locationManager.authorizationStatus
         
         if status == .authorizedAlways || status == .authorizedWhenInUse {
+            isLoading = true
             locationManager.requestLocation()
         }
     }
     
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        isLoading = false
+        
         if let location = locations.last {
             let geoCoder: CLGeocoder = CLGeocoder()
             
@@ -127,7 +133,7 @@ extension LocationViewModel: CLLocationManagerDelegate {
                 if let placemark = placemarks?.first {
                     let address: [String] = placemark.description.components(separatedBy: " ")
                     let province: String = address[3].prefix(2).description
-                    let city: String = address[4].dropLast().description
+                    let city: String = address[4]
                     
                     self.location = "\(province) \(city)"
                 }
@@ -136,6 +142,7 @@ extension LocationViewModel: CLLocationManagerDelegate {
     }
     
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        isLoading = false
         print("위치 가져오기 실패: \(error.localizedDescription)")
     }
 }

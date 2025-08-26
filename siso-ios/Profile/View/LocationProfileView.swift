@@ -20,23 +20,33 @@ public struct LocationProfileView: View {
     }
     
     public var body: some View {
-        VStack {
-            locationView()
-                .padding()
-                .navigationTitle("내 정보 수정")
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden()
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Image(systemName: "chevron.backward")
-                            .foregroundStyle(Color.Siso.Gray._50)
-                            .onTapGesture {
-                                delegate?.pop()
-                            }
-                    }
-                }
+        ZStack {
+            indicatorView()
             
-            completeButton()
+            VStack {
+                locationView()
+                completeButton()
+            }
+            .navigationTitle("내 정보 수정")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Image(systemName: "chevron.backward")
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .onTapGesture {
+                            delegate?.pop()
+                        }
+                }
+            }
+        }
+    }
+    
+    private func indicatorView() -> some View {
+        return Group {
+            if viewModel.isLoading {
+                SimpleSpinner()
+            }
         }
     }
     
@@ -83,10 +93,11 @@ public struct LocationProfileView: View {
             
             Spacer()
         }
+        .padding()
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = !viewModel.location.isEmpty
+        let isActive: Bool = !viewModel.location.isEmpty && !viewModel.isLoading
         
         return Button {
             userProfile.location = viewModel.location
@@ -105,6 +116,23 @@ public struct LocationProfileView: View {
         .frame(height: 54)
         .padding(.bottom, 38)
         .padding(.horizontal)
+    }
+}
+
+struct SimpleSpinner: View {
+    @State private var isRotating = 0.0
+    
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.7)
+            .stroke(Color.Siso.Gray._50, lineWidth: 3)
+            .frame(width: 30, height: 30)
+            .rotationEffect(Angle(degrees: isRotating))
+            .onAppear {
+                withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                    isRotating = 360
+                }
+            }
     }
 }
 
