@@ -130,10 +130,11 @@ extension LocationViewModel: CLLocationManagerDelegate {
                     return
                 }
                 
-                if let placemark = placemarks?.first {
-                    let address: [String] = placemark.description.components(separatedBy: " ")
-                    let province: String = address[3].prefix(2).description
-                    let city: String = address[4]
+                if let placemark = placemarks?.first,
+                   let country = placemark.country {
+                    let address: [String] = placemark.description.components(separatedBy: country)[1].components(separatedBy: " ")
+                    let province: String = address[1].prefix(2).description
+                    let city: String = address[2]
                     
                     self.location = "\(province) \(city)"
                 }
