@@ -41,7 +41,7 @@ public struct ImageProfileView: View {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        currentPage = .introduce
+                        currentPage = .basic
                     }
             }
         }

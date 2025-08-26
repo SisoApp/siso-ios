@@ -19,7 +19,7 @@ public struct ProfileView: View {
     @State private var height: String = ""
     @State private var weight: String = ""
     @State private var sex: String = ""
-    @State private var target: String = ""
+    @State private var targetSex: String = ""
     @State private var isPlaying: Bool = false
     @State private var religion: String = ""
     @State private var meetings: [String] = []
@@ -34,6 +34,13 @@ public struct ProfileView: View {
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
+        self._nickname = State(wrappedValue: userProfile.nickname)
+        self._age = State(wrappedValue: userProfile.age)
+        self._introduce = State(wrappedValue: userProfile.introduce)
+        self._height = State(wrappedValue: userProfile.height)
+        self._weight = State(wrappedValue: userProfile.weight)
+        self._sex = State(wrappedValue: userProfile.sex)
+        self._targetSex = State(wrappedValue: userProfile.targetSex)
     }
     
     public var body: some View {
@@ -47,9 +54,11 @@ public struct ProfileView: View {
                     basicInfoSection()
                     additionalInfoSection()
                     tagSection()
-                    Spacer()
                 }
                 .padding()
+                .onTapGesture {
+                    hideKeyboard()
+                }
                 
             }
             completeButton()
@@ -237,7 +246,7 @@ public struct ProfileView: View {
                 .padding(.top, 8)
             RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
                 .padding(.top, 16)
-            RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $target)
+            RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $targetSex)
                 .padding(.top, 16)
             
             inputView(title: "지역", item: userProfile.location)
@@ -442,6 +451,13 @@ public struct ProfileView: View {
     
     private func completeButton() -> some View {
         return Button {
+            userProfile.age = age
+            userProfile.introduce = introduce
+            userProfile.height = height
+            userProfile.weight = weight
+            userProfile.sex = sex
+            userProfile.targetSex = targetSex
+            
             delegate?.pop()
         } label: {
             Text("완료하기")
@@ -454,12 +470,20 @@ public struct ProfileView: View {
         }
         .frame(height: 54)
         .padding(.horizontal)
+        .padding(.bottom, 8)
     }
     
     private func chunked(into size: Int, items: [String]) -> [[String]] {
         return stride(from: 0, to: items.count, by: size).map {
             Array(items[$0..<min($0 + size, items.count)])
         }
+    }
+    
+    private func hideKeyboard() {
+        ageFocus = false
+        introduceFocus = false
+        heightFocus = false
+        weightFocus = false
     }
 }
 

@@ -61,7 +61,6 @@ public struct IntroduceProfileView: View {
                 .foregroundStyle(.black)
             }
         }
-        .padding(.top, 60)
         .padding(.horizontal)
     }
     
@@ -71,6 +70,7 @@ public struct IntroduceProfileView: View {
                 .font(.title2)
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 60)
                 .padding(.bottom, 8)
             
             Text("여러분의 진솔한 생각과 경험을 담아\n상대방이 당신을 더 잘 이해할 수 있도록\n5자 이상, 50자 이하로 작성해주세요\n정보는 다음에 수정할 수 있어요")
@@ -79,6 +79,7 @@ public struct IntroduceProfileView: View {
                 .lineSpacing(9)
             
         }
+        
         .onTapGesture {
             isFocused = false
         }
