@@ -220,13 +220,13 @@ public struct BasicProfileView: View {
     private func nextButton() -> some View {
         return Button {
             userProfile.nickname = nickname
-            userProfile.age = age
+            userProfile.age = Int(age) ?? 0
             userProfile.sex = sex
             userProfile.targetSex = targetSex
             
             let parameters: [String: Any] = [
                 "nickname": userProfile.nickname,
-                "age": Int(userProfile.age) ?? 0,
+                "age": userProfile.age,
                 "sex": userProfile.sex,
                 "preference_sex": userProfile.targetSex
             ]

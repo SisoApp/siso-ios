@@ -18,7 +18,7 @@ struct SisoIosApp: App {
     
     init() {
         let userProfile: UserProfile = .init(
-            nickname: "", age: "", sex: "", targetSex: "", profileImageUrl: [],
+            nickname: "", age: 0, sex: "", targetSex: "", profileImageUrl: [],
             interests: [], introduce: "", religion: "", smoking: "", drinking: "",
             meeting: [], mbti: "", location: "")
         

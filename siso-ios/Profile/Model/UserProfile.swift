@@ -11,7 +11,7 @@ import Combine
 public class UserProfile: ObservableObject {
     public static let empty: UserProfile = UserProfile(
         nickname: "",
-        age: "",
+        age: 0,
         sex: "",
         targetSex: "",
         profileImageUrl: [],
@@ -26,7 +26,7 @@ public class UserProfile: ObservableObject {
     )
     
     @Published var nickname: String // 닉네임
-    @Published var age: String // 나이
+    @Published var age: Int // 나이
     @Published var sex: String // 성별
     @Published var targetSex: String // 대상 성별
     @Published var profileImages: [UIImage] // 프로필 사진
@@ -40,7 +40,7 @@ public class UserProfile: ObservableObject {
     @Published var mbti: String // mbti
     @Published var location: String // 지역
     
-    public init(nickname: String, age: String, sex: String, targetSex: String,
+    public init(nickname: String, age: Int, sex: String, targetSex: String,
                 profileImageUrl: [UIImage], interests: [String], introduce: String,
                 religion: String, smoking: String, drinking: String,
                 meeting: [String], mbti: String, location: String) {

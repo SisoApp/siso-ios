@@ -43,7 +43,7 @@ public struct ProfileView: View {
         self.delegate = delegate
         self.userProfile = userProfile
         self._nickname = State(wrappedValue: userProfile.nickname)
-        self._age = State(wrappedValue: userProfile.age)
+        self._age = State(wrappedValue: userProfile.age.description)
         self._introduce = State(wrappedValue: userProfile.introduce)
         self._sex = State(wrappedValue: userProfile.sex)
         self._targetSex = State(wrappedValue: userProfile.targetSex)
@@ -558,7 +558,7 @@ public struct ProfileView: View {
     
     private func completeButton() -> some View {
         return Button {
-            userProfile.age = age
+            userProfile.age = Int(age) ?? 0
             userProfile.introduce = introduce
             userProfile.sex = sex
             userProfile.targetSex = targetSex
