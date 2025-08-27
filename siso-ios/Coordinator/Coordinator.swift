@@ -60,6 +60,10 @@ public class Coordinator: ObservableObject {
     @Published public var activeCallInfo: IncomingCallInfo?
     private let callManager = CallManager.shared
     private var cancellables = Set<AnyCancellable>()
+    // 튜토리얼 시청 여부
+    var tutorialHasBeenWatched: Bool {
+        UserDefaults.standard.bool(forKey: "tutorialHasBeenWatched")
+    }
     // 내 프로파일
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
