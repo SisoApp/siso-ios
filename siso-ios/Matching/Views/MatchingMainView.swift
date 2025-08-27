@@ -44,12 +44,12 @@ public struct MatchingMainView: View {
         }
         .onAppear(){
             viewModel.injectDelegateToCards()
-//            if !viewModel.isProfileWriteDemanded {
-//                print("show demend")
-//                delegate?.pushMatching(.profileWriteDemand)
-//            }
             
         }
+        if viewModel.isProfileWriteDemanded {
+            ProfileDemandingView(matchingViewModel: viewModel)
+        }
+        
     }
 }
 

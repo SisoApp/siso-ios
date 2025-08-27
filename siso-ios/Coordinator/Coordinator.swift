@@ -19,7 +19,6 @@ public enum IntegrationPage {
     // Matching
     case home
     case tutorial
-    case profileWriteDemand
     
     // Profile
     case complete
@@ -121,9 +120,7 @@ public class Coordinator: ObservableObject {
         case .tutorial:
             TutorialViews(selectedTabIndex: 0, delegate: self)
                 .navigationBarBackButtonHidden(true)
-        case .profileWriteDemand:
-            ProfileDemandingView(delegate: self, matchingViewModel: matchingViewModel)
-                .navigationBarBackButtonHidden(true)
+        
             
             // Profile
         case .complete:
@@ -211,8 +208,7 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine("home")
         case .tutorial:
             hasher.combine("tutorial")
-        case .profileWriteDemand:
-            hasher.combine("profileWriteDemand")
+       
             
             // Profile
         case .complete:

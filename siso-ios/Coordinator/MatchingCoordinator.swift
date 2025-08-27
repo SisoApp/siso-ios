@@ -13,7 +13,6 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
         switch page {
         case .tutorial: return .home
         case .home: return .tutorial
-        case .profileWriteDemand: return .profileWriteDemand
         }
     }
     
