@@ -48,13 +48,7 @@ public struct SocialLoginView: View {
                     loginButton(title: "카카오로 시작하기", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
                         Task {
                             await vm.kakaoLogin() { state in
-                                if state == "LOGIN" {
-                                    delegate?.changeAuthToMatching()
-                                } else if state == "REGISTER" {
-                                    delegate?.pushAuth(.accept)
-                                } else if state.isEmpty {
-                                    print("userState가 ''가 되는 곳")
-                                }
+                                vm.userState = vm.convertUserState(state)
                             }
                         }
                     }
@@ -69,16 +63,16 @@ public struct SocialLoginView: View {
             }
         }
         .onChange(of: vm.userState) {
-            if vm.userState == "LOGIN" {
+            if vm.userState == .login {
                 delegate?.changeAuthToMatching()
-            } else if vm.userState == "REGISTER" {
+            } else if vm.userState == .register {
                 delegate?.pushAuth(.accept)
             }
         }
         .alert("오류", isPresented: $vm.showAlert) {
             Button("확인") {
                 // 로그인 화면으로 전환
-                vm.userState = ""
+                vm.userState = vm.convertUserState("")
             }
         } message: {
             Text(vm.alertMessage)
