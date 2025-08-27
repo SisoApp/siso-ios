@@ -48,7 +48,7 @@ public struct MeetingProfileView: View {
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
+            Text("최소 3개 이상, 7개 이하로 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
                 .font(.system(size: 18))
                 .foregroundStyle(Color.Siso.Gray._60)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -60,7 +60,14 @@ public struct MeetingProfileView: View {
         let isActive: Bool = meetings.contains(title)
         
         return Button {
-            meetings.append(title)
+            if isActive {
+                guard let index = meetings.firstIndex(of: title) else { return }
+                meetings.remove(at: index)
+            } else {
+                if meetings.count < 7 {
+                    meetings.append(title)
+                }
+            }
         } label: {
             Text(title)
                 .padding(EdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 18))
@@ -85,7 +92,7 @@ public struct MeetingProfileView: View {
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = true
+        let isActive: Bool = meetings.count > 2
         
         return Button {
             userProfile.meeting = meetings

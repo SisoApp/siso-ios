@@ -49,7 +49,7 @@ public struct InterestProfileView: View {
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
+            Text("최소 3개 이상, 7개 이하로  선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundStyle(Color.Siso.Gray._60)
                 .lineSpacing(9)
@@ -65,7 +65,9 @@ public struct InterestProfileView: View {
                 guard let index: Int = interests.firstIndex(of: title) else { return }
                 interests.remove(at: index)
             } else {
-                interests.append(title)
+                if interests.count < 7 {
+                    interests.append(title)
+                }
             }
         } label: {
             Text(title)
