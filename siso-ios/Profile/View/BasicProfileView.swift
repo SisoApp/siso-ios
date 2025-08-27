@@ -42,12 +42,12 @@ public struct BasicProfileView: View {
                     textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $nickname, isFocused: nicknameFocus)
                         .focused($nicknameFocus)
                         .submitLabel(.done)
-                        .onChange(of: userProfile.nickname) { _, newValue in
-                            userProfile.nickname = String(newValue.prefix(20))
+                        .onChange(of: nickname) { _, newValue in
+                            nickname = String(newValue.prefix(8))
                         }
                         .onSubmit {
-                            nicknameFocus = false
                             ageFocus = true
+                            nicknameFocus = false
                         }
                     
                     textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $age, isFocused: ageFocus)

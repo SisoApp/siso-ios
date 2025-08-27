@@ -130,6 +130,7 @@ public struct MyPageView: View {
                     .frame(width: 20, height: 20)
             }
         }
+        .padding(.leading)
         .foregroundStyle(.black)
         .frame(height: 48)
         .frame(maxWidth: .infinity)

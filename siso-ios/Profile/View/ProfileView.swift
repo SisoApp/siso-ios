@@ -69,6 +69,13 @@ public struct ProfileView: View {
                         delegate?.pop()
                     }
             }
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("완료") {
+                    hideKeyboard()
+                }
+                .foregroundStyle(Color.Siso.Gray._90)
+            }
         }
     }
     
@@ -120,6 +127,16 @@ public struct ProfileView: View {
         return VStack {
             HStack {
                 textFieldView(title: "나이", unit: "세", binding: $age, isFocused: $ageFocus)
+                    .keyboardType(.numbersAndPunctuation)
+                    .submitLabel(.done)
+                    .onChange(of: age) { _, newValue in
+                        let filtered: String = newValue.filter { "0123456790".contains($0) }
+                        age = String(filtered.prefix(2))
+                    }
+                    .onSubmit {
+                        hideKeyboard()
+                    }
+                    
                 Spacer()
             }
         }
@@ -148,6 +165,9 @@ public struct ProfileView: View {
                     .scrollContentBackground(.hidden)
                     .font(.system(size: 20, weight: .semibold))
                     .padding()
+                    .onChange(of: introduce) { _, newValue in
+                        introduce = newValue.prefix(50).description
+                    }
                 
                 VStack {
                     Spacer()

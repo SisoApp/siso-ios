@@ -58,7 +58,7 @@ public struct IntroduceProfileView: View {
                 Button("완료") {
                     isFocused = false
                 }
-                .foregroundStyle(.black)
+                .foregroundStyle(Color.Siso.Gray._90)
             }
         }
         .padding(.horizontal)
@@ -79,7 +79,6 @@ public struct IntroduceProfileView: View {
                 .lineSpacing(9)
             
         }
-        
         .onTapGesture {
             isFocused = false
         }
@@ -107,6 +106,9 @@ public struct IntroduceProfileView: View {
                 .background(.clear)
                 .scrollContentBackground(.hidden)
                 .padding()
+                .onChange(of: introduce) { _, newValue in
+                    introduce = newValue.prefix(50).description
+                }
                 
         }
         .padding(.top, 24)
