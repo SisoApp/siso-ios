@@ -16,8 +16,6 @@ public struct ProfileView: View {
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
-    @State private var height: String = ""
-    @State private var weight: String = ""
     @State private var sex: String = ""
     @State private var targetSex: String = ""
     @State private var isPlaying: Bool = false
@@ -26,8 +24,6 @@ public struct ProfileView: View {
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
-    @FocusState private var heightFocus: Bool
-    @FocusState private var weightFocus: Bool
     
     weak var delegate: ProfileCoordinatorDelegate?
     
@@ -37,8 +33,6 @@ public struct ProfileView: View {
         self._nickname = State(wrappedValue: userProfile.nickname)
         self._age = State(wrappedValue: userProfile.age)
         self._introduce = State(wrappedValue: userProfile.introduce)
-        self._height = State(wrappedValue: userProfile.height)
-        self._weight = State(wrappedValue: userProfile.weight)
         self._sex = State(wrappedValue: userProfile.sex)
         self._targetSex = State(wrappedValue: userProfile.targetSex)
     }
@@ -239,11 +233,6 @@ public struct ProfileView: View {
     private func basicInfoSection() -> some View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
-            
-            textFieldView(title: "키", unit: "cm", binding: $height, isFocused: $heightFocus)
-                .padding(.top, 16)
-            textFieldView(title: "몸무게", unit: "kg", binding: $weight, isFocused: $weightFocus)
-                .padding(.top, 8)
             RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
                 .padding(.top, 16)
             RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $targetSex)
@@ -449,8 +438,6 @@ public struct ProfileView: View {
         return Button {
             userProfile.age = age
             userProfile.introduce = introduce
-            userProfile.height = height
-            userProfile.weight = weight
             userProfile.sex = sex
             userProfile.targetSex = targetSex
             
@@ -472,8 +459,6 @@ public struct ProfileView: View {
     private func hideKeyboard() {
         ageFocus = false
         introduceFocus = false
-        heightFocus = false
-        weightFocus = false
     }
 }
 

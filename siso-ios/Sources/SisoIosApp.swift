@@ -15,10 +15,11 @@ struct SisoIosApp: App {
     @StateObject var locationViewModel: LocationViewModel
     
     init() {
-        let userProfile = UserProfile(
+        let userProfile: UserProfile = .init(
             nickname: "", age: "", sex: "", targetSex: "", profileImageUrl: [],
             interests: [], introduce: "", religion: "", smoking: "", drinking: "",
-            meeting: [], mbti: "", location: "", height: "", weight: "")
+            meeting: [], mbti: "", location: "")
+        
         let matchingViewModel = MatchingViewModel(cards: [])
         let authViewModel = SocialLoginView.LoginViewModel()
         let locationViewModel: LocationViewModel = .init()
