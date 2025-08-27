@@ -25,6 +25,7 @@ public struct ProfileView: View {
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
     
+    private let viewModel: ProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -440,6 +441,10 @@ public struct ProfileView: View {
             userProfile.introduce = introduce
             userProfile.sex = sex
             userProfile.targetSex = targetSex
+            
+            Task {
+                await viewModel.registerProfile(userProfile)
+            }
             
             delegate?.pop()
         } label: {

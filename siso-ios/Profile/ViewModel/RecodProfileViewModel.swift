@@ -8,6 +8,7 @@
 import AVFoundation
 import Combine
 import SwiftUI
+import network
 
 enum RecordStatus {
     case pending, recording, waiting, playing
@@ -123,6 +124,10 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     func stopPlaying() {
         stopTimer()
         status = .waiting
+    }
+    
+    func uploadVoice() async {
+        try? await ProfileNetworkManager.shard.uploadVoice()
     }
 }
 

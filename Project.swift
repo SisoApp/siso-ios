@@ -180,7 +180,8 @@ let profile: Target = .target(
     infoPlist: .default,
     sources: ["siso-ios/Profile/**"],
     dependencies: [
-        .target(name: "designSystem")
+        .target(name: "designSystem"),
+        .target(name: "network")
     ]
 )
 

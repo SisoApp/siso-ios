@@ -162,6 +162,10 @@ public struct RecordProfileView: View {
         let isActive: Bool = viewModel.nextButtonIsActive
         
         return Button {
+            Task {
+                await viewModel.uploadVoice()
+            }
+            
             switch mode {
             case .signUp:
                 delegate?.pushProfile(.complete)

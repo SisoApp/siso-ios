@@ -159,7 +159,6 @@ public struct PersonalityProfileView: View {
             let mbti: String = energy + information + decision + lifeStyle
             userProfile.mbti = mbti
             delegate?.pop()
-            print(mbti)
         } label: {
             Text("완료하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
