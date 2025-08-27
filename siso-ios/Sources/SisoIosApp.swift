@@ -4,12 +4,13 @@ import auth
 import coordinator
 import profile
 import matching
+import model
 
 @main
 struct SisoIosApp: App {
     @StateObject var userProfile: UserProfile
     @StateObject private var coordinator: Coordinator
-    
+    @StateObject private var appSettings = AppSettings()
     @StateObject var matchingViewModel: MatchingViewModel
     @StateObject var authVM: SocialLoginView.LoginViewModel
     @StateObject var locationViewModel: LocationViewModel
@@ -58,6 +59,7 @@ struct SisoIosApp: App {
                     }
             }
             .id(coordinator.stackID)
+            .environmentObject(appSettings)
         }
     }
 }

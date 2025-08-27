@@ -105,17 +105,30 @@ public final class CallManager: ObservableObject {
     // MARK: - Private Methods
     
     private func subscribeToAgoraEvents() {
-        // 상대방이 채널에서 나갔을 때 (통화 중 상대가 끊었을 때)
-        agoraManager.userDidLeavePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                // 현재 통화 중 상태일 때만 반응
-                if case .inCall = self?.callState {
-                    print("📞 상대방이 전화를 종료했습니다.")
-                    // 상대방이 끊은 것은 '정상 완료'된 통화입니다.
-                    self?.endCall(reason: .completed)
-                }
-            }
-            .store(in: &cancellables)
+        // ✨ [추가] 상대방이 채널에 입장했을 때 (연결 성공 시)
+           agoraManager.userDidJoinPublisher
+               .receive(on: DispatchQueue.main)
+               .sink { [weak self] _ in
+                   // 현재 상태가 '연결 중'일 때만 반응하도록 합니다.
+                   guard let self = self, case .connecting(let info) = self.callState else { return }
+                   
+                   print("🤝 상대방이 통화에 참여했습니다. 상태를 .inCall로 변경합니다.")
+                   
+                   // 상태를 '통화 중'으로 변경합니다.
+                   // 이 상태 변경이 UI를 자동으로 업데이트하는 핵심 트리거가 됩니다.
+                   self.callState = .inCall(info: info)
+               }
+               .store(in: &cancellables)
+
+           // [기존 코드] 상대방이 채널에서 나갔을 때 (통화 중 상대가 끊었을 때)
+           agoraManager.userDidLeavePublisher
+               .receive(on: DispatchQueue.main)
+               .sink { [weak self] _ in
+                   if case .inCall = self?.callState {
+                       print("📞 상대방이 전화를 종료했습니다.")
+                       self?.endCall(reason: .completed)
+                   }
+               }
+               .store(in: &cancellables)
     }
 }

@@ -7,10 +7,12 @@
 
 import SwiftUI
 import designSystem
+import model
 
 public struct TutorialViews: View {
     @State public var selectedTabIndex: Int = 0
     public var delegate: MatchingCoordinatorDelegate
+    @EnvironmentObject var appSettings: AppSettings
     public init(selectedTabIndex: Int = 0, delegate: MatchingCoordinatorDelegate) {
         self.selectedTabIndex = selectedTabIndex
         self.delegate = delegate
@@ -33,8 +35,10 @@ public struct TutorialViews: View {
                 VStack{
                     Button {
                         if selectedTabIndex == 2 {
-                            UserDefaults.standard.set(true, forKey: "tutorialHasBeenWatched")
-                            delegate.pushMatching(.home)
+                            appSettings.tutorialHasBeenWatched = true
+                          //  delegate.pushMatching(.home)
+                            
+                            
                         } else {
                             selectedTabIndex += 1
                         }
@@ -53,9 +57,10 @@ public struct TutorialViews: View {
                     }
                     
                     Button {
-                        UserDefaults.standard.set(true, forKey: "tutorialHasBeenWatched")
-                        
-                        delegate.pushMatching(.home)
+                        appSettings.tutorialHasBeenWatched = true
+                       // delegate.pushMatching(.home)
+                   
+                       
                     } label: {
                         Text("건너뛰기")
                             .font(.system(size: 18, weight: .semibold))

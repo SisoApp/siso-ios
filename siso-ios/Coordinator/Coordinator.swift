@@ -42,11 +42,7 @@ public enum IntegrationPage {
     // Call
     case manner(opponentProfile: UserProfileServer)
     // connecting 케이스는 상대방 프로필 정보가 필요합니다.
-    case connecting(opponentProfile: UserProfileServer)
-    // calling 케이스는 InCallViewModel이 필요합니다.
-    case calling(viewModel: CallViewModel)
-    // incomingCall 케이스는 IncomingCallInfo가 필요합니다.
-    case incomingCall(callInfo: IncomingCallInfo)
+    case activeCall // 연관값이 필요 없습니다. ActiveCallView가 CallManager에서 정보를 가져옵니다.
     case reportFeedbackPopup
     // Chat
     case main
@@ -64,10 +60,7 @@ public class Coordinator: ObservableObject {
     @Published public var activeCallInfo: IncomingCallInfo?
     private let callManager = CallManager.shared
     private var cancellables = Set<AnyCancellable>()
-    // 튜토리얼 시청 여부
-    var tutorialHasBeenWatched: Bool {
-        UserDefaults.standard.bool(forKey: "tutorialHasBeenWatched")
-    }
+    
     // 내 프로파일
     var userProfile: UserProfile
     var matchingViewModel: MatchingViewModel
@@ -165,17 +158,21 @@ public class Coordinator: ObservableObject {
             // Call
         case .manner:
             CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
-        case .connecting(_):
-            
-            CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
+                .navigationBarBackButtonHidden(true)
+        case .connecting(let opponentProfile):
+            ConnectingView(opponentProfile: opponentProfile, delegate: self)
+                .navigationBarBackButtonHidden(true)
         case .calling(let viewModel):
             CallingView(inCallViewModel: viewModel,
                         delegate: self)
+            .navigationBarBackButtonHidden(true)
         case .incomingCall(let info):
             IncommingCallView(callInfo: info,
                               delegate: self)
+            .navigationBarBackButtonHidden(true)
         case .reportFeedbackPopup:
             ReportFeedBackView(delegate: self)
+                .navigationBarBackButtonHidden(true)
             
         case .main:
             ChatMainView()
