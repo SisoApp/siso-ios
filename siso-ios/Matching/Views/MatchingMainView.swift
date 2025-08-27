@@ -31,6 +31,9 @@ public struct MatchingMainView: View {
                 }
             }
             .ignoresSafeArea()
+            if viewModel.isProfileWriteDemanded {
+                ProfileDemandingView(matchingViewModel: viewModel, delegate: delegate)
+            }
         }
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }
@@ -45,9 +48,7 @@ public struct MatchingMainView: View {
         .onAppear(){
             viewModel.injectDelegateToCards()
         }
-        if viewModel.isProfileWriteDemanded {
-            ProfileDemandingView(matchingViewModel: viewModel)
-        }
+        
         
     }
 }

@@ -53,6 +53,9 @@ struct SisoIosApp: App {
                     .sheet(item: $coordinator.matchingSheet) { sheet in
                         coordinator.build(sheet: sheet)
                     }
+                    .sheet(item: $coordinator.callSheet) { sheet in
+                        coordinator.build(sheet: sheet)
+                    }
             }
             .id(coordinator.stackID)
         }

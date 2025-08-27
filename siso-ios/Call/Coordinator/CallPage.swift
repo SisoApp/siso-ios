@@ -8,7 +8,7 @@
 import Foundation
 import model
 public enum CallPage: Identifiable, Hashable, Equatable {
-    case manner
+    case manner(opponentProfile: UserProfileServer)
     case connecting(opponentProfile: UserProfileServer)
     case calling(viewModel: CallViewModel) // ViewModel은 Hashable/Equatable을 준수해야 합니다.
     case incomingCall(callInfo: IncomingCallInfo)

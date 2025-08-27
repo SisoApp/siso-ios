@@ -40,7 +40,7 @@ public enum IntegrationPage {
     case notification
     
     // Call
-    case manner
+    case manner(opponentProfile: UserProfileServer)
     // connecting 케이스는 상대방 프로필 정보가 필요합니다.
     case connecting(opponentProfile: UserProfileServer)
     // calling 케이스는 InCallViewModel이 필요합니다.
@@ -255,8 +255,10 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine("notification")
             
             // Call (연관값이 있는 경우)
-        case .manner:
+        case .manner(let opponentProfile):
             hasher.combine("manner")
+            hasher.combine(opponentProfile.id)
+            
         case .connecting(let opponentProfile):
             hasher.combine("connecting")
             hasher.combine(opponentProfile.id) // 연관값의 고유 식별자를 해싱

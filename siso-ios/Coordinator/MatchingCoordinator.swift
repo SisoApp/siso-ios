@@ -4,9 +4,9 @@ import auth
 import profile
 import matching
 import network
+import model
 
 extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
-   
     
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: MatchingPage) -> IntegrationPage {
@@ -23,20 +23,20 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
         path.append(toIntegrationPage(page))
     }
     
-    public func changeMatchingToCall() {
-        stackID = UUID()
-        path = NavigationPath()
-        Task { @MainActor in
-            try await Task.sleep(nanoseconds: 50_000_000)
-            withAnimation(.easeInOut) {
-                
-            }
-        }
-    }
     
     public func changeMatchingToAuth() {
         path.removeLast(path.count)
         stackID = UUID() // NavigationStack을 강제로 새로고침
+    }
+
+    public func changeMatchingToProfile() {
+        print("goto profile")
+        path.append(IntegrationPage.profile)
+    }
+    
+    public func changeMatchingToCall(opponentProfile: UserProfileServer) {
+        print("Call operation launched")
+        path.append(IntegrationPage.manner( opponentProfile: opponentProfile) )
     }
     
     @ViewBuilder
