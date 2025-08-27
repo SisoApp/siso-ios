@@ -18,7 +18,11 @@ struct InitialView: View {
                     ProgressView()
                 case .login:
                     // 로그인 상태이면 매칭 홈으로 바로 이동합니다.
+                if coordinator.tutorialHasBeenWatched {
                     coordinator.build(IntegrationPage.home)
+                } else {
+                    coordinator.build(.tutorial)
+                }
                 case .register:
                     coordinator.build(.accept)
                 case .logout:
