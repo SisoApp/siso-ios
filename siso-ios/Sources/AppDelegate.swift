@@ -1,7 +1,7 @@
 import UIKit
 import call
 import UserNotifications // 푸시 알림을 위한 프레임워크
-
+import FirebaseCore
 // SwiftUI 앱에 연결되기 위해 NSObject와 UIApplicationDelegate를 상속받습니다.
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -21,6 +21,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // 이 코드가 실행되면 iOS 시스템은 APNs에 이 기기를 등록하고, 성공 시 Device Token을 반환합니다.
         application.registerForRemoteNotifications()
         
+        FirebaseApp.configure()
         return true
     }
 

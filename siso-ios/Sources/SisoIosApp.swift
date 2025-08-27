@@ -14,6 +14,8 @@ struct SisoIosApp: App {
     @StateObject var authVM: SocialLoginView.LoginViewModel
     @StateObject var locationViewModel: LocationViewModel
     
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     init() {
         let userProfile: UserProfile = .init(
             nickname: "", age: "", sex: "", targetSex: "", profileImageUrl: [],

@@ -33,6 +33,7 @@ public struct TutorialViews: View {
                 VStack{
                     Button {
                         if selectedTabIndex == 2 {
+                            UserDefaults.standard.set(true, forKey: "tutorialHasBeenWatched")
                             delegate.pushMatching(.home)
                         } else {
                             selectedTabIndex += 1
@@ -52,6 +53,8 @@ public struct TutorialViews: View {
                     }
                     
                     Button {
+                        UserDefaults.standard.set(true, forKey: "tutorialHasBeenWatched")
+                        
                         delegate.pushMatching(.home)
                     } label: {
                         Text("건너뛰기")
