@@ -33,19 +33,47 @@ public struct ImageHelperSheet: View {
                 delegate?.dismissProfileSheet()
                 
                 Task {
-                    var images: [UIImage] = []
-                    
-                    for item in items {
-                        if let data: Data = try? await item.loadTransferable(type: Data.self),
-                           let image: UIImage = UIImage(data: data) {
-                            images.append(image)
+                    let images: [UIImage] = await withTaskGroup(of: UIImage?.self) { group in
+                        for item in items {
+                            group.addTask {
+                                if let data = try? await item.loadTransferable(type: Data.self),
+                                   let image = UIImage(data: data) {
+                                    return image
+                                }
+                                return nil
+                            }
                         }
+                        
+                        var results: [UIImage] = []
+                        
+                        for await image in group {
+                            if let image = image { results.append(image) }
+                        }
+                        
+                        return results
                     }
                     
                     await MainActor.run {
                         completion(images)
                     }
                 }
+                
+                
+                
+//                Task {
+//                    var images: [UIImage] = []
+//                    
+//                    for item in items {
+//                        if let data: Data = try? await item.loadTransferable(type: Data.self),
+//                           let image: UIImage = UIImage(data: data) {
+//                            images.append(image)
+//                        }
+//                    }
+//                    
+//                    await MainActor.run {
+//                        completion(images)
+//                    }
+//                }
             }
     }
     

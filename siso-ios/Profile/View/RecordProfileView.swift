@@ -35,7 +35,7 @@ public struct RecordProfileView: View {
         }
         .padding(.top, 60)
         .padding(.horizontal)
-        .navigationTitle("내 정보 수정")
+        .navigationTitle(mode == .signUp ? "내 정보 등록" : "내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
         .toolbar {

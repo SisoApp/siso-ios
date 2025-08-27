@@ -20,6 +20,7 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
         case .signUp: return .signUp
         case .interest: return .interest
         case .voice: return .voice
+        case .image: return .image 
         }
     }
 

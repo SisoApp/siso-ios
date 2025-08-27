@@ -14,15 +14,18 @@ public struct ImageProfileView: View {
     private var images: [UIImage] = [] // 이미지 등록을 건너뛸 때 초기 값으로 복구하기 위한 초기값 저장 변수
     
     weak var delegate: ProfileCoordinatorDelegate?
+    let mode: ProfileMode
     private let limit: Int = 5
     
     public init(delegate: ProfileCoordinatorDelegate?,
                 currentPage: Binding<SignUpProfilePage>,
-                userProfile: UserProfile) {
+                userProfile: UserProfile,
+                mode: ProfileMode) {
         self.delegate = delegate
         self._currentPage = currentPage
         self.userProfile = userProfile
         self.images = userProfile.profileImageUrl
+        self.mode = mode 
     }
     
     public var body: some View {
@@ -36,12 +39,20 @@ public struct ImageProfileView: View {
         }
         .padding(.top, 60)
         .padding(.horizontal)
+        .navigationTitle(mode == .signUp ? "내 정보 등록" : "내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        currentPage = .basic
+                        switch mode {
+                        case .signUp:
+                            currentPage = .basic
+                        case .edit:
+                            delegate?.pop()
+                        }
                     }
             }
         }
@@ -194,7 +205,12 @@ public struct ImageProfileView: View {
         let isActive: Bool = userProfile.profileImageUrl.count > 0
         
         return Button {
-            currentPage = .introduce
+            switch mode {
+            case .signUp:
+                currentPage = .introduce
+            case .edit:
+                delegate?.pop()
+            }
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: 54)
@@ -209,22 +225,28 @@ public struct ImageProfileView: View {
     }
     
     private func skipButton() -> some View {
-        return Button {
-            userProfile.profileImageUrl = images // 정보 갱신 x, 초기 값으로 복구
-            currentPage = .introduce
-        } label: {
-            Text("건너뛰기")
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        let isActive: Bool = mode == .signUp
+        
+        return Group {
+            if isActive {
+                Button {
+                    userProfile.profileImageUrl = images // 정보 갱신 x, 초기 값으로 복구
+                    currentPage = .introduce
+                } label: {
+                    Text("건너뛰기")
+                        .font(.system(size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(height: 54)
+            }
         }
-        .frame(height: 54)
     }
 }
 
 #Preview {
     NavigationStack {
-        ImageProfileView(delegate: nil, currentPage: .constant(.image) , userProfile: .empty)
+        ImageProfileView(delegate: nil, currentPage: .constant(.image) , userProfile: .empty, mode: .signUp)
     }
 }

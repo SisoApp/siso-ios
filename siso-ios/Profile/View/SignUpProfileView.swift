@@ -73,7 +73,7 @@ public struct SignUpProfileView: View {
             case .basic:
                 BasicProfileView(currentPage: $currentPage, userProfile: userProfile)
             case .image:
-                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
+                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile, mode: .signUp)
             case .introduce:
                 IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
             case .voice:

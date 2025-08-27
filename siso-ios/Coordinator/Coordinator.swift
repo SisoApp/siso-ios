@@ -33,6 +33,7 @@ public enum IntegrationPage {
     case signUp
     case interest
     case voice
+    case image 
     
     // MyPage
     case my
@@ -153,6 +154,9 @@ public class Coordinator: ObservableObject {
             InterestProfileView(delegate: self, userProfile: userProfile)
         case .voice:
             RecordProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit)
+        case .image:
+            ImageProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit)
+        
             
             // MyPage
         case .my:
@@ -245,6 +249,8 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine("interest")
         case .voice:
             hasher.combine("voice")
+        case .image:
+            hasher.combine("image")
             
             // MyPage
         case .my:

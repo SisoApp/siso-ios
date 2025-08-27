@@ -53,7 +53,7 @@ public struct ProfileView: View {
         VStack {
             ScrollView {
                 VStack {
-                    profileImage()
+                    profileImageView()
                     nicknameView()
                     ageView()
                     introduceView()
@@ -90,14 +90,29 @@ public struct ProfileView: View {
         }
     }
     
-    private func profileImage() -> some View {
-        return Image("testimg")
-            .resizable()
-            .scaledToFill()
-            .frame(width: 120, height: 120)
-            .clipped()
-            .clipShape(.rect(cornerRadius: 60))
-            .padding(.top, 10)
+    private func profileImageView() -> some View {
+        return ZStack(alignment: .bottomTrailing) {
+            Image("testimg")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 120, height: 120)
+                .clipped()
+                .clipShape(.rect(cornerRadius: 60))
+                .padding(.top, 10)
+                .onTapGesture {
+                    delegate?.pushProfile(.image)
+                }
+            
+            Image("pencil")
+                .resizable()
+                .scaledToFit()
+                .padding(4)
+                .frame(width: 28, height: 28)
+                .background(
+                    Circle()
+                        .fill(Color.Siso.Gray._5)
+                )
+        }
     }
     
     private func sectionHeader(title: String, point: String) -> some View {
