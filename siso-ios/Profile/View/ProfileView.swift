@@ -575,7 +575,7 @@ public struct ProfileView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.black)
                 .background(Color.Siso.Primary.main)
-                .clipShape(.rect(cornerRadius: 27))
+                .clipShape(.rect(cornerRadius: 54 / 2))
         }
         .frame(height: 54)
         .padding(.horizontal)
