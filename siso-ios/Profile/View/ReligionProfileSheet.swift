@@ -70,6 +70,7 @@ public struct ReligionProfileSheet: View {
                 .focused($isFocus)
                 .font(.system(size: 18))
                 .foregroundStyle(Color.Siso.Gray._90)
+                .submitLabel(.done)
                 .onSubmit {
                     isFocus = false
                 }
@@ -85,6 +86,7 @@ public struct ReligionProfileSheet: View {
         .background(
             RoundedRectangle(cornerRadius: 54 / 2)
                 .fill(Color.Siso.Gray._20)
+                .stroke(isFocus ? Color.Siso.Primary._60 : .clear)
         )
         .padding(.top, 30)
     }
@@ -106,7 +108,7 @@ public struct ReligionProfileSheet: View {
         .frame(height: 54)
         .background(
             RoundedRectangle(cornerRadius: 54 / 2)
-                .fill(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._20)
+                .fill(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
         )
     }
     
