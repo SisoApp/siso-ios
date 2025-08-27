@@ -8,6 +8,7 @@ import network
 import mypage
 import model
 import call
+import chat
 
 public enum IntegrationPage {
     
@@ -47,6 +48,9 @@ public enum IntegrationPage {
     // incomingCall 케이스는 IncomingCallInfo가 필요합니다.
     case incomingCall(callInfo: IncomingCallInfo)
     case reportFeedbackPopup
+    // Chat
+    case main
+    case detail
 }
 
 @MainActor
@@ -107,14 +111,14 @@ public class Coordinator: ObservableObject {
                     .tabItem {
                         Label("둘러보기", systemImage: "house")
                     }
-                
-                Text("대화 뷰")
+
+                ChatMainView()
                     .navigationBarBackButtonHidden(true)
                     .tabItem {
                         Label("대화", systemImage: "ellipsis.message")
                     }
-                
-                Text("내 정보")
+
+                MyPageView(delegate: self)
                     .navigationBarBackButtonHidden(true)
                     .tabItem {
                         Label("내 정보", systemImage: "person")
@@ -173,6 +177,10 @@ public class Coordinator: ObservableObject {
         case .reportFeedbackPopup:
             ReportFeedBackView(delegate: self)
             
+        case .main:
+            ChatMainView()
+        case .detail:
+            ChatMainView.ChatDetailView(chat: ChatMainView.RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
         }
     }
     
@@ -260,6 +268,10 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine(callInfo.id) // callInfo의 고유 식별자를 해싱
         case .reportFeedbackPopup:
             hasher.combine("reportFeedbackPopup")
+        case .main:
+            hasher.combine("main")
+        case .detail:
+            hasher.combine("detail")
         }
     }
 }
