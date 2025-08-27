@@ -53,6 +53,8 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
             ImagePicker(userProfile: userProfile)
         case .location:
             LocationProfileSheet(delegate: self, viewModel: locationViewModel)
+        case .religion:
+            ReligionProfileSheet(delegate: self, userProfile: userProfile)
         }
     }
 }

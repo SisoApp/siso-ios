@@ -99,12 +99,6 @@ public struct BasicProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._50)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            ZStack {
-                RoundedRectangle(cornerRadius: 27)
-                    .fill(Color.Siso.Gray._20)
-                    .stroke(isFocused ? Color.Siso.Primary._60 : .clear)
-                    .frame(height: 54)
-                
                 HStack {
                     TextField(placeholder, text: binding)
                         .frame(height: 48)
@@ -116,7 +110,12 @@ public struct BasicProfileView: View {
                         .frame(width: 24)
                         .padding(.trailing, 16)
                 }
-            }
+                .background(
+                    RoundedRectangle(cornerRadius: 54 / 2)
+                        .fill(Color.Siso.Gray._20)
+                        .stroke(isFocused ? Color.Siso.Primary._60 : .clear)
+                        .frame(height: 54)
+                )
         }
         .padding(.top, 24)
     }

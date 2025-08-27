@@ -16,6 +16,7 @@ public enum ProfileSheet: Identifiable, Hashable {
     case imageHelper(([UIImage]) -> Void)
     case cameraSheet
     case location
+    case religion
     
     public var id: String {
         switch self {
@@ -25,6 +26,8 @@ public enum ProfileSheet: Identifiable, Hashable {
             return "cameraSheet"
         case .location:
             return "location"
+        case .religion:
+            return "religion"
         }
     }
     

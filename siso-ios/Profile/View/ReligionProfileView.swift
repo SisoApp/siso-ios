@@ -66,7 +66,7 @@ public struct ReligionProfileView: View {
         return VStack {
             HStack(spacing: 12) {
                 ForEach(first) { religion in
-                    religionButton(religion.rawValue)
+                    religionButton(religion)
                 }
                 Spacer()
             }
@@ -75,20 +75,25 @@ public struct ReligionProfileView: View {
             
             HStack(spacing: 12) {
                 ForEach(second) { religion in
-                    religionButton(religion.rawValue)
+                    religionButton(religion)
                 }
                 Spacer()
             }
         }
     }
     
-    private func religionButton(_ title: String) -> some View {
-        let isContain: Bool = religion == title
+    private func religionButton(_ item: Religion) -> some View {
+        let isContain: Bool = religion == item.rawValue
         
         return Button {
-            religion = isContain ? "" : title
+            switch item {
+            case .other:
+                delegate?.presentProfile(sheet: .religion)
+            default:
+                religion = isContain ? "" : item.rawValue
+            }
         } label: {
-            Text(title)
+            Text(item.rawValue)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._90)
