@@ -16,13 +16,20 @@ protocol LoginProtocol {
     func appleLogout() async
 }
 
+public enum UserState {
+    case undefined
+    case login
+    case logout
+    case register
+}
+
 public extension SocialLoginView {
     
     @MainActor
     class LoginViewModel: ObservableObject, LoginProtocol {
         
         @Published public var token: String? // accessToken
-        @Published public var userState: String = ""
+        @Published public var userState: UserState = .undefined
         @Published public var showAlert: Bool = false
         @Published public var alertMessage = ""
         
@@ -36,7 +43,7 @@ public extension SocialLoginView {
             switch result {
                 case .success(let refreshResult):
                     await MainActor.run {
-                        self.userState = refreshResult.registrationStatus
+                        self.userState = convertUserState(refreshResult.registrationStatus)
                     }
                 case .failure(let failure):
                     if failure.responseCode == 401 {
@@ -62,9 +69,7 @@ public extension SocialLoginView {
             if let token = self.token {
                 do {
                     try await networkManager.login(at: token) { [weak self] state, err in
-                        self?.userState = state
                         completion(state)
-                        
                         guard let err = err else { return }
                         
                         if let statusCode = err.responseCode {
@@ -82,7 +87,7 @@ public extension SocialLoginView {
                         }
                     }
                 } catch {
-                    print("카카오 로그인 -> 서버로 통신 login 함수 throws err : \(error)")
+                    debugPrint("카카오 로그인 -> 서버로 통신 login 함수 throws err : \(error)")
                 }
             }
         }
@@ -91,7 +96,7 @@ public extension SocialLoginView {
             let _ = await logoutKaKao()
             
             await networkManager.logout()
-            self.userState = ""
+            self.userState = convertUserState("")
             self.token = nil
         }
         
@@ -101,6 +106,19 @@ public extension SocialLoginView {
         
         func appleLogout() async {
             
+        }
+        
+        func convertUserState(_ state: String) -> UserState {
+            switch state {
+                case "":
+                    return .logout
+                case "LOGIN":
+                    return .login
+                case "REGISTER":
+                    return .register
+                default:
+                    return .undefined
+            }
         }
     }
 }
@@ -114,10 +132,10 @@ extension SocialLoginView.LoginViewModel {
         await withCheckedContinuation { continuation in
             UserApi.shared.loginWithKakaoTalk { (oauthToken, error) in
                 if let error = error {
-                    print("인앱 카카오 로그인 err: \(error)")
+                    debugPrint("인앱 카카오 로그인 err: \(error)")
                     continuation.resume(returning: nil)
                 } else {
-                    print("loginWithKakaoTalk() success.")
+                    debugPrint("loginWithKakaoTalk() success.")
                     // 성공 시 동작 구현
                     if let token = oauthToken {
                         continuation.resume(returning: token.accessToken)
@@ -132,10 +150,10 @@ extension SocialLoginView.LoginViewModel {
         await withCheckedContinuation { continuation in
             UserApi.shared.loginWithKakaoAccount { (oauthToken, error) in
                 if let error = error {
-                    print("웹뷰 카카오 로그인 err: \(error)")
+                    debugPrint("웹뷰 카카오 로그인 err: \(error)")
                     continuation.resume(returning: nil)
                 } else {
-                    print("loginWithKakaoAccount() success.")
+                    debugPrint("loginWithKakaoAccount() success.")
                     // 성공 시 동작 구현
                     if let token = oauthToken {
                         continuation.resume(returning: token.accessToken)
@@ -150,10 +168,10 @@ extension SocialLoginView.LoginViewModel {
         await withCheckedContinuation { continuation in
             UserApi.shared.logout { error in
                 if let error = error {
-                    print("kakao logout error: \(error)")
+                    debugPrint("kakao logout error: \(error)")
                     continuation.resume(returning: false) // 에러 시 false 반환
                 } else {
-                    print("kakao logout() success.")
+                    debugPrint("kakao logout() success.")
                     continuation.resume(returning: true)
                 }
             }
