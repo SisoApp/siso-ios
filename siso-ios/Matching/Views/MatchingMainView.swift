@@ -42,7 +42,14 @@ public struct MatchingMainView: View {
                 print("👀 Now Watching: \(newWatchingCard.nickname)")
             }
         }
-//        아 
+        .onAppear(){
+            viewModel.injectDelegateToCards()
+//            if !viewModel.isProfileWriteDemanded {
+//                print("show demend")
+//                delegate?.pushMatching(.profileWriteDemand)
+//            }
+            
+        }
     }
 }
 

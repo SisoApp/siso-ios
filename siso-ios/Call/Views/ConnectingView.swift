@@ -12,11 +12,11 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
 public struct ConnectingView: View {
-    let opponentProfile: UserProfileServer
+   @ObservedObject var callViewModel: CallViewModel
    
-    public init(opponentProfile: UserProfileServer) {
-            self.opponentProfile = opponentProfile
-        }
+    public init(callViewModel: CallViewModel) {
+        self.callViewModel = callViewModel
+    }
     
     // MARK: - Body
     
@@ -25,7 +25,7 @@ public struct ConnectingView: View {
             Spacer()
             
             // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
-            Text("\(opponentProfile.nickname) 님과\n연결중이에요")
+            Text("\(callViewModel.opponentProfile.nickname) 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
@@ -134,8 +134,8 @@ public struct ConnectingView: View {
 
 
 // MARK: - Preview
-
-#Preview {
-    // 4. 완성된 ViewModel을 View에 주입하여 프리뷰를 실행합니다.
-    ConnectingView(opponentProfile: UserProfileServer.sampleMessi)
-}
+//
+//#Preview {
+//    // 4. 완성된 ViewModel을 View에 주입하여 프리뷰를 실행합니다.
+//    ConnectingView(opponentProfile: UserProfileServer.sampleMessi)
+//}

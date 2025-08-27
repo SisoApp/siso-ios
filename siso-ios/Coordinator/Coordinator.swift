@@ -159,9 +159,10 @@ public class Coordinator: ObservableObject {
             
             // Call
         case .manner:
-            CallMannerView(delegate: self)
-        case .connecting(let opponentProfile):
-            ConnectingView(opponentProfile: opponentProfile)
+            CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
+        case .connecting(_):
+            
+            CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
         case .calling(let viewModel):
             CallingView(inCallViewModel: viewModel,
                         delegate: self)

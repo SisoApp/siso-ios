@@ -7,13 +7,21 @@
 
 import SwiftUI
 import model
+import chat
+import matching
 
 public struct AfterCallAssessmentView: View {
     var opponentProfile: UserProfileServer
     
-    public init(opponentProfile: UserProfileServer){
+    var matchingDelegate: MatchingCoordinatorDelegate?
+    // ChatCoordinator
+    
+    
+    public init(opponentProfile: UserProfileServer, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
+        self.matchingDelegate = matchingDelegate
     }
+    
     public var body: some View {
         
         VStack(spacing: 30) {
@@ -43,6 +51,7 @@ public struct AfterCallAssessmentView: View {
                 HStack {
                     Button {
                         print("deny")
+                        matchingDelegate?.pushMatching(.home)
                     } label: {
                         denyButton
                     }
@@ -59,6 +68,7 @@ public struct AfterCallAssessmentView: View {
             
             Button {
                 print("sue")
+                // chat으로 화면전환
             } label: {
                 Text("신고하기")
                     .font(.system(size: 18))
