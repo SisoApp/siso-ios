@@ -29,7 +29,7 @@ public class UserProfile: ObservableObject {
     @Published var age: String // 나이
     @Published var sex: String // 성별
     @Published var targetSex: String // 대상 성별
-    @Published var profileImageUrl: [UIImage] // 프로필 사진
+    @Published var profileImages: [UIImage] // 프로필 사진
     @Published var interests: [String] // 관심사
     @Published var introduce: String // 자기소개
     @Published var voice: Bool // 목소리
@@ -48,7 +48,7 @@ public class UserProfile: ObservableObject {
         self.age = age
         self.sex = sex
         self.targetSex = targetSex
-        self.profileImageUrl = profileImageUrl
+        self.profileImages = profileImageUrl
         self.interests = interests
         self.introduce = introduce
         self.voice = false

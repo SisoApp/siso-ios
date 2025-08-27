@@ -110,7 +110,8 @@ public struct ProfileView: View {
                 .frame(width: 28, height: 28)
                 .background(
                     Circle()
-                        .fill(Color.Siso.Gray._5)
+                        .fill(Color.Siso.Gray._20)
+                        .stroke(Color.Siso.Gray._5, lineWidth: 3)
                 )
         }
     }

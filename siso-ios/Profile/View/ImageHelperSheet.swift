@@ -15,7 +15,7 @@ public struct ImageHelperSheet: View {
     public weak var delegate: ProfileCoordinatorDelegate?
     public var completion: ([UIImage]) -> Void
     private let limit: Int = 5
-    private var available: Int { return limit - userProfile.profileImageUrl.count }
+    private var available: Int { return limit - userProfile.profileImages.count }
     
     public init(delegate: ProfileCoordinatorDelegate?,
                 userProfile: UserProfile,
@@ -33,24 +33,30 @@ public struct ImageHelperSheet: View {
                 delegate?.dismissProfileSheet()
                 
                 Task {
-                    let images: [UIImage] = await withTaskGroup(of: UIImage?.self) { group in
-                        for item in items {
+                    let images: [UIImage] = await withTaskGroup(of: (Int, UIImage?).self) { group in
+                        for (index, item) in items.enumerated() {
                             group.addTask {
                                 if let data = try? await item.loadTransferable(type: Data.self),
                                    let image = UIImage(data: data) {
-                                    return image
+                                    
+                                    if let compressedData = image.jpegData(compressionQuality: 0.3),
+                                       let compressedImage: UIImage = .init(data: compressedData) {
+                                        
+                                        return (index, compressedImage)
+                                    }
                                 }
-                                return nil
+                                
+                                return (index, nil)
                             }
                         }
                         
-                        var results: [UIImage] = []
+                        var results: [UIImage?] = .init(repeating: nil, count: items.count)
                         
-                        for await image in group {
-                            if let image = image { results.append(image) }
+                        for await (index, image) in group {
+                            results[index] = image
                         }
                         
-                        return results
+                        return results.compactMap { $0 }
                     }
                     
                     await MainActor.run {
@@ -140,6 +146,18 @@ public struct ImageHelperSheet: View {
     }
     
     private func galleryButton() -> some View {
+//        return PhotosPicker(
+//            selection: $selectedImages,
+//            maxSelectionCount: available
+//        ) {
+//            Text("앨범에서 가져오기")
+//                .frame(maxWidth: .infinity, maxHeight: 54)
+//                .font(.system(size: 18))
+//                .fontWeight(.semibold)
+//                .foregroundStyle(.black)
+//                .background(Color.Siso.Primary.main)
+//                .clipShape(.rect(cornerRadius: 27))
+//            }
         return PhotosPicker(
             selection: $selectedImages,
             maxSelectionCount: available

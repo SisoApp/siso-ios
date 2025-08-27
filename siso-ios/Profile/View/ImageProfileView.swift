@@ -24,7 +24,7 @@ public struct ImageProfileView: View {
         self.delegate = delegate
         self._currentPage = currentPage
         self.userProfile = userProfile
-        self.images = userProfile.profileImageUrl
+        self.images = userProfile.profileImages
         self.mode = mode 
     }
     
@@ -75,12 +75,12 @@ public struct ImageProfileView: View {
     
     private func mainImageView() -> some View {
         let index: Int = 0
-        let isExist: Bool = userProfile.profileImageUrl.count > index
+        let isExist: Bool = userProfile.profileImages.count > index
         
         return ZStack(alignment: .topTrailing) {
             Group {
                 if isExist {
-                    Image(uiImage: userProfile.profileImageUrl[index])
+                    Image(uiImage: userProfile.profileImages[index])
                         .resizable()
                         .scaledToFill()
                         .frame(height: 206)
@@ -88,7 +88,7 @@ public struct ImageProfileView: View {
                         .clipped()
                         .clipShape(.rect(cornerRadius: 12))
                     Button {
-                        userProfile.profileImageUrl.remove(at: index)
+                        userProfile.profileImages.remove(at: index)
                     } label: {
                         Image(systemName: "xmark")
                             .fontWeight(.bold)
@@ -126,12 +126,12 @@ public struct ImageProfileView: View {
         return HStack(spacing: 8) {
             ForEach(1...4, id: \.self) { index in
                 let isExist: Bool =
-                userProfile.profileImageUrl.count > index
+                userProfile.profileImages.count > index
                 
                 ZStack(alignment: .topTrailing) {
                     Group {
                         if isExist {
-                            Image(uiImage: userProfile.profileImageUrl[index])
+                            Image(uiImage: userProfile.profileImages[index])
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: size, height: size)
@@ -140,7 +140,7 @@ public struct ImageProfileView: View {
                                 .clipShape(.rect(cornerRadius: 12))
                             
                             Button {
-                                userProfile.profileImageUrl.remove(at: index)
+                                userProfile.profileImages.remove(at: index)
                             } label: {
                                 Image(systemName: "xmark")
                                     .fontWeight(.bold)
@@ -170,15 +170,15 @@ public struct ImageProfileView: View {
     }
     
     private func addButton() -> some View {
-        let isActive: Bool = userProfile.profileImageUrl.count >= 0 && userProfile.profileImageUrl.count < 5
+        let isActive: Bool = userProfile.profileImages.count >= 0 && userProfile.profileImages.count < 5
         
         return Button {
             delegate?.presentProfile(sheet: .imageHelper({ images in
                 delegate?.dismissProfileSheet()
-                userProfile.profileImageUrl.append(contentsOf: images)
+                userProfile.profileImages.append(contentsOf: images)
             }))
         } label: {
-            Text("사진 추가하기 (\(userProfile.profileImageUrl.count)/\(limit))")
+            Text("사진 추가하기 (\(userProfile.profileImages.count)/\(limit))")
                 .frame(maxWidth: .infinity, maxHeight: 54)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
@@ -193,7 +193,7 @@ public struct ImageProfileView: View {
     
     private func bottomButton() -> some View {
         return Group {
-            if userProfile.profileImageUrl.count > 0 {
+            if userProfile.profileImages.count > 0 {
                 nextButton()
             } else {
                 skipButton()
@@ -202,7 +202,7 @@ public struct ImageProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = userProfile.profileImageUrl.count > 0
+        let isActive: Bool = userProfile.profileImages.count > 0
         
         return Button {
             switch mode {
@@ -230,7 +230,7 @@ public struct ImageProfileView: View {
         return Group {
             if isActive {
                 Button {
-                    userProfile.profileImageUrl = images // 정보 갱신 x, 초기 값으로 복구
+                    userProfile.profileImages = images // 정보 갱신 x, 초기 값으로 복구
                     currentPage = .introduce
                 } label: {
                     Text("건너뛰기")
