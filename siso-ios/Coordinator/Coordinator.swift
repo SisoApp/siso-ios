@@ -177,6 +177,10 @@ public class Coordinator: ObservableObject {
         case .reportFeedbackPopup:
             ReportFeedBackView(delegate: self)
             
+        case .main:
+            ChatMainView()
+        case .detail:
+            ChatMainView.ChatDetailView(chat: ChatMainView.RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
         }
     }
     
@@ -265,9 +269,9 @@ extension IntegrationPage: Equatable, Hashable {
         case .reportFeedbackPopup:
             hasher.combine("reportFeedbackPopup")
         case .main:
-            ChatMainView()
+            hasher.combine("main")
         case .detail:
-            ChatMainView.ChatDetailView(chat: ChatMainView.RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
+            hasher.combine("detail")
         }
     }
 }
