@@ -26,13 +26,19 @@ enum ReportReasonType: String, CaseIterable, Identifiable {
         return self.rawValue
     }
 }
-struct ReportPopupView: View {
+
+public struct ReportPopupView: View {
     @State private var otherSueReason: String = ""
     @State private var selectedType: ReportReasonType? = nil
     
+    
     var opponentProfile: UserProfileServer
     
-    var body: some View {
+    public init(opponentProfile: UserProfileServer) {
+        self.opponentProfile = opponentProfile
+    }
+    
+   public var body: some View {
         headerView
         profileImageView(profile: opponentProfile)
         

@@ -7,13 +7,21 @@
 
 import SwiftUI
 import model
+import chat
+import matching
 
 public struct AfterCallAssessmentView: View {
     var opponentProfile: UserProfileServer
     
-    public init(opponentProfile: UserProfileServer){
+    var matchingDelegate: MatchingCoordinatorDelegate?
+    // ChatCoordinator
+    
+    
+    public init(opponentProfile: UserProfileServer, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
+        self.matchingDelegate = matchingDelegate
     }
+    
     public var body: some View {
         
         VStack(spacing: 30) {
@@ -43,6 +51,7 @@ public struct AfterCallAssessmentView: View {
                 HStack {
                     Button {
                         print("deny")
+                        matchingDelegate?.pushMatching(.home)
                     } label: {
                         denyButton
                     }
@@ -59,6 +68,7 @@ public struct AfterCallAssessmentView: View {
             
             Button {
                 print("sue")
+                // chat으로 화면전환
             } label: {
                 Text("신고하기")
                     .font(.system(size: 18))
@@ -79,10 +89,14 @@ public struct AfterCallAssessmentView: View {
                     RoundedRectangle(cornerRadius: 12) // 배경과 같은 값으로 설정
                         .stroke(Color.Siso.Gray._30, lineWidth: 1)
                 )
+            VStack{
+                Image("denylove")
+                    .resizable()
+                    .frame(width: 60, height: 60)
+                Text("다른 인연 찾기")
+                    .foregroundStyle(.black)
+            }
             
-            Image("denylove")
-                .resizable()
-                .frame(width: 60, height: 60)
         }
         
     }
@@ -97,9 +111,14 @@ public struct AfterCallAssessmentView: View {
                     RoundedRectangle(cornerRadius: 12) // 배경과 같은 값으로 설정
                         .stroke(Color.Siso.Gray._30, lineWidth: 1)
                 )
-            Image("sendlove")
-                .resizable()
-                .frame(width: 60, height: 60)
+            VStack {
+                Image("sendlove")
+                    .resizable()
+                    .frame(width: 60, height: 60)
+                Text("인연 이어가기")
+                    .foregroundStyle(.black)
+            }
+           
         }
         
     }
@@ -109,20 +128,17 @@ public struct AfterCallAssessmentView: View {
             AsyncImage(url: URL(string: opponentProfile.profileImageUrls.first ?? "testimg")){ image in
                 
                 image
-                    .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
-                    .scaledToFill() // 2. 프레임을 꽉 채우도록 비율 유지 (프로필 사진에 필수!)
-                    .frame(width: 140, height: 140) // 3. 프레임 크기 지정
-                    .clipShape(Circle()) // 4. 원형으로 자르기
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 140, height: 140)
+                    .clipShape(Circle()) 
                 
             } placeholder: {
                 Circle()
                     .frame(width: 140, height: 140) // 3. 프레임 크기 지정
             }
         }
-        
-        
     }
-    
 }
 
 

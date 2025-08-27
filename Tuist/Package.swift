@@ -25,6 +25,7 @@ let package = Package(
             url: "https://github.com/kakao/kakao-ios-sdk.git",
             exact: "2.24.6"
         ),
-//        .package(url: "https://github.com/AgoraIO/AgoraRtcEngine_iOS.git", from: "4.5.2") 
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.1.0")
+//        .package(url: "https://github.com/AgoraIO/AgoraRtcEngine_iOS.git", from: "4.5.2")
     ]
 )

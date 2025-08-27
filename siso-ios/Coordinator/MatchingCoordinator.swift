@@ -13,13 +13,13 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
         switch page {
         case .tutorial: return .home
         case .home: return .tutorial
-        case .profileWriteDemand: return .profileWriteDemand
         }
     }
     
     // MARK: MatchingCoordinator Delegate Method
    
     public func pushMatching(_ page: MatchingPage) {
+        print("Push Matching \(page)")
         path.append(toIntegrationPage(page))
     }
     

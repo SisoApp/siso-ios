@@ -9,24 +9,18 @@ import SwiftUI
 import designSystem
 
 public struct ProfileDemandingView: View {
-    
     @ObservedObject var matchingViewModel: MatchingViewModel
-    public var delegate: MatchingCoordinatorDelegate
-    
-    public init(delegate: MatchingCoordinatorDelegate, matchingViewModel: MatchingViewModel) {
-        self.delegate = delegate
-        self.matchingViewModel = matchingViewModel
-    }
+   
     
     public var body: some View {
         ZStack {
+            Color.black
+                .opacity(0.6)
             VStack {
                 HStack {
                     Spacer()
                     Button {
-                        delegate.pop()
-                        
-                        
+                        matchingViewModel.isProfileWriteDemanded = false
                     } label: {
                         Image(systemName: "xmark")
                             .resizable()
@@ -70,7 +64,7 @@ public struct ProfileDemandingView: View {
                     }
                     
                     Button {
-                        delegate.pop()
+                        matchingViewModel.isProfileWriteDemanded = true
                     } label: {
                         Text("닫기")
                             .font(.system(size: 18, weight: .semibold))
@@ -80,11 +74,11 @@ public struct ProfileDemandingView: View {
                     }
                 }
             }
+            .frame(width: 283, height: 474)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .foregroundStyle(.white)
+            )
         }
-        .background(
-            Color.black
-                .opacity(0.6)
-        )
-        
     }
 }

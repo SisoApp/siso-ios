@@ -12,15 +12,15 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 public struct CallingView: View {
     
-    @StateObject var inCallViewModel: InCallViewModel
+    @StateObject var callViewModel: CallViewModel
     
     // Coordinator와 통신이 필요하다면 delegate를 유지하고 init에서 주입받습니다.
     var delegate: CallCoordinatorDelegate?
     
-    public init(inCallViewModel: InCallViewModel, delegate: CallCoordinatorDelegate? = nil) {
+    public init(inCallViewModel: CallViewModel, delegate: CallCoordinatorDelegate? = nil) {
         // StateObject는 뷰가 소유권을 가질 때 사용하므로 init에서 wrappedValue를 설정합니다.
         // 만약 상위 뷰에서 @StateObject로 생성된 ViewModel을 받는다면, 이 뷰는 @ObservedObject를 사용해야 합니다.
-        self._inCallViewModel = .init(wrappedValue: inCallViewModel)
+        self._callViewModel = .init(wrappedValue: inCallViewModel)
         self.delegate = delegate
     }
     
@@ -30,14 +30,14 @@ public struct CallingView: View {
         VStack {
             
             HStack {
-                profileImageView(profile: inCallViewModel.opponentProfile)
+                profileImageView(profile: callViewModel.opponentProfile)
                 VStack(alignment: .leading, spacing: 0){
-                    Text("\(inCallViewModel.opponentProfile.nickname)")
+                    Text("\(callViewModel.opponentProfile.nickname)")
                         .font(.system(size: 24, weight: .bold))
                     HStack {
-                        Text("\(inCallViewModel.opponentProfile.age)세")
+                        Text("\(callViewModel.opponentProfile.age)세")
                             .font(.system(size: 22, weight: .medium))
-                        locationInfoSection(profile: inCallViewModel.opponentProfile)
+                        locationInfoSection(profile: callViewModel.opponentProfile)
                     }
                     
                 }
@@ -48,24 +48,23 @@ public struct CallingView: View {
             VStack {
                 Text("남은시간")
                 
-                Text(inCallViewModel.remainTime)
+                Text(callViewModel.remainTime)
                     .font(.system(size: 32, weight: .bold))
                 
                 Button {
-                    // 통화 시간 연장 (결제 필요함)
-                    print("tap")
+                    // 통화 시간 연장 (결제 필요함, 아직 결제 기능 없으므로 무료 연장)
+                    callViewModel.remainingSeconds += 60.0
                 } label: {
                     
                     Text("통화 연장하기")
                         .font(.system(size: 18, weight: .semibold))
-                    
                         .padding(.vertical)
                         .padding(.horizontal, 30)
                         .foregroundStyle(.black)
                         .background
                     {
                         // 삼항 연산자를 사용한 버전
-                        inCallViewModel.remainingSeconds < 60.0 ?
+                        callViewModel.remainingSeconds < 60.0 ?
                         
                         // 참일 때 (60초 미만): 배경 채우기
                         AnyView(RoundedRectangle(cornerRadius: 30)
@@ -86,7 +85,7 @@ public struct CallingView: View {
             }
             
             Spacer()
-            commonInterestView(profile: inCallViewModel.opponentProfile)
+            commonInterestView(profile: callViewModel.opponentProfile)
             
             actionButtonsSection()
         }
@@ -205,30 +204,31 @@ public struct CallingView: View {
             
             // 음소거 버튼
             Button {
-                inCallViewModel.isMuteMode.toggle()
+                callViewModel.isMuteMode.toggle()
+                
             } label: {
                 // ViewModel의 상태에 따라 아이콘과 배경색이 바뀝니다.
                 actionButtonContent(
-                    imageName: inCallViewModel.isMuteMode ? "Volume-off 1" : "Volume-off", // 에셋 이름 확인 필요
-                    text: inCallViewModel.isMuteMode ? "음소거" : "음소거",
-                    condition: inCallViewModel.isMuteMode
+                    imageName: callViewModel.isMuteMode ? "Volume-off 1" : "Volume-off", // 에셋 이름 확인 필요
+                    text: callViewModel.isMuteMode ? "음소거" : "음소거",
+                    condition: callViewModel.isMuteMode
                 )
                 .frame(width: 104, height: 96)
-                .background(inCallViewModel.isMuteMode ? Color.Siso.Gray._50 : Color.white)
+                .background(callViewModel.isMuteMode ? Color.Siso.Gray._50 : Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
             }
             
             // 스피커 버튼
             Button {
-                inCallViewModel.isSpeakerMode.toggle()
+                callViewModel.isSpeakerMode.toggle()
             } label: {
                 actionButtonContent(
-                    imageName: inCallViewModel.isSpeakerMode ? "Volume-up1" :"Volume-up",
+                    imageName: callViewModel.isSpeakerMode ? "Volume-up1" :"Volume-up",
                     text: "스피커",
-                    condition: inCallViewModel.isSpeakerMode
+                    condition: callViewModel.isSpeakerMode
                 )
                 .frame(width: 104, height: 96)
-                .background(inCallViewModel.isSpeakerMode ? Color.Siso.Blue._50 : Color.white)
+                .background(callViewModel.isSpeakerMode ? Color.Siso.Blue._50 : Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
@@ -253,5 +253,5 @@ public struct CallingView: View {
 
 // MARK: - Preview
 #Preview {
-    CallingView(inCallViewModel: InCallViewModel(opponentProfile: UserProfileServer.sampleMessi))
+    CallingView(inCallViewModel: CallViewModel(opponentProfile: UserProfileServer.sampleMessi))
 }

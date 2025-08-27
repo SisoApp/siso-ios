@@ -7,8 +7,13 @@
 
 import SwiftUI
 
-struct SueFeedBackView: View {
-    var body: some View {
+public struct ReportFeedBackView: View {
+    var delegate: CallCoordinatorDelegate
+    
+    public init(delegate: CallCoordinatorDelegate) {
+        self.delegate = delegate
+    }
+  public  var body: some View {
         VStack{
             Text("신고 완료")
                 .font(.system(size: 24, weight: .bold))
@@ -20,9 +25,10 @@ struct SueFeedBackView: View {
                 .padding()
             
             Button {
-                print("sue")
+                print("close")
+                delegate.pop()
             } label: {
-                Text("신고하기")
+                Text("닫기")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.black)
                     .padding()
@@ -37,8 +43,4 @@ struct SueFeedBackView: View {
         }
         .frame(width: 330, height: 313)
     }
-}
-
-#Preview {
-    SueFeedBackView()
 }

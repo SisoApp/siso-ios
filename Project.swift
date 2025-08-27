@@ -49,6 +49,7 @@ let sisoApp: Target = .target(
     ),
     sources: ["siso-ios/Sources/**",],
     resources: ["siso-ios/Resources/**"],
+    entitlements: .file(path: "siso-ios/SupportingFiles/siso-ios.entitlements"),
     dependencies: [
         .target(name: "auth"),
         .target(name: "network"),
@@ -58,7 +59,9 @@ let sisoApp: Target = .target(
         .target(name: "coordinator"),
         .target(name: "designSystem"),
         .target(name: "call"),
-        .target(name: "chat")
+        .target(name: "chat"),
+        .external(name: "FirebaseAnalytics"),
+        .external(name: "FirebaseMessaging"),
     ]
 )
 
@@ -142,12 +145,12 @@ let call: Target = .target(
         .xcframework(path: .relativeToRoot("Frameworks/libs/Agoraffmpeg.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/Agorafdkaac.xcframework")),
         
-        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationExtension.xcframework")),
+            .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationExtension.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiEchoCancellationLLExtension.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiNoiseSuppressionExtension.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAiNoiseSuppressionLLExtension.xcframework")),
         
-        .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAudioBeautyExtension.xcframework")),
+            .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraAudioBeautyExtension.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraLipSyncExtension.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraSoundTouch.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraSpatialAudioExtension.xcframework"))

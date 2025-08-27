@@ -30,14 +30,13 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     public var nowWatching: CardViewModel? = nil
     public weak var delegate: MatchingCoordinatorDelegate?
     
-    var isProfileWriteDemanded: Bool = false
-    
     public init(delegate: MatchingCoordinatorDelegate? = nil, cards: [CardViewModel]) {
         self.delegate = delegate
         self.cards = [card1, card2, card3, card4]
     }
     
     @Published public var cards: [CardViewModel] = []
+    @Published var isProfileWriteDemanded: Bool = true
     
     public func injectDelegateToCards() {
         print(delegate == nil)
