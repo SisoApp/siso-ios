@@ -11,6 +11,17 @@ public enum ProfileMode {
     case signUp, edit
 }
 
+public enum Sex: String, CaseIterable {
+    case female = "여성"
+    case male = "남성"
+}
+
+public enum TargetSex: String, CaseIterable {
+    case female = "여성"
+    case male = "남성"
+    case other = "상관없음"
+}
+
 public struct ProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var nickname: String = ""
@@ -254,9 +265,9 @@ public struct ProfileView: View {
     private func basicInfoSection() -> some View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
-            RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
+            RadioButtonView(title: "내 성별", options: Sex.allCases.map { $0.rawValue }, binding: $sex)
                 .padding(.top, 16)
-            RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $targetSex)
+            RadioButtonView(title: "매칭 성별", options: TargetSex.allCases.map { $0.rawValue }, binding: $targetSex)
                 .padding(.top, 16)
             
             inputView(title: "지역", item: userProfile.location)
@@ -418,6 +429,80 @@ public struct ProfileView: View {
                     }
                     .onTapGesture {
                         binding.wrappedValue = option
+                    }
+                }
+                .padding(.top, 4)
+                
+                Spacer()
+            }
+        }
+    }
+    
+    private func sexRadioButtonView(title: String) -> some View {
+        return VStack {
+            Text(title)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack() {
+                ForEach(Sex.allCases, id: \.self) { option in
+                    let isSelect: Bool = sex == String(describing: option).uppercased()
+                    
+                    HStack(spacing: 2) {
+                        Text(option.rawValue)
+                            .padding(.trailing, 2)
+                            .font(.system(size: 20))
+                            .fontWeight(.semibold)
+                        
+                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .bold()
+                            .foregroundStyle(isSelect ? .black : .gray)
+                            .padding(.trailing, 24)
+                    }
+                    .onTapGesture {
+                        sex = String(describing: option).uppercased()
+                        print(sex)
+                    }
+                }
+                .padding(.top, 4)
+                
+                Spacer()
+            }
+        }
+    }
+    
+    private func targetSexRadioButtonView(title: String) -> some View {
+        return VStack {
+            Text(title)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack() {
+                ForEach(TargetSex.allCases, id: \.self) { option in
+                    let isSelect: Bool = targetSex == String(describing: option).uppercased()
+                    
+                    HStack(spacing: 2) {
+                        Text(option.rawValue)
+                            .padding(.trailing, 2)
+                            .font(.system(size: 20))
+                            .fontWeight(.semibold)
+                        
+                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .bold()
+                            .foregroundStyle(isSelect ? .black : .gray)
+                            .padding(.trailing, 24)
+                    }
+                    .onTapGesture {
+                        targetSex = String(describing: option).uppercased()
+                        print(targetSex)
                     }
                 }
                 .padding(.top, 4)

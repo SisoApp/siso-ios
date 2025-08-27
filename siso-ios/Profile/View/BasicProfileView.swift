@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import network
 
 public struct BasicProfileView: View {
     @ObservedObject private var userProfile: UserProfile
@@ -61,13 +62,11 @@ public struct BasicProfileView: View {
                         .onSubmit {
                             hideKeyboard()
                         }
-                    RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
+                    sexRadioButtonView(title: "내 성별")
                     
-                    RadioButtonView(
+                    targetSexRadioButtonView(
                         title: "매칭 성별",
-                        subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
-                        options: ["동성", "이성"],
-                        binding: $targetSex
+                        subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요."
                     )
                 }
                 .onTapGesture {
@@ -120,7 +119,7 @@ public struct BasicProfileView: View {
         .padding(.top, 24)
     }
     
-    private func RadioButtonView(title: String, subTitle: String? = nil, options: [String], binding: Binding<String>) -> some View {
+    private func sexRadioButtonView(title: String, subTitle: String? = nil) -> some View {
         return VStack(spacing: 0) {
             Text(title)
                 .padding(.top, 16)
@@ -141,11 +140,11 @@ public struct BasicProfileView: View {
             }
             
             HStack(spacing: 0) {
-                ForEach(options, id: \.self) { option in
-                    let isSelect: Bool = binding.wrappedValue == option
+                ForEach(Sex.allCases, id: \.self) { option in
+                    let isSelect: Bool = sex == String(describing: option).uppercased()
                     
                     HStack(spacing: 0) {
-                        Text(option)
+                        Text(option.rawValue)
                             .padding(.trailing, 2)
                             .font(.system(size: 20))
                             .fontWeight(.semibold)
@@ -159,7 +158,56 @@ public struct BasicProfileView: View {
                     }
                     .padding(.top, 12)
                     .onTapGesture {
-                        binding.wrappedValue = option
+                        sex = String(describing: option).uppercased()
+                    }
+                }
+                
+                Spacer()
+            }
+        }
+        .padding(.top)
+    }
+    
+    private func targetSexRadioButtonView(title: String, subTitle: String? = nil) -> some View {
+        return VStack(spacing: 0) {
+            Text(title)
+                .padding(.top, 16)
+                .font(.system(size: 18))
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Siso.Gray._50)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if let subTitle = subTitle {
+                Text(subTitle)
+                    .padding(.top, 6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(Color.Siso.Gray._50)
+                    .font(.system(size: 18))
+                    .lineSpacing(5)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            HStack(spacing: 0) {
+                ForEach(TargetSex.allCases, id: \.self) { option in
+                    let isSelect: Bool = targetSex == String(describing: option).uppercased()
+                    
+                    HStack(spacing: 0) {
+                        Text(option.rawValue)
+                            .padding(.trailing, 2)
+                            .font(.system(size: 20))
+                            .fontWeight(.semibold)
+                        
+                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .bold()
+                            .foregroundStyle(isSelect ? .black : .gray)
+                            .padding(.trailing, 24)
+                    }
+                    .padding(.top, 12)
+                    .onTapGesture {
+                        targetSex = String(describing: option).uppercased()
                     }
                 }
                 
@@ -176,7 +224,19 @@ public struct BasicProfileView: View {
             userProfile.sex = sex
             userProfile.targetSex = targetSex
             
-            currentPage = .image
+            let parameters: [String: Any] = [
+                "nickname": userProfile.nickname,
+                "age": Int(userProfile.age) ?? 0,
+                "sex": userProfile.sex,
+                "preference_sex": userProfile.targetSex
+            ]
+            
+            print(parameters)
+            
+            Task {
+                try? await ProfileNetworkManager.shard.registerProfile(parameters)
+                currentPage = .image
+            }
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
