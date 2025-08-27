@@ -27,7 +27,7 @@ public struct InterestProfileView: View {
             nextButton()
         }
         .background(.white)
-        .padding(.horizontal)
+        .padding()
         .navigationTitle("내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -98,8 +98,8 @@ public struct InterestProfileView: View {
                     }
                 }
             }
-            .padding(.vertical, 12)
         }
+        .padding(.vertical, 8)
     }
     
     private func nextButton() -> some View {
@@ -118,7 +118,6 @@ public struct InterestProfileView: View {
                 .clipShape(.rect(cornerRadius: 27))
                 .animation(.smooth, value: isActive)
         }
-        .padding(.bottom, 8)
         .disabled(!isActive)
     }
 }

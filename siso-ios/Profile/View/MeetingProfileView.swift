@@ -87,7 +87,6 @@ public struct MeetingProfileView: View {
                 }
             }
         }
-        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
