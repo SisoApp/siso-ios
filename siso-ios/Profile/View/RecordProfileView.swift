@@ -14,7 +14,7 @@ public struct RecordProfileView: View {
     @StateObject private var viewModel: RecordProfileViewModel
     @Binding var currentPage: SignUpProfilePage
     
-    let mode: ProfileMode
+    private let mode: ProfileMode
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, currentPage: Binding<SignUpProfilePage>, userProfile: UserProfile, mode: ProfileMode) {

@@ -231,8 +231,6 @@ public struct BasicProfileView: View {
                 "preference_sex": userProfile.targetSex
             ]
             
-            print(parameters)
-            
             Task {
                 try? await ProfileNetworkManager.shard.registerProfile(parameters)
                 currentPage = .image

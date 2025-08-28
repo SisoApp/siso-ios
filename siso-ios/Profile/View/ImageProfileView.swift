@@ -7,6 +7,7 @@
 
 import SwiftUI
 import designSystem
+import network
 
 public struct ImageProfileView: View {
     @ObservedObject private var userProfile: UserProfile
@@ -14,7 +15,7 @@ public struct ImageProfileView: View {
     private var images: [UIImage] = [] // 이미지 등록을 건너뛸 때 초기 값으로 복구하기 위한 초기값 저장 변수
     
     weak var delegate: ProfileCoordinatorDelegate?
-    let mode: ProfileMode
+    private let mode: ProfileMode
     private let limit: Int = 5
     
     public init(delegate: ProfileCoordinatorDelegate?,
@@ -205,6 +206,10 @@ public struct ImageProfileView: View {
         let isActive: Bool = userProfile.profileImages.count > 0
         
         return Button {
+            Task {
+                try? await ProfileNetworkManager.shard.uploadImages(userProfile.profileImages)
+            }
+        
             switch mode {
             case .signUp:
                 currentPage = .introduce

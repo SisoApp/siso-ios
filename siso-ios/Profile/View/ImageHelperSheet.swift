@@ -63,23 +63,6 @@ public struct ImageHelperSheet: View {
                         completion(images)
                     }
                 }
-                
-                
-                
-//                Task {
-//                    var images: [UIImage] = []
-//                    
-//                    for item in items {
-//                        if let data: Data = try? await item.loadTransferable(type: Data.self),
-//                           let image: UIImage = UIImage(data: data) {
-//                            images.append(image)
-//                        }
-//                    }
-//                    
-//                    await MainActor.run {
-//                        completion(images)
-//                    }
-//                }
             }
     }
     
@@ -146,18 +129,6 @@ public struct ImageHelperSheet: View {
     }
     
     private func galleryButton() -> some View {
-//        return PhotosPicker(
-//            selection: $selectedImages,
-//            maxSelectionCount: available
-//        ) {
-//            Text("앨범에서 가져오기")
-//                .frame(maxWidth: .infinity, maxHeight: 54)
-//                .font(.system(size: 18))
-//                .fontWeight(.semibold)
-//                .foregroundStyle(.black)
-//                .background(Color.Siso.Primary.main)
-//                .clipShape(.rect(cornerRadius: 27))
-//            }
         return PhotosPicker(
             selection: $selectedImages,
             maxSelectionCount: available
