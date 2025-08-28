@@ -58,8 +58,10 @@ public class Coordinator: ObservableObject {
     @Published public var callPage: CallPage?
     @Published public var callSheet: CallSheet?
     @Published public var activeCallInfo: IncomingCallInfo?
+    @Published public var afterCallSheetProfile: UserProfileServer?
     private let callManager = CallManager.shared
     private var cancellables = Set<AnyCancellable>()
+   
     
     // 내 프로파일
     var userProfile: UserProfile
@@ -74,8 +76,20 @@ public class Coordinator: ObservableObject {
         self.authViewModel = authViewModel
         self.locationViewModel = locationViewModel
         self.matchingViewModel.delegate = self
+        subscribeToCallManagerEvents()
     }
-    
+    private func subscribeToCallManagerEvents() {
+        callManager.showAfterCallPopupPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] opponentProfile in
+                print("📞 Coordinator received event to show assessment sheet.")
+                self?.afterCallSheetProfile = opponentProfile
+            }
+            .store(in: &cancellables)
+        
+        // 수신 전화 fullScreenCover를 위한 로직도 여기에 추가하면 좋습니다.
+        // ...
+    }
     // ** Common
     public func pop() {
         path.removeLast()
@@ -85,6 +99,27 @@ public class Coordinator: ObservableObject {
         path.removeLast(path.count - 1)
     }
     
+    public func dismissCallFlow() {
+        print("Dismissing call flow...")
+        
+        // 현재 스택에 쌓인 뷰의 개수를 확인합니다.
+        let pathCount = self.path.count
+        
+        // 통화 플로우는 'manner' -> 'activeCall' 순서로 2개의 뷰로 구성됩니다.
+        // 스택에 2개 이상의 뷰가 쌓여있고, 통화 플로우가 맞는지 대략적으로 추측할 수 있습니다.
+        // (더 정확하게 하려면 각 뷰로 진입할 때 플래그를 세우는 방법도 있지만 복잡해집니다.)
+        
+        // 현재 로직상 통화가 끝나면 스택의 마지막 두 개는 항상 manner와 activeCall 입니다.
+        // 따라서 안전하게 2개를 지웁니다.
+        if pathCount >= 2 {
+            print("Popping 2 views (activeCall, manner) from the stack.")
+            self.path.removeLast(2)
+        } else if pathCount == 1 {
+            // 혹시라도 스택에 activeCall 하나만 있는 예외적인 경우
+            print("Popping 1 view from the stack.")
+            self.path.removeLast(1)
+        }
+    }
     @ViewBuilder
     public func build(_ page: IntegrationPage) -> some View {
         switch page {
@@ -104,13 +139,13 @@ public class Coordinator: ObservableObject {
                     .tabItem {
                         Label("둘러보기", systemImage: "house")
                     }
-
+                
                 ChatMainView()
                     .navigationBarBackButtonHidden(true)
                     .tabItem {
                         Label("대화", systemImage: "ellipsis.message")
                     }
-
+                
                 MyPageView(delegate: self)
                     .navigationBarBackButtonHidden(true)
                     .tabItem {
@@ -121,7 +156,7 @@ public class Coordinator: ObservableObject {
         case .tutorial:
             TutorialViews(selectedTabIndex: 0, delegate: self)
                 .navigationBarBackButtonHidden(true)
-        
+            
             
             // Profile
         case .complete:
@@ -159,17 +194,17 @@ public class Coordinator: ObservableObject {
         case .manner:
             CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
                 .navigationBarBackButtonHidden(true)
-        case .connecting(let opponentProfile):
-            ConnectingView(opponentProfile: opponentProfile, delegate: self)
-                .navigationBarBackButtonHidden(true)
-        case .calling(let viewModel):
-            CallingView(inCallViewModel: viewModel,
-                        delegate: self)
-            .navigationBarBackButtonHidden(true)
-        case .incomingCall(let info):
-            IncommingCallView(callInfo: info,
-                              delegate: self)
-            .navigationBarBackButtonHidden(true)
+            //        case .connecting(let opponentProfile):
+            //            ConnectingView(opponentProfile: opponentProfile, delegate: self)
+            //                .navigationBarBackButtonHidden(true)
+            //        case .calling(let viewModel):
+            //            CallingView(inCallViewModel: viewModel,
+            //                        delegate: self)
+            //            .navigationBarBackButtonHidden(true)
+            //        case .incomingCall(let info):
+            //            IncommingCallView(callInfo: info,
+            //                              delegate: self)
+            //            .navigationBarBackButtonHidden(true)
         case .reportFeedbackPopup:
             ReportFeedBackView(delegate: self)
                 .navigationBarBackButtonHidden(true)
@@ -178,10 +213,11 @@ public class Coordinator: ObservableObject {
             ChatMainView()
         case .detail:
             ChatMainView.ChatDetailView(chat: ChatMainView.RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
+        case .activeCall: // 통합된 케이스
+            ActiveCallView(delegate: self)
+                .navigationBarBackButtonHidden(true)
         }
     }
-    
-    
 }
 
 extension IntegrationPage: Equatable, Hashable {
@@ -190,12 +226,14 @@ extension IntegrationPage: Equatable, Hashable {
         switch (lhs, rhs) {
         case (.login, .login), (.accept, .accept), (.home, .home), (.manner, .manner), (.reportFeedbackPopup, .reportFeedbackPopup):
             return true // 연관값 없는 케이스들
-        case (.connecting(let lhsProfile), .connecting(let rhsProfile)):
-            return lhsProfile.id == rhsProfile.id // id로 비교
-        case (.calling(let lhsVM), .calling(let rhsVM)):
-            return lhsVM === rhsVM // ViewModel은 클래스이므로 인스턴스 자체를 비교 (===)
-        case (.incomingCall(let lhsInfo), .incomingCall(let rhsInfo)):
-            return lhsInfo.id == rhsInfo.id // 정보의 고유 ID로 비교
+        case (.activeCall, .activeCall): // 새로운 케이스 추가
+            return true
+            //        case (.connecting(let lhsProfile), .connecting(let rhsProfile)):
+            //            return lhsProfile.id == rhsProfile.id // id로 비교
+            //        case (.calling(let lhsVM), .calling(let rhsVM)):
+            //            return lhsVM === rhsVM // ViewModel은 클래스이므로 인스턴스 자체를 비교 (===)
+            //        case (.incomingCall(let lhsInfo), .incomingCall(let rhsInfo)):
+            //            return lhsInfo.id == rhsInfo.id // 정보의 고유 ID로 비교
         default:
             return false // 다른 모든 조합은 false
         }
@@ -217,7 +255,7 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine("home")
         case .tutorial:
             hasher.combine("tutorial")
-       
+            
             
             // Profile
         case .complete:
@@ -256,15 +294,18 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine("manner")
             hasher.combine(opponentProfile.id)
             
-        case .connecting(let opponentProfile):
-            hasher.combine("connecting")
-            hasher.combine(opponentProfile.id) // 연관값의 고유 식별자를 해싱
-        case .calling(let viewModel):
-            hasher.combine("calling")
-            hasher.combine(viewModel.id) // ViewModel의 고유 식별자를 해싱
-        case .incomingCall(let callInfo):
-            hasher.combine("incomingCall")
-            hasher.combine(callInfo.id) // callInfo의 고유 식별자를 해싱
+        case .activeCall: // 새로운 케이스 추가
+            hasher.combine("activeCall")
+            
+            //        case .connecting(let opponentProfile):
+            //            hasher.combine("connecting")
+            //            hasher.combine(opponentProfile.id) // 연관값의 고유 식별자를 해싱
+            //        case .calling(let viewModel):
+            //            hasher.combine("calling")
+            //            hasher.combine(viewModel.id) // ViewModel의 고유 식별자를 해싱
+            //        case .incomingCall(let callInfo):
+            //            hasher.combine("incomingCall")
+            //            hasher.combine(callInfo.id) // callInfo의 고유 식별자를 해싱
         case .reportFeedbackPopup:
             hasher.combine("reportFeedbackPopup")
         case .main:

@@ -11,17 +11,20 @@ public struct ActiveCallView: View {
     // 코디네이터와의 통신을 위한 delegate
     var delegate: CallCoordinatorDelegate
     
+    public init(delegate: CallCoordinatorDelegate) {
+        self.delegate = delegate
+    }
+    
     public var body: some View {
         // CallManager의 callState 값에 따라 뷰를 전환합니다.
         switch callManager.callState {
             
         case .idle:
-            // 통화가 끝나거나 취소되어 idle 상태가 되면, 뷰가 사라져야 합니다.
-            // .onAppear에서 pop을 호출하여 이 뷰를 내비게이션 스택에서 제거합니다.
-            Color.clear // 빈 뷰
+            Color.clear
                 .onAppear {
-                    print("Call state is idle. Popping view.")
-                    delegate.pop() // 이전 화면으로 돌아가기
+                    print("Call state is idle. Dismissing call flow.")
+                    // ✨ pop() 대신 dismissCallFlow()를 호출합니다.
+                    delegate.dismissCallFlow()
                 }
             
         case .connecting(let info):

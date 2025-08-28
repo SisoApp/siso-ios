@@ -14,5 +14,7 @@ public protocol CallCoordinatorDelegate: AnyObject {
     func pop()
     
     func popToRoot()
+    
+    func dismissCallFlow()
 }
 

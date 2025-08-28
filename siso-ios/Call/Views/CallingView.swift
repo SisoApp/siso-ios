@@ -81,6 +81,18 @@ public struct CallingView: View {
                     }
                     
                 }
+                // ================== 테스트 코드 추가 시작 ==================
+                            #if DEBUG
+                            Button("TEST: 상대방이 전화 끊음") {
+                                print("🧪 TEST: Forcing call state to .idle")
+                                CallManager.shared.forceUpdateState(to: .idle)
+                            }
+                            .padding()
+                            .background(Color.orange)
+                            .foregroundColor(.black)
+                            .clipShape(Capsule())
+                            #endif
+                            // ================== 테스트 코드 추가 끝 ==================
                 
             }
             
@@ -193,7 +205,7 @@ public struct CallingView: View {
             // 통화 종료 버튼
             Button {
                 // Singleton 대신 주입받은 viewModel의 메서드를 호출합니다.
-                //callViewModel.endCall()
+                callViewModel.endCall()
             } label: {
                 
                 actionButtonContent(imageName: "endcall", text: "통화 종료", condition: false)

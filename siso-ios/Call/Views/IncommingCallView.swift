@@ -15,6 +15,7 @@ public struct IncommingCallView: View {
     // ViewModel 대신, 필요한 데이터 모델을 직접 받습니다.
     let callInfo: IncomingCallInfo
     var delegate: CallCoordinatorDelegate
+    
     public init(callInfo: IncomingCallInfo, delegate: CallCoordinatorDelegate) {
         self.callInfo = callInfo
         self.delegate = delegate

@@ -16,16 +16,19 @@ extension Coordinator: @preconcurrency CallCoordinatorDelegate {
             
         case .manner(let opponentProfile):
             return .manner(opponentProfile: opponentProfile)
+    
+        case .activeCall:
+            return .activeCall
             
-        case .connecting(let opponentProfile):
-            return .connecting(opponentProfile: opponentProfile)
-            
-        case .calling(let viewModel):
-            return .calling(viewModel: viewModel)
-            
-        case .incomingCall(let callInfo):
-            return .incomingCall(callInfo: callInfo)
-            
+//        case .connecting(let opponentProfile):
+//            return .connecting(opponentProfile: opponentProfile)
+//            
+//        case .calling(let viewModel):
+//            return .calling(viewModel: viewModel)
+//            
+//        case .incomingCall(let callInfo):
+//            return .incomingCall(callInfo: callInfo)
+//            
         case .reportFeedbackPopup:
             return .reportFeedbackPopup
         }

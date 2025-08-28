@@ -65,6 +65,24 @@ public struct ConnectingView: View {
                             .font(.headline)
                             .foregroundColor(.black)
                             .padding()
+                        // ================== 테스트 코드 추가 시작 ==================
+                                  #if DEBUG // DEBUG 빌드에서만 이 버튼이 보이도록 합니다.
+                                  Button("TEST: 상대방이 전화 받음") {
+                                      // CallManager의 상태를 강제로 .inCall로 변경합니다.
+                                      // 실제 앱에서는 이 부분이 Agora 이벤트에 의해 자동으로 호출됩니다.
+                                      
+                                      // 현재 callState가 .connecting일 때만 동작하도록 방어 코드 추가
+                                      if case .connecting(let info) = CallManager.shared.callState {
+                                          print("🧪 TEST: Forcing call state to .inCall")
+                                          CallManager.shared.forceUpdateState(to: .inCall(info: info))
+                                      }
+                                  }
+                                  .padding()
+                                  .background(Color.yellow)
+                                  .foregroundColor(.black)
+                                  .clipShape(Capsule())
+                                  #endif
+                                  // ================== 테스트 코드 추가 끝 ==================
                     }
                 }
             }

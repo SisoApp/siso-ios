@@ -46,9 +46,10 @@ public struct CallMannerView: View {
             
             Button {
                 print("확인했어요 전화 시작")
-                delegate?.pushCall(.connecting(opponentProfile: opponentProfile))
                 // 전화 시작
                 CallManager.shared.startCall(to: opponentProfile)
+                
+                delegate?.pushCall(.activeCall)
             } label: {
                 Text("확인했어요")
                     .font(.system(size: 18))

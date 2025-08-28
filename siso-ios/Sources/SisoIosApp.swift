@@ -5,6 +5,7 @@ import coordinator
 import profile
 import matching
 import model
+import call
 
 @main
 struct SisoIosApp: App {
@@ -25,12 +26,12 @@ struct SisoIosApp: App {
         let matchingViewModel = MatchingViewModel(cards: [])
         let authViewModel = SocialLoginView.LoginViewModel()
         let locationViewModel: LocationViewModel = .init()
-
+        
         self._userProfile = StateObject(wrappedValue: userProfile)
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         self._authVM = StateObject(wrappedValue: authViewModel)
         self._locationViewModel = StateObject(wrappedValue: locationViewModel)
-
+        
         self._coordinator = StateObject(
             wrappedValue: Coordinator(
                 userProfile: userProfile,
@@ -56,6 +57,11 @@ struct SisoIosApp: App {
                     }
                     .sheet(item: $coordinator.callSheet) { sheet in
                         coordinator.build(sheet: sheet)
+                    }
+                // ✨ [추가] 통화 후 평가 시트를 위한 .sheet 수정자
+                    .sheet(item: $coordinator.afterCallSheetProfile) { profile in
+                        // afterCallSheetProfile에 값이 할당되면 이 시트가 나타납니다.
+                        AfterCallAssessmentView(opponentProfile: profile, matchingDelegate: coordinator)
                     }
             }
             .id(coordinator.stackID)
