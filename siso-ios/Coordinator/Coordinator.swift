@@ -10,14 +10,48 @@ import model
 import call
 import chat
 
-// ✨ 1. Delegate 프로토콜을 @MainActor와 : AnyObject로 올바르게 정의합니다.
-@MainActor
-public protocol MatchingCoordinatorDelegate: AnyObject {
-    func push(page: IntegrationPage)
-    func pop()
-    func popToRoot()
-    func present(sheet: MatchingSheet)
-    func changeToAuth() // ✨ 추가: 로그아웃 등 인증 플로우로 돌아갈 때 사용
+public enum IntegrationPage {
+    
+    // Auth
+    case login
+    case accept
+    case welcome
+    
+    // Matching
+    case home
+    case tutorial
+    
+    // Profile
+    case complete
+    case location
+    case religion
+    case smoke
+    case drink
+    case personality
+    case meeting
+    case profile
+    case signUp
+    case interest
+    case voice
+    
+    // MyPage
+    case my
+    case setting
+    case notification
+    
+    // Call
+    case manner
+    // connecting 케이스는 상대방 프로필 정보가 필요합니다.
+    case connecting(opponentProfile: UserProfileServer)
+    // calling 케이스는 InCallViewModel이 필요합니다.
+    case calling(viewModel: CallViewModel)
+    // incomingCall 케이스는 IncomingCallInfo가 필요합니다.
+    case incomingCall(callInfo: IncomingCallInfo)
+    case reportFeedbackPopup
+    // Chat
+    case main
+    case detail
+    case notificationChat
 }
 
 
@@ -93,12 +127,7 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
     }
     
     public func popToRoot() {
-        switch selectedTab {
-        case 0: matchingPath = NavigationPath()
-        case 1: chatPath = NavigationPath()
-        case 2: myPagePath = NavigationPath()
-        default: path = NavigationPath()
-        }
+        path = NavigationPath()
     }
     
     public func present(sheet: MatchingSheet) {
@@ -141,34 +170,47 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
                 WelcomeView(delegate: self)
                 
             // Matching
-            case .home:
-                TabView(selection: $selectedTab) {
-                    NavigationStack(path: $matchingPath) {
-                        MatchingMainView(viewModel: matchingViewModel, delegate: self)
-                            .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
-                    }
-                    .tabItem { Label("둘러보기", systemImage: "house") }.tag(0)
-                                    
-                    NavigationStack(path: $chatPath) {
-                        ChatMainView()
-                            .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
-                    }
-                    .tabItem { Label("대화", systemImage: "ellipsis.message") }.tag(1)
-                                    
-                    NavigationStack(path: $myPagePath) {
-                        MyPageView(delegate: self)
-                            .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
-                    }
-                    .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
+        case .home:
+            TabView {
+                NavigationStack(path: Binding(get: { self.matchingPath }, set: { self.matchingPath = $0 })) {
+                    MatchingMainView(viewModel: matchingViewModel, delegate: self)
+                        .navigationBarBackButtonHidden(true)
+                        .navigationDestination(for: IntegrationPage.self) { page in
+                            AnyView(self.build(page))
+                        }
+                }
+                .tabItem {
+                    Label("둘러보기", systemImage: "house")
                 }
                 .tint(Color.Siso.Primary._100)
                 
-            case .tutorial:
-                TutorialViews(selectedTabIndex: 0, delegate: self)
-                    .navigationBarBackButtonHidden(true)
+                NavigationStack(path: Binding(get: { self.chatPath }, set: { self.chatPath = $0 })) {
+                    ChatMainView(delegate: self)
+                        .navigationBarBackButtonHidden(true)
+                        .navigationDestination(for: IntegrationPage.self) { page in
+                            AnyView(self.build(page))
+                        }
+                }
+                .tabItem {
+                    Label("대화", systemImage: "ellipsis.message")
+                }
+                
+                NavigationStack(path: Binding(get: { self.myPagePath }, set: { self.myPagePath = $0 })) {
+                    MyPageView(delegate: self)
+                        .navigationBarBackButtonHidden(true)
+                        .navigationDestination(for: IntegrationPage.self) { page in
+                            AnyView(self.build(page))
+                        }
+                }
+                .tabItem {
+                    Label("내 정보", systemImage: "person")
+                }
+            }
+            .tint(Color.Siso.Primary._100)
+        case .tutorial:
+            TutorialViews(selectedTabIndex: 0, delegate: self)
+                .navigationBarBackButtonHidden(true)
+            
             
             // Profile
             case .complete: CompleteProfileView(delegate: self)
@@ -189,34 +231,127 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
             case .notification: NotificationView(delegate: self)
                 
             // Call
-            case .manner(let profile):
-                CallMannerView(opponentProfile: profile, delegate: self)
-                    .navigationBarBackButtonHidden(true)
-               
-            case .reportFeedbackPopup:
-                ReportFeedBackView(delegate: self)
-                    .navigationBarBackButtonHidden(true)
-                
+        case .manner:
+            CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
+        case .connecting(_):
+            
+            CallMannerView(opponentProfile: UserProfileServer.sampleMessi, delegate: self)
+        case .calling(let viewModel):
+            CallingView(inCallViewModel: viewModel,
+                        delegate: self)
+        case .incomingCall(let info):
+            IncommingCallView(callInfo: info,
+                              delegate: self)
+        case .reportFeedbackPopup:
+            ReportFeedBackView(delegate: self)
             // Chat
-            case .main: ChatMainView()
-            case .detail: ChatMainView.ChatDetailView(chat: .init(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
-                
-            // Call (통합 뷰)
-            case .activeCall:
-                ActiveCallView(delegate: self)
-                    .navigationBarBackButtonHidden(true)
-            }
-        )
+        case .main:
+            ChatMainView(delegate: self)
+        case .detail:
+            ChatMainView.ChatDetailView(chat: ChatMainView.RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
+        case .notificationChat:
+            NotificationChatView()
+        }
     }
     
-    // ✨ [추가] 시트 빌더 메서드도 여기에 통합합니다.
-//    @ViewBuilder
-//    public func build(sheet: MatchingSheet) -> some View {
-//        switch sheet {
-//        case .fullScreenProfile:
-//            if let nowWatching = nowWatching {
-//                FullScreenProfileView(cardViewModel: nowWatching)
-//            }
-//        }
-//    }
+    
+}
+
+extension IntegrationPage: Equatable, Hashable {
+    // Equatable 프로토콜 구현 (==)
+    public static func == (lhs: IntegrationPage, rhs: IntegrationPage) -> Bool {
+        switch (lhs, rhs) {
+        case (.login, .login), (.accept, .accept), (.home, .home), (.manner, .manner), (.reportFeedbackPopup, .reportFeedbackPopup):
+            return true // 연관값 없는 케이스들
+        case (.connecting(let lhsProfile), .connecting(let rhsProfile)):
+            return lhsProfile.id == rhsProfile.id // id로 비교
+        case (.calling(let lhsVM), .calling(let rhsVM)):
+            return lhsVM === rhsVM // ViewModel은 클래스이므로 인스턴스 자체를 비교 (===)
+        case (.incomingCall(let lhsInfo), .incomingCall(let rhsInfo)):
+            return lhsInfo.id == rhsInfo.id // 정보의 고유 ID로 비교
+        default:
+            return false // 다른 모든 조합은 false
+        }
+    }
+    
+    // Hashable 프로토콜 구현 (hash)
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+            // Auth
+        case .login:
+            hasher.combine("login")
+        case .accept:
+            hasher.combine("accept")
+        case .welcome:
+            hasher.combine("welcome")
+            
+            // Matching
+        case .home:
+            hasher.combine("home")
+        case .tutorial:
+            hasher.combine("tutorial")
+       
+            
+            // Profile
+        case .complete:
+            hasher.combine("complete")
+        case .location:
+            hasher.combine("location")
+        case .religion:
+            hasher.combine("religion")
+        case .smoke:
+            hasher.combine("smoke")
+        case .drink:
+            hasher.combine("drink")
+        case .personality:
+            hasher.combine("personality")
+        case .meeting:
+            hasher.combine("meeting")
+        case .profile:
+            hasher.combine("profile")
+        case .signUp:
+            hasher.combine("signUp")
+        case .interest:
+            hasher.combine("interest")
+        case .voice:
+            hasher.combine("voice")
+            
+            // MyPage
+        case .my:
+            hasher.combine("my")
+        case .setting:
+            hasher.combine("setting")
+        case .notification:
+            hasher.combine("notification")
+            
+            // Call (연관값이 있는 경우)
+        case .manner:
+            hasher.combine("manner")
+        case .connecting(let opponentProfile):
+            hasher.combine("connecting")
+            hasher.combine(opponentProfile.id) // 연관값의 고유 식별자를 해싱
+        case .calling(let viewModel):
+            hasher.combine("calling")
+            hasher.combine(viewModel.id) // ViewModel의 고유 식별자를 해싱
+        case .incomingCall(let callInfo):
+            hasher.combine("incomingCall")
+            hasher.combine(callInfo.id) // callInfo의 고유 식별자를 해싱
+        case .reportFeedbackPopup:
+            hasher.combine("reportFeedbackPopup")
+            // Chat
+        case .main:
+            hasher.combine("main")
+        case .detail:
+            hasher.combine("detail")
+        case .notificationChat:
+            hasher.combine("notificationChat")
+        }
+    }
+}
+#Preview {
+    // Preview용 UserProfile
+    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
+    
+    // TabView 테스트
+    coordinator.build(.home)
 }

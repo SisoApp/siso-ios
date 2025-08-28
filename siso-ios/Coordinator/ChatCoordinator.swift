@@ -14,10 +14,11 @@ extension Coordinator: @preconcurrency ChatCoordinatorDelegate {
         switch page {
             case .main: return .main
             case .detail: return .detail
+            case .notificationChat: return .notificationChat
         }
     }
     
     public func pushChat(_ page: chat.ChatPage) {
-        path.append(page)
+        chatPath.append(toIntegrationPage(page))
     }
 }
