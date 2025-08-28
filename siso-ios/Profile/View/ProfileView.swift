@@ -11,24 +11,15 @@ public enum ProfileMode {
     case signUp, edit
 }
 
-public enum Sex: String, CaseIterable {
-    case female = "여성"
-    case male = "남성"
-}
 
-public enum TargetSex: String, CaseIterable {
-    case female = "여성"
-    case male = "남성"
-    case other = "상관없음"
-}
 
 public struct ProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
-    @State private var sex: String = ""
-    @State private var targetSex: String = ""
+    @State private var sex: Sex? = nil
+    @State private var targetSex: TargetSex? = nil
     @State private var isPlaying: Bool = false
     @State private var religion: String = ""
     @State private var meetings: [String] = []
@@ -45,8 +36,8 @@ public struct ProfileView: View {
         self._nickname = State(wrappedValue: userProfile.nickname)
         self._age = State(wrappedValue: userProfile.age.description)
         self._introduce = State(wrappedValue: userProfile.introduce)
-        self._sex = State(wrappedValue: userProfile.sex)
-        self._targetSex = State(wrappedValue: userProfile.targetSex)
+        self._sex = State(wrappedValue: Sex(rawValue: userProfile.sex))
+        self._targetSex = State(wrappedValue: TargetSex(rawValue: userProfile.targetSex))
     }
     
     public var body: some View {
@@ -281,10 +272,12 @@ public struct ProfileView: View {
     private func basicInfoSection() -> some View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
-            RadioButtonView(title: "내 성별", options: Sex.allCases.map { $0.rawValue }, binding: $sex)
-                .padding(.top, 16)
-            RadioButtonView(title: "매칭 성별", options: TargetSex.allCases.map { $0.rawValue }, binding: $targetSex)
-                .padding(.top, 16)
+            
+            RadioButtonGroup(title: "내 성별", options: Sex.allCases, selection: $sex)
+                .padding(.top)
+            
+            RadioButtonGroup(title: "매칭 성별", options: TargetSex.allCases, selection: $targetSex)
+                .padding(.top)
             
             inputView(title: "지역", item: userProfile.location)
                 .onTapGesture {
@@ -418,116 +411,6 @@ public struct ProfileView: View {
         }
     }
     
-    private func RadioButtonView(title: String, options: [String], binding: Binding<String>) -> some View {
-        return VStack {
-            Text(title)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack() {
-                ForEach(options, id: \.self) { option in
-                    let isSelect: Bool = binding.wrappedValue == option
-                    
-                    HStack(spacing: 2) {
-                        Text(option)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .onTapGesture {
-                        binding.wrappedValue = option
-                    }
-                }
-                .padding(.top, 4)
-                
-                Spacer()
-            }
-        }
-    }
-    
-    private func sexRadioButtonView(title: String) -> some View {
-        return VStack {
-            Text(title)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack() {
-                ForEach(Sex.allCases, id: \.self) { option in
-                    let isSelect: Bool = sex == String(describing: option).uppercased()
-                    
-                    HStack(spacing: 2) {
-                        Text(option.rawValue)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .onTapGesture {
-                        sex = String(describing: option).uppercased()
-                        print(sex)
-                    }
-                }
-                .padding(.top, 4)
-                
-                Spacer()
-            }
-        }
-    }
-    
-    private func targetSexRadioButtonView(title: String) -> some View {
-        return VStack {
-            Text(title)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack() {
-                ForEach(TargetSex.allCases, id: \.self) { option in
-                    let isSelect: Bool = targetSex == String(describing: option).uppercased()
-                    
-                    HStack(spacing: 2) {
-                        Text(option.rawValue)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .onTapGesture {
-                        targetSex = String(describing: option).uppercased()
-                        print(targetSex)
-                    }
-                }
-                .padding(.top, 4)
-                
-                Spacer()
-            }
-        }
-    }
-    
     private func inputView(title: String, item: String) -> some View {
         return VStack {
             Text(title)
@@ -558,14 +441,16 @@ public struct ProfileView: View {
     
     private func completeButton() -> some View {
         return Button {
+            guard let sex = sex, let targetSex = targetSex else { return }
+            
             userProfile.age = Int(age) ?? 0
             userProfile.introduce = introduce
-            userProfile.sex = sex
-            userProfile.targetSex = targetSex
+            userProfile.sex = sex.text
+            userProfile.targetSex = targetSex.text
             
-            Task {
-                await viewModel.registerProfile(userProfile)
-            }
+//            Task {
+//                await viewModel.registerProfile(userProfile)
+//            }
             
             delegate?.pop()
         } label: {

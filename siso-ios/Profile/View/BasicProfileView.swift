@@ -14,15 +14,15 @@ public struct BasicProfileView: View {
     @Binding private var currentPage: SignUpProfilePage
     @State private var nickname: String = ""
     @State private var age: String = ""
-    @State private var sex: String = ""
-    @State private var targetSex: String = ""
+    @State private var sex: Sex? = nil
+    @State private var targetSex: TargetSex? = nil
     
     @FocusState private var nicknameFocus: Bool
     @FocusState private var ageFocus: Bool
     
     private var isActive: Bool {
         return !nickname.isEmpty && !age.isEmpty &&
-                !sex.isEmpty && !targetSex.isEmpty
+                sex != nil && targetSex != nil
     }
     
     private var isScroll: Bool {
@@ -62,12 +62,13 @@ public struct BasicProfileView: View {
                         .onSubmit {
                             hideKeyboard()
                         }
-                    sexRadioButtonView(title: "내 성별")
                     
-                    targetSexRadioButtonView(
-                        title: "매칭 성별",
-                        subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요."
-                    )
+                    RadioButtonGroup(title: "내 성별", options: Sex.allCases, selection: $sex)
+                    
+                    RadioButtonGroup(title: "매칭 성별",
+                                     subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
+                                     options: TargetSex.allCases,
+                                     selection: $targetSex)
                 }
                 .onTapGesture {
                     nicknameFocus = false
@@ -119,110 +120,14 @@ public struct BasicProfileView: View {
         .padding(.top, 24)
     }
     
-    private func sexRadioButtonView(title: String, subTitle: String? = nil) -> some View {
-        return VStack(spacing: 0) {
-            Text(title)
-                .padding(.top, 16)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            if let subTitle = subTitle {
-                Text(subTitle)
-                    .padding(.top, 6)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundStyle(Color.Siso.Gray._50)
-                    .font(.system(size: 18))
-                    .lineSpacing(5)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            
-            HStack(spacing: 0) {
-                ForEach(Sex.allCases, id: \.self) { option in
-                    let isSelect: Bool = sex == String(describing: option).uppercased()
-                    
-                    HStack(spacing: 0) {
-                        Text(option.rawValue)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .padding(.top, 12)
-                    .onTapGesture {
-                        sex = String(describing: option).uppercased()
-                    }
-                }
-                
-                Spacer()
-            }
-        }
-        .padding(.top)
-    }
-    
-    private func targetSexRadioButtonView(title: String, subTitle: String? = nil) -> some View {
-        return VStack(spacing: 0) {
-            Text(title)
-                .padding(.top, 16)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            if let subTitle = subTitle {
-                Text(subTitle)
-                    .padding(.top, 6)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundStyle(Color.Siso.Gray._50)
-                    .font(.system(size: 18))
-                    .lineSpacing(5)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            
-            HStack(spacing: 0) {
-                ForEach(TargetSex.allCases, id: \.self) { option in
-                    let isSelect: Bool = targetSex == String(describing: option).uppercased()
-                    
-                    HStack(spacing: 0) {
-                        Text(option.rawValue)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .padding(.top, 12)
-                    .onTapGesture {
-                        targetSex = String(describing: option).uppercased()
-                    }
-                }
-                
-                Spacer()
-            }
-        }
-        .padding(.top)
-    }
-    
     private func nextButton() -> some View {
         return Button {
+            guard let sex = sex, let targetSex = targetSex else { return }
+            
             userProfile.nickname = nickname
             userProfile.age = Int(age) ?? 0
-            userProfile.sex = sex
-            userProfile.targetSex = targetSex
+            userProfile.sex = sex.text
+            userProfile.targetSex = targetSex.text
             
             let parameters: [String: Any] = [
                 "nickname": userProfile.nickname,
@@ -231,10 +136,10 @@ public struct BasicProfileView: View {
                 "preference_sex": userProfile.targetSex
             ]
             
-            Task {
-                try? await ProfileNetworkManager.shard.registerProfile(parameters)
-                currentPage = .image
-            }
+//            Task {
+//                try? await ProfileNetworkManager.shard.registerProfile(parameters)
+//                currentPage = .image
+//            }
         } label: {
             Text("계속하기")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
