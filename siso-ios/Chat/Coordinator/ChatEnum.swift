@@ -6,7 +6,7 @@
 //
 
 public enum ChatPage: String, Identifiable, Hashable {
-    case main, detail
+    case main, detail, notificationChat
     
     public var id: String { self.rawValue }
 }
