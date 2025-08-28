@@ -33,9 +33,9 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     }
     
     public var nowWatching: CardViewModel? = nil
-    public var delegate: MatchingCoordinatorDelegate
+    public var delegate: MatchingCoordinatorDelegate?
     
-    public init(delegate: MatchingCoordinatorDelegate, cards: [CardViewModel]) {
+    public init(delegate: MatchingCoordinatorDelegate? = nil, cards: [CardViewModel]) {
         self.delegate = delegate
         self.cards = [card1, card2, card3, card4]
     }
@@ -59,20 +59,20 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     }
     
 }
-//extension MatchingViewModel {
-//    
-//    // 정적(static) 프로퍼티로 샘플 데이터를 만듭니다.
-//    // 이렇게 하면 MatchingViewModel.sample 로 어디서든 접근 가능합니다.
-//    public static var sample: MatchingViewModel {
-//        let viewModel = MatchingViewModel( delegate: <#any MatchingCoordinatorDelegate#>, cards: [])
-//        
-//       
-//
-//        // 생성된 카드들을 viewModel의 cards 배열에 추가합니다.
-//        viewModel.cards = [card1, card2, card3, card4]
-//        return viewModel
-//    }
-//}
+extension MatchingViewModel {
+    
+    // 정적(static) 프로퍼티로 샘플 데이터를 만듭니다.
+    // 이렇게 하면 MatchingViewModel.sample 로 어디서든 접근 가능합니다.
+    public static var sample: MatchingViewModel {
+        let viewModel = MatchingViewModel( delegate: nil, cards: [])
+        
+       
+
+        // 생성된 카드들을 viewModel의 cards 배열에 추가합니다.
+        viewModel.cards = [card1, card2, card3, card4]
+        return viewModel
+    }
+}
 
 
 // 여러 개의 CardViewModel 샘플을 생성합니다.

@@ -6,7 +6,7 @@ import matching
 import network
 import model
 
-extension Coordinator: MatchingCoordinatorDelegate {
+extension Coordinator {
     
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: MatchingPage) -> IntegrationPage {

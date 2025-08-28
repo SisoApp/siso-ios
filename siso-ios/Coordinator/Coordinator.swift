@@ -130,22 +130,34 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
             // Matching
         case .home:
             AnyView(
-                TabView(selection: $selectedTab) {
-                    NavigationStack(path: $matchingPath) {
+                TabView(selection: Binding(
+                    get: { self.selectedTab },
+                    set: { self.selectedTab = $0 }
+                )) {
+                    NavigationStack(path: Binding(
+                        get: { self.matchingPath },
+                        set: { self.matchingPath = $0 }
+                    )) {
                         MatchingMainView(viewModel: matchingViewModel, delegate: self)
                             .navigationBarBackButtonHidden(true)
                             .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
                     }
                     .tabItem { Label("둘러보기", systemImage: "house") }.tag(0)
                     
-                    NavigationStack(path: $chatPath) {
+                    NavigationStack(path: Binding(
+                        get: { self.chatPath },
+                        set: { self.chatPath = $0 }
+                    ))  {
                         ChatMainView(delegate: self)
                             .navigationBarBackButtonHidden(true)
                             .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
                     }
                     .tabItem { Label("대화", systemImage: "ellipsis.message") }.tag(1)
                     
-                    NavigationStack(path: $myPagePath) {
+                    NavigationStack(path: Binding(
+                        get: { self.matchingPath },
+                        set: { self.matchingPath = $0 }
+                    ))  {
                         MyPageView(delegate: self)
                             .navigationBarBackButtonHidden(true)
                             .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
@@ -198,10 +210,10 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
 }
 
 
-//#Preview {
-//    // Preview용 UserProfile
-//    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
-//
-//    // TabView 테스트
-//    coordinator.build(.home)
-//}
+#Preview {
+    // Preview용 UserProfile
+    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
+
+    // TabView 테스트
+    coordinator.build(.home)
+}
