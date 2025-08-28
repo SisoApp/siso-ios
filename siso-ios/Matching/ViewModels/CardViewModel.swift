@@ -55,7 +55,8 @@ public class CardViewModel: ObservableObject, Identifiable  {
     func call() { // 화면전환 -> 매너 뷰
        
         homeCardDelegate?.cardViewModelDidRequestCall(on: self)
-        delegate?.changeMatchingToCall(opponentProfile: homeCardDelegate?.getNowWatchingCardViewModel()?.baseProfile ?? UserProfileServer.sampleMessi)
+        print("콜함수 씨발아 호출되라고 1 \(self.baseProfile.nickname)")
+        delegate?.changeMatchingToCall(opponentProfile: self.baseProfile)
         
     }
     

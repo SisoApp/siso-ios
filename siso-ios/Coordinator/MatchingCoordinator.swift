@@ -6,7 +6,7 @@ import matching
 import network
 import model
 
-extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
+extension Coordinator: MatchingCoordinatorDelegate {
     
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: MatchingPage) -> IntegrationPage {
@@ -23,7 +23,7 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
         path.append(toIntegrationPage(page))
     }
     
-    
+    // 변소
     public func changeMatchingToAuth() {
         path.removeLast(path.count)
         stackID = UUID() // NavigationStack을 강제로 새로고침
@@ -36,7 +36,9 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
     
     public func changeMatchingToCall(opponentProfile: UserProfileServer) {
         print("Call operation launched")
-        path.append(IntegrationPage.manner( opponentProfile: opponentProfile) )
+        print("콜함수 씨발아 호출되라고 2 \(opponentProfile.nickname)")
+        matchingPath.append(IntegrationPage.manner(opponentProfile: opponentProfile))
+        print(matchingPath.count)
     }
     
     @ViewBuilder

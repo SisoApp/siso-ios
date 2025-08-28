@@ -10,9 +10,6 @@ public struct MatchingCardView: View {
     @ObservedObject var cardViewModel: CardViewModel
     @ObservedObject var audioPlayer: AudioPlayerManager
     
-    //@State private var isPlaying = false
-    //public var delegate: MatchingCoordinatorDelegate?
-    
     public init(cardViewModel: CardViewModel, audioPlayer: AudioPlayerManager) {
         self._cardViewModel = .init(wrappedValue: cardViewModel)
         self._audioPlayer = .init(wrappedValue: audioPlayer)

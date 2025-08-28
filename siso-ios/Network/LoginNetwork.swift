@@ -9,8 +9,6 @@ import Foundation
 import Alamofire
 import CryptoKit
 
-
-
 // MARK: - Network Manager
 
 public final actor LoginNetworkManager: Sendable {

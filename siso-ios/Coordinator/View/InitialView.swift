@@ -5,34 +5,43 @@ import Alamofire
 import model
 
 /// ** 앱 시작 시 비동기 로직(자동 로그인)을 처리하고 첫 화면을 결정하는 뷰입니다.
-struct InitialView: View {
+public struct InitialView: View {
     // Coordinator와 ViewModel을 EnvironmentObject로 주입받습니다.
     @EnvironmentObject var coordinator: Coordinator
     @EnvironmentObject var authVM: SocialLoginView.LoginViewModel
     @EnvironmentObject var appSettings: AppSettings
     
   
-    var body: some View {
+    public init() {}
+    
+    public var body: some View {
         let _ = print("✅ [InitialView] Body re-evaluated. tutorialHasBeenWatched is: \(appSettings.tutorialHasBeenWatched)")
         
         Group {
             // authVM의 userState 값에 따라 뷰를 분기합니다.
             switch authVM.userState {
-            case .undefined:
-                // 비로그인 상태이거나, 회원가입 플로우가 필요한 경우 로그인 뷰를 보여줍니다.
-                ProgressView()
-            case .login:
-                if appSettings.tutorialHasBeenWatched {
-                    let _ = print("➡️ [InitialView] Condition met. Building HOME.")
-                    coordinator.build(IntegrationPage.home)
-                } else {
-                    let _ = print("➡️ [InitialView] Condition not met. Building TUTORIAL.")
-                    coordinator.build(.tutorial)
-                }
-            case .register:
-                coordinator.build(.accept)
-            case .logout:
-                coordinator.build(.login)
+                case .login:
+                    // 로그인 상태이면 매칭 홈으로 바로 이동합니다.
+                    if appSettings.tutorialHasBeenWatched {
+                        coordinator.build(IntegrationPage.home)
+                    } else {
+                        NavigationStack(path: $coordinator.path) {
+                            coordinator.build(.tutorial)
+                        }
+                    }
+                case .register:
+                    NavigationStack(path: $coordinator.path) {
+                        coordinator.build(.accept)
+                    }
+                case .logout, .undefined:
+                    NavigationStack(path: $coordinator.path) {
+                        if authVM.userState == .undefined {
+                            // 비로그인 상태이거나, 회원가입 플로우가 필요한 경우 로그인 뷰를 보여줍니다.
+                            ProgressView()
+                        }else {
+                            coordinator.build(.login)
+                        }
+                    }
             }
         }
         .onAppear {

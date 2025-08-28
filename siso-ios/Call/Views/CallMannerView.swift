@@ -31,6 +31,9 @@ public struct CallMannerView: View {
             Text("🤝 전화 시작 전 약속")
                 .font(.system(size: 24, weight: .bold))
                 .padding(.top, 30)
+                .onAppear(){
+                    print("MANNER ON")
+                }
             
             Spacer()
             HStack {
