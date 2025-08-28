@@ -131,17 +131,17 @@ public struct BasicProfileView: View {
             
             currentPage = .image
             
-//            let parameters: [String: Any] = [
-//                "nickname": userProfile.nickname,
-//                "age": userProfile.age,
-//                "sex": userProfile.sex,
-//                "preference_sex": userProfile.targetSex
-//            ]
+            let parameters: [String: Any] = [
+                "nickname": userProfile.nickname,
+                "age": userProfile.age,
+                "sex": userProfile.sex,
+                "preference_sex": userProfile.targetSex
+            ]
             
-//            Task {
-//                try? await ProfileNetworkManager.shard.registerProfile(parameters)
-//                currentPage = .image
-//            }
+            Task {
+                try? await ProfileNetworkManager.shard.registerProfile(parameters)
+                currentPage = .image
+            }
         }
         .padding(.bottom, 8)
     }

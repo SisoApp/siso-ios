@@ -28,6 +28,8 @@ public final actor LoginNetworkManager: Sendable {
         guard let baseURL = baseURL else { throw AFError.invalidURL(url: "base URL is Not Found") }
         let urlString = "\(baseURL)/api/auth/kakao"
         
+        print(urlString)
+        
         guard let url = URL(string: urlString) else {
             throw AFError.invalidURL(url: urlString)
         }
@@ -40,6 +42,7 @@ public final actor LoginNetworkManager: Sendable {
             "accessToken": accessToken,
         ]
         
+        
         AF.request(url,
                    method: .post,
                    parameters: parameters,
@@ -51,15 +54,9 @@ public final actor LoginNetworkManager: Sendable {
                 switch response.result {
                 case .success(let token):
                     // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
-                    self?.keychain.save(token: token.accessToken, for: "accessToken")
                     self?.keychain.save(token: token.refreshToken, for: "refreshToken")
                     completionHandler(token.registrationStatus, nil)
                 case .failure(let error):
-                    guard let data = response.data else { return }
-                    print("------------ response -----------")
-                    print(String(data: data, encoding: .utf8) ?? "")
-                    print("------------ error -----------")
-                    print("Decoding error:", error)
                     completionHandler("", error)
                     return
                 }

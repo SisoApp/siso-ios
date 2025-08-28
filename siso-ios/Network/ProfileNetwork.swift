@@ -20,18 +20,14 @@ public final actor ProfileNetworkManager: Sendable {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
-        
-        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
-            throw AFError.invalidURL(url: "accessToken -> nil")
+        guard let refreshToken = KeyChainManager.shared.get(for: "refreshToken") else {
+            throw AFError.invalidURL(url: "refreshToken -> nil")
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)",
+            "Authorization": "Bearer \(refreshToken)",
             "Content-Type": "application/json"
         ]
-        
-        print(accessToken)
-        print(parameters)
         
         AF.request(url,
                    method: .post,
@@ -44,6 +40,8 @@ public final actor ProfileNetworkManager: Sendable {
                 case .success:
                     break
                 case .failure(let error):
+                    print("---------- response ----------")
+                    print(response.data!)
                     print("프로필 등록 실패: ", error.localizedDescription)
                     
                     if let data  = response.data, let body = String(data: data, encoding: .utf8) {
@@ -76,7 +74,7 @@ public final actor ProfileNetworkManager: Sendable {
             .response { response in
                 switch response.result {
                 case .success:
-                    break
+                    print("프로필 업로드 성공!")
                 case .failure(let error):
                     print("프로필 등록 실패: ", error.localizedDescription)
                     
@@ -99,8 +97,6 @@ public final actor ProfileNetworkManager: Sendable {
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(refreshToken)"
         ]
-        
-        print(refreshToken)
         
         AF.upload(
             multipartFormData: { multipartFormData in
@@ -140,10 +136,9 @@ public final actor ProfileNetworkManager: Sendable {
             throw AFError.invalidURL(url: "refreshToken -> nil")
         }
         
-        print(refreshToken)
-        
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(refreshToken)"
+            "Authorization": "Bearer \(refreshToken)",
+            "Content-Type": "multipart/form-data"
         ]
         
         AF.upload(
@@ -170,6 +165,7 @@ public final actor ProfileNetworkManager: Sendable {
                 print("이미지 업로드 성공!")
             case .failure(let error):
                 print("이미지 업로드 실패: ", error.localizedDescription)
+                
                 if let data  = response.data, let body = String(data: data, encoding: .utf8) {
                     print("body: \(body)")
                 }
