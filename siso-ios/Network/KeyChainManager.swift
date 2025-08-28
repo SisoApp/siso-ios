@@ -96,7 +96,6 @@ public final class KeyChainManager: Sendable {
      * 주로 로그아웃 시 사용됩니다.
      */
     public func clearAllTokens() {
-        delete(for: "accessToken")
         delete(for: "refreshToken")
     }
 }

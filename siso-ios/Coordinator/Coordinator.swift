@@ -51,6 +51,7 @@ public enum IntegrationPage {
     // Chat
     case main
     case detail
+    case notificationChat
 }
 
 @MainActor
@@ -95,7 +96,7 @@ public class Coordinator: ObservableObject {
     }
     
     public func popToRoot() {
-        path.removeLast(path.count - 1)
+        path = NavigationPath()
     }
     
     @ViewBuilder
@@ -115,14 +116,20 @@ public class Coordinator: ObservableObject {
                 NavigationStack(path: Binding(get: { self.matchingPath }, set: { self.matchingPath = $0 })) {
                     MatchingMainView(viewModel: matchingViewModel, delegate: self)
                         .navigationBarBackButtonHidden(true)
+                        .navigationDestination(for: IntegrationPage.self) { page in
+                            AnyView(self.build(page))
+                        }
                 }
                 .tabItem {
                     Label("둘러보기", systemImage: "house")
                 }
                 
                 NavigationStack(path: Binding(get: { self.chatPath }, set: { self.chatPath = $0 })) {
-                    ChatMainView()
+                    ChatMainView(delegate: self)
                         .navigationBarBackButtonHidden(true)
+                        .navigationDestination(for: IntegrationPage.self) { page in
+                            AnyView(self.build(page))
+                        }
                 }
                 .tabItem {
                     Label("대화", systemImage: "ellipsis.message")
@@ -131,6 +138,9 @@ public class Coordinator: ObservableObject {
                 NavigationStack(path: Binding(get: { self.myPagePath }, set: { self.myPagePath = $0 })) {
                     MyPageView(delegate: self)
                         .navigationBarBackButtonHidden(true)
+                        .navigationDestination(for: IntegrationPage.self) { page in
+                            AnyView(self.build(page))
+                        }
                 }
                 .tabItem {
                     Label("내 정보", systemImage: "person")
@@ -140,7 +150,7 @@ public class Coordinator: ObservableObject {
         case .tutorial:
             TutorialViews(selectedTabIndex: 0, delegate: self)
                 .navigationBarBackButtonHidden(true)
-        
+            
             
             // Profile
         case .complete:
@@ -188,11 +198,13 @@ public class Coordinator: ObservableObject {
                               delegate: self)
         case .reportFeedbackPopup:
             ReportFeedBackView(delegate: self)
-            
+            // Chat
         case .main:
-            ChatMainView()
+            ChatMainView(delegate: self)
         case .detail:
             ChatMainView.ChatDetailView(chat: ChatMainView.RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true))
+        case .notificationChat:
+            NotificationChatView()
         }
     }
     
@@ -280,10 +292,13 @@ extension IntegrationPage: Equatable, Hashable {
             hasher.combine(callInfo.id) // callInfo의 고유 식별자를 해싱
         case .reportFeedbackPopup:
             hasher.combine("reportFeedbackPopup")
+            // Chat
         case .main:
             hasher.combine("main")
         case .detail:
             hasher.combine("detail")
+        case .notificationChat:
+            hasher.combine("notificationChat")
         }
     }
 }

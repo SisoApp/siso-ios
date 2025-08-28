@@ -19,55 +19,49 @@ public struct SocialLoginView: View {
     }
     
     public var body: some View {
-        NavigationStack {
-            ZStack {
-                Image("bgLogin")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .ignoresSafeArea()
+        ZStack {
+            Image("bgLogin")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .ignoresSafeArea()
+            
+            Image("Vector")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .offset(x: 18.2)
+                .rotationEffect(Angle(degrees: -18.61))
+            
+            VStack(alignment: .leading) {
+                Spacer()
+                Group {
+                    Text("지금도,\n사랑하기 딱 좋은 나이")
+                        .font(.appFont(name: .regular, size: 32))
+                        .foregroundStyle(Color.Siso.Orange._100)
+                    Text("시팅")
+                        .font(.appFont(name: .regular, size: 72))
+                        .foregroundStyle(Color.Siso.Orange._100)
+                }
+                Spacer()
+                Spacer()
                 
-                Image("Vector")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .offset(x: 18.2)
-                    .rotationEffect(Angle(degrees: -18.61))
-                
-                VStack(alignment: .leading) {
-                    Spacer()
-                    Group {
-                        Text("지금도,\n사랑하기 딱 좋은 나이")
-                            .font(.appFont(name: .regular, size: 32))
-                            .foregroundStyle(Color.Siso.Orange._100)
-                        Text("시팅")
-                            .font(.appFont(name: .regular, size: 72))
-                            .foregroundStyle(Color.Siso.Orange._100)
-                    }
-                    Spacer()
-                    Spacer()
-                    
-                    loginButton(title: "카카오로 시작하기", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
-                        Task {
-                            await vm.kakaoLogin() { state in
-                                vm.userState = vm.convertUserState(state)
-                            }
+                loginButton(title: "카카오로 시작하기", icon: "KaKao", bgColor: Color(hex: "FEE500"), textColor: .black) {
+                    Task {
+                        await vm.kakaoLogin() { state in
+                            vm.userState = vm.convertUserState(state)
                         }
                     }
-                    loginButton(title: "Apple로 시작하기", icon: "Apple" , bgColor: .black, textColor: .white) {
-                        // Apple Login
-                    }
-                    
-                    Spacer()
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
+                loginButton(title: "Apple로 시작하기", icon: "Apple" , bgColor: .black, textColor: .white) {
+                    // Apple Login
+                }
+                
+                Spacer()
             }
+            .frame(maxWidth: .infinity)
+            .padding()
         }
         .onChange(of: vm.userState) {
-            if vm.userState == .login {
-                delegate?.changeAuthToMatching()
-            } else if vm.userState == .register {
-                delegate?.pushAuth(.accept)
-            }
+            delegate?.popToRoot()
         }
         .alert("오류", isPresented: $vm.showAlert) {
             Button("확인") {
