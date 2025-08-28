@@ -56,7 +56,13 @@ public enum IntegrationPage {
 @MainActor
 public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
-    @Published public var path: NavigationPath = NavigationPath()
+    
+    // MARK: - Navigation Paths
+    @Published public var path: NavigationPath = NavigationPath() // 인증(Auth) 흐름용
+    @Published public var matchingPath = NavigationPath()
+    @Published public var chatPath = NavigationPath()
+    @Published public var myPagePath = NavigationPath()
+    
     @Published public var profileSheet: ProfileSheet?
     @Published public var matchingSheet: MatchingSheet?
     @Published public var callPage: CallPage?
@@ -106,23 +112,29 @@ public class Coordinator: ObservableObject {
             // Matching
         case .home:
             TabView {
-                MatchingMainView(viewModel: matchingViewModel, delegate: self)
-                    .navigationBarBackButtonHidden(true)
-                    .tabItem {
-                        Label("둘러보기", systemImage: "house")
-                    }
-
-                ChatMainView()
-                    .navigationBarBackButtonHidden(true)
-                    .tabItem {
-                        Label("대화", systemImage: "ellipsis.message")
-                    }
-
-                MyPageView(delegate: self)
-                    .navigationBarBackButtonHidden(true)
-                    .tabItem {
-                        Label("내 정보", systemImage: "person")
-                    }
+                NavigationStack(path: Binding(get: { self.matchingPath }, set: { self.matchingPath = $0 })) {
+                    MatchingMainView(viewModel: matchingViewModel, delegate: self)
+                        .navigationBarBackButtonHidden(true)
+                }
+                .tabItem {
+                    Label("둘러보기", systemImage: "house")
+                }
+                
+                NavigationStack(path: Binding(get: { self.chatPath }, set: { self.chatPath = $0 })) {
+                    ChatMainView()
+                        .navigationBarBackButtonHidden(true)
+                }
+                .tabItem {
+                    Label("대화", systemImage: "ellipsis.message")
+                }
+                
+                NavigationStack(path: Binding(get: { self.myPagePath }, set: { self.myPagePath = $0 })) {
+                    MyPageView(delegate: self)
+                        .navigationBarBackButtonHidden(true)
+                }
+                .tabItem {
+                    Label("내 정보", systemImage: "person")
+                }
             }
             .tint(Color.Siso.Primary._100)
         case .tutorial:
@@ -280,7 +292,5 @@ extension IntegrationPage: Equatable, Hashable {
     @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
     
     // TabView 테스트
-    NavigationStack(path: $coordinator.path) {
-        coordinator.build(.home)
-    }
+    coordinator.build(.home)
 }
