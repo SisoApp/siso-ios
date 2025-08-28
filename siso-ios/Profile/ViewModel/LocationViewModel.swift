@@ -44,6 +44,11 @@ final public class LocationViewModel: NSObject, ObservableObject {
         locationManager.delegate = self
     }
     
+    deinit {
+        locationManager.stopUpdatingLocation() // 위치 업데이트 중단
+        locationManager.delegate = nil // delegate 해제
+    }
+    
     func getCities(_ province: Province) -> [String] {
         switch province {
         case .seoul:
@@ -106,6 +111,7 @@ extension LocationViewModel: CLLocationManagerDelegate {
             locationManager.requestLocation()
         default:
             print("위치 권한 오류")
+            isLoading = false
         }
     }
     
@@ -115,28 +121,38 @@ extension LocationViewModel: CLLocationManagerDelegate {
         if status == .authorizedAlways || status == .authorizedWhenInUse {
             isLoading = true
             locationManager.requestLocation()
+        } else if status == .denied || status == .restricted {
+            isLoading = false // 권한이 거부되면 로딩 상태 해제
         }
     }
     
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        isLoading = false
-        
         if let location = locations.last {
             let geoCoder: CLGeocoder = CLGeocoder()
             
-            geoCoder.reverseGeocodeLocation(location) { placemarks, error in
-                if let error = error {
-                    print("\(error.localizedDescription)")
-                    return
-                }
-                
-                if let placemark = placemarks?.first,
-                   let country = placemark.country {
-                    let address: [String] = placemark.description.components(separatedBy: country)[1].components(separatedBy: " ")
-                    let province: String = address[1].prefix(2).description
-                    let city: String = address[2]
+            geoCoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        print("geoCoder error: \(error.localizedDescription)")
+                        self?.isLoading = false
+                        return
+                    }
                     
-                    self.location = "\(province) \(city)"
+                    if let placemark = placemarks?.first,
+                       let country = placemark.country {
+                        let address: [String] = placemark.description.components(separatedBy: country)[1].components(separatedBy: " ")
+                        
+                        if address.count > 2 {
+                            let province: String = address[1].prefix(2).description
+                            let city: String = address[2]
+                            
+                            self?.location = "\(province) \(city)"
+                        } else {
+                            print("Address Parsing Error: Out of Index...")
+                        }
+                        
+                        self?.isLoading = false
+                    }
                 }
             }
         }
