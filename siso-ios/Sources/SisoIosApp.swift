@@ -42,19 +42,7 @@ struct SisoIosApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $coordinator.path) {
-                coordinator.start()
-                    .navigationDestination(for: IntegrationPage.self, destination: { page in
-                        coordinator.build(page)
-                    })
-                    .sheet(item: $coordinator.profileSheet) { sheet in
-                        coordinator.build(sheet: sheet)
-                    }
-                    .sheet(item: $coordinator.matchingSheet) { sheet in
-                        coordinator.build(sheet: sheet)
-                    }
-            }
-            .id(coordinator.stackID)
+            coordinator.start()
         }
     }
 }

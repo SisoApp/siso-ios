@@ -12,7 +12,6 @@ import designSystem
 
 public struct ChatMainView: View {
     @State private var selectedList: ContactType = .recentChat
-    @State private var isToolbarVisible: Bool = true
     
     // 삭제 기능을 위해 상태 변수로 관리합니다.
     @State private var callHistory: [Contact] = []
@@ -84,12 +83,7 @@ public struct ChatMainView: View {
             // View가 나타날 때 초기 데이터를 State 변수에 로드합니다.
             self.recentChats = chats
             self.callHistory = calls
-            self.isToolbarVisible = true
         }
-        .onDisappear {
-            self.isToolbarVisible = false
-        }
-        .toolbar(isToolbarVisible ? .visible : .hidden, for: .navigationBar)
     }
     
     // Date Format Convert String
