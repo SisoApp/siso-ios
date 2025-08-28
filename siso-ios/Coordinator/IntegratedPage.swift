@@ -1,16 +1,16 @@
 import Foundation
-import model
+import model // UserProfileServer를 사용하기 위해 필요
 
 public enum IntegrationPage: Hashable, Identifiable {
     // Auth
     case login
     case accept
     case welcome
-
+    
     // Matching
     case home
     case tutorial
-
+    
     // Profile
     case complete
     case location
@@ -23,25 +23,29 @@ public enum IntegrationPage: Hashable, Identifiable {
     case signUp
     case interest
     case voice
-
+    
     // MyPage
     case my
     case setting
     case notification
-
+    
     // Call
+    // ✨ [수정] manner 케이스는 어떤 상대방과의 통화인지 알아야 하므로
+    // opponentProfile 연관값을 갖도록 수정합니다.
     case manner(opponentProfile: UserProfileServer)
+    
+    // ✨ [수정] connecting, calling, incomingCall을 'activeCall' 하나로 통합합니다.
     case activeCall
+    
     case reportFeedbackPopup
     
     // Chat
     case main
     case detail
-
+    case notificationChat
+    
     // MARK: - Identifiable Conformance
     
-    /// Identifiable 프로토콜을 준수하기 위한 id 프로퍼티입니다.
-    /// 각 케이스를 고유하게 식별할 수 있는 안정적인 값을 반환합니다.
     public var id: String {
         switch self {
         case .login: return "login"
@@ -63,25 +67,25 @@ public enum IntegrationPage: Hashable, Identifiable {
         case .my: return "my"
         case .setting: return "setting"
         case .notification: return "notification"
-        // 연관값이 있는 케이스는 연관값의 고유 ID를 포함하여 ID를 생성합니다.
+        // ✨ [수정] manner 케이스의 ID는 상대방의 고유 ID를 포함하여 생성합니다.
         case .manner(let opponentProfile): return "manner-\(opponentProfile.id)"
         case .activeCall: return "activeCall"
         case .reportFeedbackPopup: return "reportFeedbackPopup"
         case .main: return "main"
         case .detail: return "detail"
+        case .notificationChat: return "notificationChat"
         }
     }
     
-    // MARK: - Hashable Conformance
+    // MARK: - Hashable & Equatable Conformance
     
-    /// Hashable 프로토콜을 준수하기 위한 메서드입니다.
-    /// 연관값이 있는 케이스도 올바르게 해싱되도록 직접 구현합니다.
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(self.id) // Identifiable의 id를 해싱하는 것이 가장 간단하고 확실한 방법입니다.
-    }
-    
-    /// Equatable 프로토콜은 Hashable을 위해 필요하며, id를 비교하여 구현합니다.
+    // ✨ [수정] Equatable 구현을 id 기반으로 단순화하고, 모든 케이스를 처리하도록 수정합니다.
     public static func == (lhs: IntegrationPage, rhs: IntegrationPage) -> Bool {
         return lhs.id == rhs.id
+    }
+    
+    // ✨ [수정] Hashable 구현을 id 기반으로 단순화합니다.
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.id)
     }
 }

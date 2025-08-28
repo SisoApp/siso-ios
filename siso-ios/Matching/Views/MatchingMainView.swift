@@ -62,9 +62,3 @@ private func makeView(for cardViewModel: CardViewModel, geometry: GeometryProxy)
 }
 
 
-// Preview Provider
-struct MatchingShortsVerticalView_Previews: PreviewProvider {
-    static var previews: some View {
-        MatchingMainView(viewModel: MatchingViewModel( cards: []), delegate: nil)
-    }
-}
