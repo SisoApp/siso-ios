@@ -121,7 +121,7 @@ public struct BasicProfileView: View {
     }
     
     private func nextButton() -> some View {
-        return Button {
+        return PrimaryButton(title: "계속하기", isActive: isActive) {
             guard let sex = sex, let targetSex = targetSex else { return }
             
             userProfile.nickname = nickname
@@ -129,29 +129,20 @@ public struct BasicProfileView: View {
             userProfile.sex = sex.text
             userProfile.targetSex = targetSex.text
             
-            let parameters: [String: Any] = [
-                "nickname": userProfile.nickname,
-                "age": userProfile.age,
-                "sex": userProfile.sex,
-                "preference_sex": userProfile.targetSex
-            ]
+            currentPage = .image
+            
+//            let parameters: [String: Any] = [
+//                "nickname": userProfile.nickname,
+//                "age": userProfile.age,
+//                "sex": userProfile.sex,
+//                "preference_sex": userProfile.targetSex
+//            ]
             
 //            Task {
 //                try? await ProfileNetworkManager.shard.registerProfile(parameters)
 //                currentPage = .image
 //            }
-        } label: {
-            Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
         .padding(.bottom, 8)
     }
     

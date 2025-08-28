@@ -39,10 +39,7 @@ public struct IntroduceProfileView: View {
                 }
             }
             nextButton()
-            
-            if !isFocused {
-                skipButton()
-            }
+            skipButton()
         }
         .scrollDisabled(!isFocused)
         .toolbar {
@@ -126,35 +123,28 @@ public struct IntroduceProfileView: View {
     private func nextButton() -> some View {
         let isActive: Bool = introduce.count >= 5
         
-        return Button {
+        return PrimaryButton(title: "계속하기", isActive: isActive) {
             userProfile.introduce = introduce
             currentPage = .voice
-        } label: {
-            Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .frame(height: 54)
-        .disabled(!isActive)
         .padding(.vertical, 8)
     }
     
     private func skipButton() -> some View {
-        return Button {
-            currentPage = .voice
-        } label: {
-            Text("건너뛰기")
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        return Group {
+            if !isFocused {
+                Button {
+                    currentPage = .voice
+                } label: {
+                    Text("건너뛰기")
+                        .font(.system(size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(height: 54)
+            }
         }
-        .frame(height: 54)
     }
 }
 

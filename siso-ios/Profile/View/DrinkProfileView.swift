@@ -96,21 +96,10 @@ public struct DrinkProfileView: View {
     private func completeButton() -> some View {
         let isActive: Bool = !drinking.isEmpty
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             userProfile.drinking = drinking
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
         .padding(.bottom, 38)
     }
 }

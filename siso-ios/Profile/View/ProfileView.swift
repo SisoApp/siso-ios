@@ -440,7 +440,9 @@ public struct ProfileView: View {
     }
     
     private func completeButton() -> some View {
-        return Button {
+        let isActive: Bool = introduce.count >= 5
+        
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             guard let sex = sex, let targetSex = targetSex else { return }
             
             userProfile.age = Int(age) ?? 0
@@ -453,16 +455,7 @@ public struct ProfileView: View {
 //            }
             
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
-                .clipShape(.rect(cornerRadius: 54 / 2))
         }
-        .frame(height: 54)
         .padding(.horizontal)
         .padding(.bottom, 8)
     }

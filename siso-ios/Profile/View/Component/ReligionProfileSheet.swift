@@ -94,22 +94,11 @@ public struct ReligionProfileSheet: View {
     private func completeButton() -> some View {
         let isActive: Bool = religion.count > 0
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             userProfile.religion = religion
             delegate?.dismissProfileSheet()
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .font(.system(size: 18, weight: .semibold))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .foregroundStyle(Color.Siso.Gray._90)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
-        .background(
-            RoundedRectangle(cornerRadius: 54 / 2)
-                .fill(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-        )
     }
     
     

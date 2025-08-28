@@ -123,20 +123,9 @@ public struct RecordProfileView: View {
     private func recordButton() -> some View {
         let isActive: Bool = viewModel.recordButtonIsActive
         
-        return Button {
+        return PrimaryButton(title: "녹음시작", isActive: isActive) {
             viewModel.startRecoding()
-        } label: {
-            Text("녹음시작")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
     
     private func skipButton() -> some View {
@@ -161,7 +150,7 @@ public struct RecordProfileView: View {
     private func nextButton() -> some View {
         let isActive: Bool = viewModel.nextButtonIsActive
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             Task {
                 await viewModel.uploadVoice()
             }
@@ -172,36 +161,15 @@ public struct RecordProfileView: View {
             case .edit:
                 delegate?.pop()
             }
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18)) 
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
     
     private func restartButton() -> some View {
         let isActive: Bool = viewModel.restartButtonIsActive
         
-        return Button {
+        return PrimaryButton(title: "다시 녹음하기", isActive: isActive) {
             viewModel.startRecoding()
-        } label: {
-            Text("다시 녹음하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
 }
 

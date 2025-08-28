@@ -173,23 +173,13 @@ public struct ImageProfileView: View {
     private func addButton() -> some View {
         let isActive: Bool = userProfile.profileImages.count >= 0 && userProfile.profileImages.count < 5
         
-        return Button {
+        return PrimaryButton(title: "사진 추가하기 (\(userProfile.profileImages.count)/\(limit))", isActive: isActive) {
             delegate?.presentProfile(sheet: .imageHelper({ images in
                 delegate?.dismissProfileSheet()
                 userProfile.profileImages.append(contentsOf: images)
             }))
-        } label: {
-            Text("사진 추가하기 (\(userProfile.profileImages.count)/\(limit))")
-                .frame(maxWidth: .infinity, maxHeight: 54)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._20)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
         .padding(.vertical, 8)
-        .disabled(!isActive)
     }
     
     private func bottomButton() -> some View {
@@ -205,7 +195,7 @@ public struct ImageProfileView: View {
     private func nextButton() -> some View {
         let isActive: Bool = userProfile.profileImages.count > 0
         
-        return Button {
+        return PrimaryButton(title: "계속하기", isActive: isActive) {
             Task {
                 try? await ProfileNetworkManager.shard.uploadImages(userProfile.profileImages)
             }
@@ -216,17 +206,7 @@ public struct ImageProfileView: View {
             case .edit:
                 delegate?.pop()
             }
-        } label: {
-            Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
     }
     
     private func skipButton() -> some View {
