@@ -25,7 +25,7 @@ public struct ProfileDemandingView: View {
                 HStack {
                     Spacer()
                     Button {
-                        matchingViewModel.isProfileWriteDemanded = true
+                        matchingViewModel.isProfileWriteDemanded = false
                     } label: {
                         Image(systemName: "xmark")
                             .resizable()

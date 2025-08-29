@@ -60,7 +60,6 @@ let sisoApp: Target = .target(
         .target(name: "coordinator"),
         .target(name: "designSystem"),
         .target(name: "call"),
-        .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
     ]
@@ -267,7 +266,6 @@ let project = Project(
         coordinator,
         designSystem,
         model,
-        chat,
         call
     ]
 )

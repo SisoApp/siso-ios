@@ -108,10 +108,10 @@ public struct CallingView: View {
     @ViewBuilder
     private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
-        if profile.profileImageUrls.isEmpty {
+        if profile.imageUrls.isEmpty {
             placeholderImage
         } else {
-            let urlString = profile.profileImageUrls.first!
+            let urlString = profile.imageUrls.first!
             AsyncImage(url: URL(string: urlString)) { image in
                 image
                     .resizable()
@@ -190,7 +190,7 @@ public struct CallingView: View {
                         )
                 .frame(width: 100)
                
-            ForEach(profile.interestTags, id: \.self) { interest in
+            ForEach(profile.interests, id: \.self) { interest in
                 Text("#\(interest)")
                     .lineLimit(1)
                     .fixedSize()

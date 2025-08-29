@@ -41,6 +41,10 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
         print("👀 nowWatching이 \(viewModel.nickname)(으)로 업데이트 되었습니다.")
     }
     
+    func fetchCards() {
+        let newProfile: MatchingProfile = .sampleMessi
+    }
+    
     
     
 }

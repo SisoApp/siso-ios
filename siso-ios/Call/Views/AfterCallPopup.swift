@@ -73,7 +73,7 @@ public struct AfterCallPopup: View {
     
     private var profileImageView: some View {
         ZStack {
-            AsyncImage(url: URL(string: opponentProfile.profileImageUrls.first ?? "testimg")){ image in
+            AsyncImage(url: URL(string: opponentProfile.imageUrls.first ?? "testimg")){ image in
                 
                 image
                     .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
