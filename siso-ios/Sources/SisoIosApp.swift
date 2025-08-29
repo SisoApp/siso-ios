@@ -9,6 +9,8 @@ import call
 
 @main
 struct SisoIosApp: App {
+  
+    
     @StateObject var userProfile: UserProfile
     @StateObject private var coordinator: Coordinator
     @StateObject private var appSettings = AppSettings()

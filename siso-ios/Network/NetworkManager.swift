@@ -18,7 +18,7 @@ public class NetworkManager {
         }
         
         // 1. 엔드포인트 경로 수정: "/matching"으로 변경
-        let urlString: String = baseUrl + "/api/matching" // ✅ 백엔드와 경로를 맞춰주세요. 보통 "/api" 접두사가 붙습니다.
+        let urlString: String = baseUrl + "/api/filter/matching" // ✅ 백엔드와 경로를 맞춰주세요. 보통 "/api" 접두사가 붙습니다.
         guard let url: URL = URL(string: urlString) else {
             throw AFError.invalidURL(url: urlString)
         }
@@ -41,10 +41,16 @@ public class NetworkManager {
         
         // 3. AF.request 호출부 수정
         let dataTask = AF.request(url,
-                                  method: .get, // << 변경: @GetMapping이므로 .get 사용
-                                  parameters: parameters, // << count 파라미터를 전달
-                                  encoding: URLEncoding.default, // << 변경: GET 요청의 쿼리 파라미터로 인코딩
+                                  method: .get,
+                                  parameters: parameters,
+                                  encoding: URLEncoding.default,
                                   headers: headers)
+        // ✨ 1. cURL 로그 출력
+                   .cURLDescription { curl in
+                       print("\n\n=============== 🚀 cURL Request ===============\n")
+                       print(curl)
+                       print("\n==============================================\n\n")
+                   }
             .validate(statusCode: 200..<300)
             .serializingDecodable([MatchingProfile].self)
         

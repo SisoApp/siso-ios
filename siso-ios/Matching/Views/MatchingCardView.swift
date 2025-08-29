@@ -18,99 +18,75 @@ public struct MatchingCardView: View {
     // MARK: - Main Body
     
     public var body: some View {
-        
-        VStack { // 컴포넌트 간 간격을 적절히 줍니다.
+        VStack {
             Spacer()
-            
             stateView
-            
             profileImageView
-            
             locationInfoSection
-            
-            HStack{
+            HStack {
                 userInfoSection
                     .fixedSize()
                 Spacer()
                 voicePlayerSection
-                    
             }
             .padding(.horizontal)
-            
-            
             interestTagsSection
-            
             introductionSection
-          
             actionButtonsSection
-            
             Spacer()
-         
         }
-        
+        // background는 VStack의 background로 설정하는 것이 더 일반적입니다.
+        .background(backgroundView)
     }
     
     // MARK: - Subviews (UI Components)
     @ViewBuilder
     private var backgroundView: some View {
-        if let firstImgUrl = cardViewModel.profileImages.first {
-            
+        // 🔥 변경: viewModel의 계산 프로퍼티 사용
+        if let firstImgUrl = cardViewModel.profileImageURLs.first {
             AsyncImage(url: firstImgUrl) { image in
-                // '결과' 1: 성공 시 SwiftUI의 Image 뷰를 받음
                 image
                     .resizable()
                     .scaledToFill()
                     .blur(radius: 60)
-                    .overlay {
-                        Color.black
-                            .opacity(0.6)
-                    } // 이미지가 프레임에 맞게 조절되도록 설정
+                    .overlay(Color.black.opacity(0.6))
             } placeholder: {
-                // '결과' 2: 로딩 중 SwiftUI의 View를 보여줌
                 Color.black
                     .blur(radius: 60)
-                    .overlay {
-                        Color.black
-                            .opacity(0.6)
-                    }
+                    .overlay(Color.black.opacity(0.6))
             }
-            
+            .ignoresSafeArea() // 배경이 화면 전체를 채우도록
+        } else {
+            // 이미지가 없는 경우 기본 배경
+            Color.black.ignoresSafeArea()
         }
     }
     
-    
     private var stateView: some View {
         HStack {
-            makeUserStateView // 괄호 없이 접근
+            makeUserStateView
             Spacer()
         }
         .padding(.horizontal)
     }
     
     private var profileImageView: some View {
-        ZStack {
-            Group {
-                Rectangle()
-                
-                TabView() {
-                    ForEach(cardViewModel.profileImages,id: \.self) { url in
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
-                            
-                        } placeholder: {
-                            ProgressView()
-                        }
-                    }
+        TabView {
+            // 🔥 변경: viewModel의 계산 프로퍼티 사용
+            ForEach(cardViewModel.profileImageURLs, id: \.self) { url in
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } placeholder: {
+                    ProgressView()
                 }
-                .tabViewStyle(.page(indexDisplayMode: .automatic))
             }
-            .frame(maxWidth: .infinity, maxHeight: 242)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .padding(.horizontal)
         }
-        
+        .tabViewStyle(.page(indexDisplayMode: .automatic))
+        .frame(height: 242)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal)
     }
     
     @ViewBuilder
@@ -124,42 +100,41 @@ public struct MatchingCardView: View {
                 .fill(circleColor)
                 .frame(width: 10, height: 10)
             
+            // 폰트 색상을 배경에 맞게 수정 (예: white)
             Text(statusText)
-                .foregroundStyle(.black)
+                .foregroundStyle(.white)
         }
     }
     
-    /// 사용자 이름과 나이를 표시하는 뷰
     private var userInfoSection: some View {
         HStack {
-            Group {
-                Text("\(cardViewModel.nickname),")
-                Text("\(cardViewModel.age)세")
-            }
-            .font(.system(size: 24, weight: .bold, design: .default))
-            .foregroundStyle(.black)
-            
-            Spacer()
+            // 🔥 변경: viewModel의 계산 프로퍼티 사용
+            Text("\(cardViewModel.nickname),")
+            Text("\(cardViewModel.age)세")
         }
+        .font(.system(size: 24, weight: .bold))
+        .foregroundStyle(.white) // 배경이 어두우므로 white로 변경
     }
     
-    /// 위치 정보를 표시하는 뷰
     private var locationInfoSection: some View {
         HStack {
-            Image("locationicon_inverse")
+            Image("locationicon_inverse") // 아이콘 이름 확인 필요
+            // 🔥 변경: viewModel의 계산 프로퍼티 사용
             Text(cardViewModel.location)
-                .foregroundStyle(.black) // 배경이 어두울 것을 가정
+                .foregroundStyle(.white) // 배경에 맞게 white로 변경
             Spacer()
         }
         .padding(.horizontal)
     }
     
-    /// 음성 재생 관련 UI를 표시하는 뷰
     private var voicePlayerSection: some View {
-        let isCurrentlyPlayingThisCard = audioPlayer.isPlaying && audioPlayer.currentlyPlayingURL == cardViewModel.voiceSample
+        // 🔥 변경: viewModel의 계산 프로퍼티 사용
+        let isCurrentlyPlayingThisCard = audioPlayer.isPlaying && audioPlayer.currentlyPlayingURL == cardViewModel.voiceSampleURL
+        
         return HStack {
             HStack(spacing: -15) {
-                let systemName = cardViewModel.voiceSample != nil ? (audioPlayer.isPlaying ? "pause.fill" : "play.fill") : "play.slash"
+                // 🔥 변경: viewModel의 계산 프로퍼티 사용
+                let systemName = cardViewModel.voiceSampleURL != nil ? (isCurrentlyPlayingThisCard ? "pause.fill" : "play.fill") : "play.slash"
                 
                 Image(systemName: systemName)
                     .foregroundStyle(.white)
@@ -171,53 +146,50 @@ public struct MatchingCardView: View {
             }
             .frame(width: 76, height: 44)
             .padding(.horizontal, 5)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.Siso.Gray._70)
-            )
+            .background(RoundedRectangle(cornerRadius: 20).fill(Color.Siso.Gray._70))
             .onTapGesture {
-                guard let voiceURL = cardViewModel.voiceSample else { return }
+                // 🔥 변경: viewModel의 계산 프로퍼티 사용
+                guard let voiceURL = cardViewModel.voiceSampleURL else { return }
                 
-                // ✨ 6. 탭 제스처 로직을 수정합니다.
                 if isCurrentlyPlayingThisCard {
-                    // 현재 이 카드의 오디오가 재생 중이면 -> 일시정지
                     audioPlayer.pause()
                 } else {
                     audioPlayer.play(from: voiceURL)
                 }
             }
         }
-        
     }
     
-    /// 관심사 태그들을 표시하는 뷰
     private var interestTagsSection: some View {
-        HStack {
-            ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in // 태그가 너무 많으면 잘릴 수 있으므로 prefix 사용 고려
-                HStack(spacing: 2) {
-                    Text("#")
-                        .foregroundStyle(.black)
-                    Text(interest)
-                        .foregroundStyle(.black)
-                }
-                .font(.system(size: 18))
+        HStack(spacing: 8) {
+            // 🔥 변경: viewModel의 계산 프로퍼티 사용
+            ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in
+                Text("#\(interest)")
+                    .font(.system(size: 16))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.2))
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
             }
             Spacer()
         }
         .padding(.horizontal)
     }
     
-    /// 자기소개 텍스트를 표시하는 뷰
     private var introductionSection: some View {
+        // 🔥 변경: viewModel의 계산 프로퍼티 사용
         Text(cardViewModel.introduction)
-            .foregroundStyle(.black)
-            .font(.system(size: 18))
+            .foregroundStyle(Color.white.opacity(0.9))
+            .font(.system(size: 16))
+            .lineLimit(2) // 2줄로 제한하고, 더보기 기능을 넣을 수 있음
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .onTapGesture {
-                print ("show all text")
+                print("show all text")
             }
     }
+    
     
     /// 하단 액션 버튼 (메시지, 통화) 뷰
     private var actionButtonsSection: some View {
@@ -259,24 +231,3 @@ public struct MatchingCardView: View {
 }
 
 
-// #Preview는 기존과 동일합니다.
-#Preview {
-    let cardViewModel = CardViewModel(
-        baseProfile: MatchingProfile.sampleMessi,
-        nickname: "삼성전자회장이나야",
-        age: 58,
-        isOnline: true,
-        interestTags: ["여행✈️", "사진", "카페투어"],
-        profileImages: [
-            URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-            URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-            URL(string: "https://picsum.photos/seed/jane2/400/600")!,
-            URL(string: "https://picsum.photos/seed/jane3/400/600")!
-        ],
-        voiceSample: URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"),
-        introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
-        location: "인천 미추홀구"
-    )
-    MatchingCardView(cardViewModel: cardViewModel, audioPlayer: AudioPlayerManager())
-    
-}

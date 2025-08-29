@@ -2,8 +2,9 @@ import UIKit
 import call
 import UserNotifications // 푸시 알림을 위한 프레임워크
 import FirebaseCore
+import FirebaseMessaging
 // SwiftUI 앱에 연결되기 위해 NSObject와 UIApplicationDelegate를 상속받습니다.
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     // MARK: - 1. 앱 시작 시 초기 설정
     
@@ -22,6 +23,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         application.registerForRemoteNotifications()
         
         FirebaseApp.configure()
+        Messaging.messaging().delegate = self
         return true
     }
 
@@ -32,7 +34,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Device Token은 Data 형태로 전달됩니다. 서버로 보내기 위해 16진수 문자열로 변환합니다.
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         print("✅ APNs Device Token: \(tokenString)")
-        
+        Messaging.messaging().apnsToken = deviceToken
         // 🚨 중요: 이 tokenString을 사용자의 ID와 함께 백엔드 서버로 전송해야 합니다.
         // 예: ApiClient.shared.sendDeviceToken(token: tokenString)
         // 백엔드는 이 토큰을 저장해두었다가, 해당 사용자에게 푸시를 보낼 때 사용합니다.
@@ -41,6 +43,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     /// Device Token 등록에 실패했을 때 호출됩니다.
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("🛑 Failed to register for remote notifications: \(error.localizedDescription)")
+        
         // 시뮬레이터에서는 항상 실패합니다. 실제 기기에서 테스트해야 합니다.
     }
 
@@ -85,7 +88,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 // MARK: - UNUserNotificationCenterDelegate 구현
 
-extension AppDelegate: UNUserNotificationCenterDelegate {
+extension AppDelegate {
     
     /// **앱이 포그라운드(화면 맨 앞에 활성화) 상태일 때** 알림이 도착하면 호출됩니다.
     /// 이 메서드를 구현하지 않으면, 포그라운드 상태에서는 푸시 알림이 사용자에게 보이지 않습니다.
@@ -116,10 +119,30 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 }
 
+// MARK: - ✨ Firebase Messaging Delegate Extension ✨
+// FCM 토큰 관리 관련 델리게이트
+extension AppDelegate: MessagingDelegate {
+    
+    /// FCM 등록 토큰이 갱신될 때마다 호출되는 메서드입니다.
+    /// - 토큰은 앱 재설치, 사용자 데이터 삭제, 앱 업데이트 시 등 다양한 경우에 갱신될 수 있습니다.
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let token = fcmToken else {
+            print("🔴 FCM token is nil.")
+            return
+        }
+        
+        print("🔥 FCM Registration Token: \(token)")
+        
+        // 🚨 중요: 이 새로운/갱신된 FCM 토큰을 백엔드 서버로 전송하여
+        // 사용자의 정보와 함께 저장해야 합니다.
+        // 예: ApiClient.shared.sendFCMTokenToServer(token: token)
+    }
+}
 
-// MARK: - Helper Methods
 
+// MARK: - Helper Methods Extension
 private extension AppDelegate {
+    
     /// 사용자에게 알림 권한을 요청하는 함수
     func requestNotificationAuthorization() {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
@@ -132,7 +155,6 @@ private extension AppDelegate {
                 print("✅ Notification authorization granted.")
             } else {
                 print("❌ Notification authorization denied.")
-                // 사용자에게 설정에서 알림을 켜달라고 유도하는 UI를 보여주는 것이 좋습니다.
             }
         }
     }
