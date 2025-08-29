@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import model
 
 public protocol MatchingCoordinatorDelegate: AnyObject {
     
@@ -19,6 +20,9 @@ public protocol MatchingCoordinatorDelegate: AnyObject {
     
     func changeMatchingToAuth()
     /// 전화로 전환
-    func changeMatchingToCall()
+    func changeMatchingToCall(opponentProfile: UserProfileServer)
+    
+    /// 프로필 수정으로 보내기
+    func changeMatchingToProfile()
 }
 

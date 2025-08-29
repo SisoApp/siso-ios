@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import model
 /*
  매칭 화면에 뿌려져야 하는 것
  상대방 매칭 카드 뷰
@@ -27,8 +28,12 @@ import AVFoundation
  */
 
 public class MatchingViewModel: ObservableObject, HomeCardDelegate {
+    public func getNowWatchingCardViewModel() -> CardViewModel? {
+        return nowWatching
+    }
+    
     public var nowWatching: CardViewModel? = nil
-    public weak var delegate: MatchingCoordinatorDelegate?
+    public var delegate: MatchingCoordinatorDelegate?
     
     public init(delegate: MatchingCoordinatorDelegate? = nil, cards: [CardViewModel]) {
         self.delegate = delegate
@@ -39,7 +44,6 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     @Published var isProfileWriteDemanded: Bool = true
     
     public func injectDelegateToCards() {
-        print(delegate == nil)
         print("main delegate")
         for card in cards {
             card.delegate = self.delegate
@@ -60,7 +64,7 @@ extension MatchingViewModel {
     // 정적(static) 프로퍼티로 샘플 데이터를 만듭니다.
     // 이렇게 하면 MatchingViewModel.sample 로 어디서든 접근 가능합니다.
     public static var sample: MatchingViewModel {
-        let viewModel = MatchingViewModel( cards: [])
+        let viewModel = MatchingViewModel( delegate: nil, cards: [])
         
        
 
@@ -73,6 +77,7 @@ extension MatchingViewModel {
 
 // 여러 개의 CardViewModel 샘플을 생성합니다.
 let card1 = CardViewModel(
+    baseProfile: UserProfileServer.sampleMessi,
     nickname: "제인",
     age: 28,
     isOnline: true,
@@ -92,6 +97,7 @@ let card1 = CardViewModel(
 )
 
 let card2 = CardViewModel(
+    baseProfile: UserProfileServer.sampleMessi,
     nickname: "마이크",
     age: 32,
     isOnline: false,
@@ -107,6 +113,7 @@ let card2 = CardViewModel(
 )
 
 let card3 = CardViewModel(
+    baseProfile: UserProfileServer.sampleMessi,
     nickname: "클로이",
     age: 25,
     isOnline: true,
@@ -123,6 +130,7 @@ let card3 = CardViewModel(
 )
 
 let card4 = CardViewModel(
+    baseProfile: UserProfileServer.sampleMessi,
     nickname: "알렉스",
     age: 30,
     isOnline: true,

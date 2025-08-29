@@ -8,6 +8,7 @@ import network
 
 extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
     
+    
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: AuthPage) -> IntegrationPage {
         switch page {
@@ -37,5 +38,6 @@ extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
         InitialView()
             .environmentObject(self) // self(Coordinator)를 주입
             .environmentObject(self.authViewModel) // authViewModel을 주입
+            .environmentObject(self.appSettings)
     }
 }

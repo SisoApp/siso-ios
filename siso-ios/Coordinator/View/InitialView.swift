@@ -2,22 +2,27 @@ import SwiftUI
 import auth
 import network
 import Alamofire
+import model
 
 /// ** 앱 시작 시 비동기 로직(자동 로그인)을 처리하고 첫 화면을 결정하는 뷰입니다.
 public struct InitialView: View {
     // Coordinator와 ViewModel을 EnvironmentObject로 주입받습니다.
     @EnvironmentObject var coordinator: Coordinator
     @EnvironmentObject var authVM: SocialLoginView.LoginViewModel
-
+    @EnvironmentObject var appSettings: AppSettings
+    
+  
     public init() {}
     
     public var body: some View {
+        let _ = print("✅ [InitialView] Body re-evaluated. tutorialHasBeenWatched is: \(appSettings.tutorialHasBeenWatched)")
+        
         Group {
             // authVM의 userState 값에 따라 뷰를 분기합니다.
             switch authVM.userState {
                 case .login:
                     // 로그인 상태이면 매칭 홈으로 바로 이동합니다.
-                    if coordinator.tutorialHasBeenWatched {
+                    if appSettings.tutorialHasBeenWatched {
                         coordinator.build(IntegrationPage.home)
                     } else {
                         coordinator.build(.tutorial)

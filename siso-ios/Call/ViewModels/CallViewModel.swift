@@ -1,105 +1,115 @@
-// InCallViewModel.swift
+// CallViewModel.swift
 
 import SwiftUI
 import Combine
 import model
 import Foundation
 
-// 이제 싱글톤이 아닌 일반 ObservableObject
+@MainActor // UI와 직접 상호작용하므로 클래스 전체를 MainActor로 지정합니다.
 public class CallViewModel: ObservableObject, Identifiable {
     
-    public let id = UUID()
+    public let id = UUID() // SwiftUI 리스트나 시트 등에서 식별자로 사용하기 위해 추가
     
     // MARK: - Published Properties
-    @Published var isMuteMode: Bool = false
-    @Published var isSpeakerMode: Bool = false
     
-    @Published var isShowingTalkTip: Bool = false
-    @Published var isShowingProfile: Bool = false
-    @Published var connectedUserIDs: Set<UInt> = []
-    @Published var remainTime: String = "00:00"
-    
+    @Published public var remainTime: String = "00:00"
+    @Published public var remainingSeconds: TimeInterval
+    @Published public var isMuteMode: Bool = false {
+        didSet { agoraManager.muteLocalAudio(isMuteMode) } // 상태가 바뀌면 즉시 Agora에 적용
+    }
+    @Published public var isSpeakerMode: Bool = false {
+        didSet { agoraManager.enableSpeakerphone(isSpeakerMode) } // 상태가 바뀌면 즉시 Agora에 적용
+    }
     
     // MARK: - Properties
-    var opponentProfile: UserProfileServer
+    
+    public let opponentProfile: UserProfileServer
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
-    private var timer: Timer?
     
-    // Timer
-    var remainingSeconds = 480.0
-    private var totalCallDuration: TimeInterval = 480
-    private var callDuration: TimeInterval = 0
-    
+    private var timerSubscription: AnyCancellable?
+    private let initialCallDuration: TimeInterval = 480.0 // 초기 통화 시간: 8분 (480초)
 
-    // View가 생성될 때 상대방 정보를 주입받음
-    init(opponentProfile: UserProfileServer) {
+    // MARK: - Initializer
+    
+    public init(opponentProfile: UserProfileServer) {
         self.opponentProfile = opponentProfile
+        self.remainingSeconds = initialCallDuration
+        self.remainTime = timeString(from: initialCallDuration)
+        
         bindAgoraManager()
+        
+        // remainingSeconds의 변화를 감지하여 remainTime을 업데이트하는
+        // '영구적인' 파이프라인을 init에서 '단 한 번만' 설정합니다.
+        $remainingSeconds
+            .map { [weak self] seconds in
+                // 약한 참조로 순환 참조를 방지하는 것이 더 안전합니다.
+                self?.timeString(from: seconds) ?? "00:00"
+            }
+            .assign(to: \.remainTime, on: self)
+            .store(in: &cancellables) // 구독을 cancellables에 저장하여 생명주기를 관리합니다.
     }
     
     deinit {
-        print("InCallViewModel deinit")
-        timer?.invalidate()
+        print("CallViewModel deinitialized")
+        // deinit에서 stopTimer()를 호출하지 않습니다.
+        // self.cancellables에 저장된 모든 구독(timerSubscription 포함)은
+        // ViewModel 인스턴스가 메모리에서 해제될 때 자동으로 cancel()되어 정리됩니다.
     }
 
+    // MARK: - Private Methods
+    
     private func bindAgoraManager() {
         agoraManager.userDidJoinPublisher
             .receive(on: DispatchQueue.main)
+            .first() // 상대방이 입장하는 이벤트를 단 한 번만 수신하여 타이머 중복 시작 방지
             .sink { [weak self] uid in
-                self?.connectedUserIDs.insert(uid)
-                // 상대방이 들어오면 타이머 시작
-                if self?.timer == nil {
-                    self?.startTimer()
-                }
+                print("Opponent (uid: \(uid)) joined. Starting call timer.")
+                self?.startTimer()
             }
             .store(in: &cancellables)
     }
     
-    // MARK: - Public Methods (UI Actions)
-    
-    func toggleMute() {
-        isMuteMode.toggle()
-        agoraManager.muteLocalAudio(isMuteMode)
-    }
-    
-    func toggleSpeaker() {
-        isSpeakerMode.toggle()
-        agoraManager.enableSpeakerphone(isSpeakerMode)
-    }
-    
-    // MARK: - Private Methods
-    
     private func startTimer() {
-            // 타이머가 시작될 때 초기 남은 시간을 설정해줍니다.
-            self.remainTime = timeString(from: Int(totalCallDuration))
-            
-            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // 이미 타이머가 실행 중이면 중복 실행 방지
+        guard timerSubscription == nil else { return }
+        
+        // Combine의 Timer.publish를 사용하여 1초마다 이벤트를 방출하는 타이머를 생성
+        timerSubscription = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
                 guard let self = self else { return }
 
-                // 1. 경과 시간을 1초씩 증가
-                self.callDuration += 1
-                
-                // 2. 남은 시간을 계산
-                remainingSeconds = self.totalCallDuration - self.callDuration
-                
-                if remainingSeconds >= 0 {
-                    // 3. 남은 시간이 0 이상이면, 포맷팅하여 Published 프로퍼티 업데이트
-                    self.remainTime = self.timeString(from: Int(remainingSeconds))
+                if self.remainingSeconds > 0 {
+                    self.remainingSeconds -= 1
                 } else {
-                    // 4. 남은 시간이 0이 되면 타이머를 멈추고 통화 종료 로직 호출
-                    self.timer?.invalidate()
-                    print("시간 종료! 통화를 종료합니다.")
-                    // CallManager를 통해 통화 종료 액션 호출
-                    CallManager.shared.endCall(reason: .completed)
+                    // 시간이 다 되면 통화를 종료하고 타이머를 멈춥니다.
+                    print("Time is up! Ending the call.")
+                    self.stopTimer() // 타이머를 먼저 멈추고
+                    self.endCall()   // 통화 종료 로직 호출
                 }
             }
-        }
+        // 타이머 구독도 cancellables에 저장하여 생명주기를 관리합니다.
+        timerSubscription?.store(in: &cancellables)
+    }
     
-    private func timeString(from totalSeconds: Int) -> String {
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        // String(format:)을 사용하여 항상 두 자리 숫자로 표시 (예: 08, 01)
+    private func stopTimer() {
+        timerSubscription?.cancel()
+        timerSubscription = nil
+    }
+    
+    private func timeString(from totalSeconds: TimeInterval) -> String {
+        let secondsInt = Int(totalSeconds)
+        let minutes = secondsInt / 60
+        let seconds = secondsInt % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    // MARK: - Public Methods for UI Actions
+    
+    /// UI에서 통화 종료 버튼을 눌렀을 때 호출됩니다.
+    public func endCall() {
+        stopTimer()
+        CallManager.shared.endCall(reason: .completed)
     }
 }

@@ -14,16 +14,13 @@ extension Coordinator: @preconcurrency CallCoordinatorDelegate {
     private func toIntegrationPage(_ page: CallPage) -> IntegrationPage {
         switch page {
             
-        case .manner:
-            return .manner
-        case .connecting(let opponentProfile):
-            return .connecting(opponentProfile: opponentProfile)
-        case .calling(let viewModel):
-            return .calling(viewModel: viewModel)
+        case .manner(let opponentProfile):
+            return .manner(opponentProfile: opponentProfile)
+    
+        case .activeCall:
+            return .activeCall
             
-        case .incomingCall(let callInfo):
-            return .incomingCall(callInfo: callInfo)
-            
+
         case .reportFeedbackPopup:
             return .reportFeedbackPopup
         }
