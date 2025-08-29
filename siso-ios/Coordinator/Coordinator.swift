@@ -8,12 +8,12 @@ import network
 import mypage
 import model
 import call
-import chat
+
 
 
 
 @MainActor
-public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
+public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
     
     // MARK: - Navigation Paths
@@ -191,9 +191,11 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
             // Call (Enum 수정이 필요합니다)
         case .manner(let opponentProfile):
             AnyView(CallMannerView(opponentProfile: opponentProfile, delegate: self))
+                .navigationBarBackButtonHidden(true)
             
         case .activeCall:
             AnyView(ActiveCallView(delegate: self))
+                .navigationBarBackButtonHidden(true)
             
         case .reportFeedbackPopup:
             AnyView(ReportFeedBackView(delegate: self))
