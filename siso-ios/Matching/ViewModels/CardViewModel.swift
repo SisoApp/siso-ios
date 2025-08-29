@@ -15,68 +15,50 @@ public protocol HomeCardDelegate: AnyObject {
 }
 
 
-public class CardViewModel: ObservableObject, Identifiable  {
+public class CardViewModel: ObservableObject, Identifiable {
+    
+    // 1. Model을 let으로 소유 (Source of Truth)
+    public let profile: MatchingProfile
+    
+    // 의존성 주입
     weak var delegate: MatchingCoordinatorDelegate?
-    
     public weak var homeCardDelegate: HomeCardDelegate?
+
+    // 2. Identifiable 준수를 위한 id
+    public var id: Int { profile.id }
+
+    // --- 뷰를 위한 계산 프로퍼티 ---
+    public var nickname: String { profile.nickname }
+    public var age: Int { profile.age }
+    public var location: String { profile.location }
+    public var interestTags: [String] { profile.interests }
+    public var introduction: String { profile.introduce }
     
-    public init(baseProfile: MatchingProfile ,delegate: MatchingCoordinatorDelegate? = nil) {
+    public var profileImageURLs: [URL] {
+        profile.imageUrls.compactMap { URL(string: $0) }
+    }
+    
+    public var voiceSampleURL: URL? {
+        guard let urlString = profile.voiceSampleUrl else { return nil }
+        return URL(string: urlString)
+    }
+    
+    // ViewModel이 직접 관리하는 상태
+    @Published public var isOnline: Bool = true
+
+    // --- Initializer ---
+    public init(profile: MatchingProfile, delegate: MatchingCoordinatorDelegate? = nil) {
+        self.profile = profile
         self.delegate = delegate
-        self.baseProfile = baseProfile
     }
-    
-    public var baseProfile: MatchingProfile
-    
-    
-    public let uuid: UUID = UUID()
-    public var nickname: String = ""
-    public var age: Int = 0
-    public var isOnline: Bool = true
-    public var interestTags: [String] = []
-    public var profileImages: [URL] = []
-    public var voiceSample: URL?
-    public var introduction: String = ""
-    public var location: String = ""
-    // let backgroundImage: UIImage
-    
-    public init(baseProfile: MatchingProfile ,nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String, location: String) {
-        self.baseProfile = baseProfile
-        self.nickname = nickname
-        self.age = age
-        self.isOnline = isOnline
-        self.interestTags = interestTags
-        self.profileImages = profileImages
-        self.voiceSample = voiceSample
-        self.introduction = introduction
-        self.location = location
-        
-    }
-    
-    func call() { // 화면전환 -> 매너 뷰
-       
+
+    // --- Actions ---
+    func call() {
         homeCardDelegate?.cardViewModelDidRequestCall(on: self)
-        delegate?.changeMatchingToCall(opponentProfile: self.baseProfile)
-        
+        delegate?.changeMatchingToCall(opponentProfile: self.profile)
     }
     
     func chat() {
         print("chat button tapped")
     }
-}
-extension CardViewModel {
-    static let testModel: CardViewModel = .init(
-        baseProfile: MatchingProfile.sampleMessi, nickname: "삼성전자회장이나야",
-        age: 58,
-        isOnline: true,
-        interestTags: ["여행✈️", "사진", "카페투어"],
-        profileImages: [
-            URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-            URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-            URL(string: "https://picsum.photos/seed/jane2/400/600")!,
-            URL(string: "https://picsum.photos/seed/jane3/400/600")!
-        ],
-        voiceSample: URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"),
-        introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요. SwiftUI는 재밌지만 가끔은 어렵네요. 그래도 열심히 공부하고 있습니다. 같이 코딩하실 분도 환영!",
-        location: "인천 미추홀구"
-    )
 }

@@ -8,6 +8,7 @@ import network
 import mypage
 import model
 import call
+import chat
 
 
 
@@ -212,13 +213,4 @@ public class Coordinator: ObservableObject {
             )
         }
     }
-}
-
-
-#Preview {
-    // Preview용 UserProfile
-    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
-
-    // TabView 테스트
-    coordinator.build(.home)
 }
