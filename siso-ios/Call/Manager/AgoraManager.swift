@@ -1,4 +1,4 @@
-//sdf
+// AgoraManager.swift
 
 import AgoraRtcKit
 import Foundation
@@ -7,49 +7,28 @@ import Combine
 public final class AgoraManager: NSObject {
     public static let shared = AgoraManager()
     
-    // MARK: - Publishers (외부 공개 API)
-    
-    /// 채널에 성공적으로 입장했을 때 (자신의 uid 방출)
+    // ... Publishers (기존 코드와 동일) ...
     public let didJoinChannelPublisher = PassthroughSubject<UInt, Never>()
-    
-    // 채널에서 퇴장했을 때
     public let didLeaveChannelPublisher = PassthroughSubject<Void, Never>()
-    
-    // Another User Enters the channel (his uid emit)
     public let userDidJoinPublisher = PassthroughSubject<UInt, Never>()
-    
-    // Another User Leaves the Channel (emit his uid)
     public let userDidLeavePublisher = PassthroughSubject<UInt, Never>()
-    
-    // When Error Occurred
     public let errorPublisher = PassthroughSubject<AgoraErrorCode, Never>()
-    
-    // MARK: - Private Properties
     
     private var agoraEngine: AgoraRtcEngineKit?
     private let appId: String = "a914eda873c04f09a72ee7bd3e522300"
     
-    // MARK: -Lifecycle
-    
     override init() {
         super.init()
+        print("🎙️ [AgoraManager] Initialized.")
     }
     
     deinit {
-        print("AgoraManager deinit")
+        print("🎙️ [AgoraManager] Deinitialized.")
         leaveChannel()
     }
     
-    
-    // MARK: - Public Methods
-    
-    /// Agora 엔진을 초기화하고 음성 통화 채널에 입장합니다.
-    /// - Parameters:
-    ///   - channelName: 입장할 채널의 이름.
-    ///   - token: 인증을 위한 RTC 토큰 (필요시).
-    ///
-    
     public func initalizeAndJoinChannel(channelName: String, token: String? = nil) {
+        print("🎙️ [AgoraManager] ➡️ Attempting to initialize and join channel: '\(channelName)'")
         let config = AgoraRtcEngineConfig()
         config.appId = appId
         config.audioScenario = .chatRoom
@@ -67,65 +46,60 @@ public final class AgoraManager: NSObject {
                                               uid: 0,
                                               mediaOptions: option)
         
-        if result != 0 {
-                    print("Failed to join channel with error code: \(String(describing: result))")
+        if result == 0 {
+            print("🎙️ [AgoraManager] ✅ joinChannel call succeeded locally. Waiting for delegate callback...")
+        } else {
+            print("🎙️ [AgoraManager] 🔴 FAILED to join channel with error code: \(String(describing: result))")
             errorPublisher.send(.joinChannelRejected)
-                }
+        }
     }
     
-    /// 채널에서 퇴장하고 엔진을 파괴합니다.
     public func leaveChannel() {
+        print("🎙️ [AgoraManager] ➡️ Leaving channel and destroying engine.")
         agoraEngine?.leaveChannel()
         AgoraRtcEngineKit.destroy()
         agoraEngine = nil
     }
     
-    // MARK: - Audio Control
-    
-    /// 자신의 마이크 음소거 여부를 설정합니다.
-    /// - Parameter isMuted: true이면 음소거, false이면 음소거 해제.
-    public func muteLocalAudio(_ isMuted: Bool) {
-        agoraEngine?.muteLocalAudioStream(isMuted)
-    }
-    
-    /// 스피커폰 활성화 여부를 설정합니다.
-    /// - Parameter isEnabled: true이면 스피커폰 활성화, false이면 비활성화(일반 통화 리시버).
-    
-    public func enableSpeakerphone(_ isEnable: Bool) {
-        agoraEngine?.setEnableSpeakerphone(isEnable)
-    }
-    
-    // MARK: - Private Helper Methods
-    
+    // ... Audio Control (기존 코드와 동일) ...
+    public func muteLocalAudio(_ isMuted: Bool) { agoraEngine?.muteLocalAudioStream(isMuted) }
+    public func enableSpeakerphone(_ isEnable: Bool) { agoraEngine?.setEnableSpeakerphone(isEnable) }
+
     private func setupAudio() {
         guard let agoraEngine = agoraEngine else {return}
-        // 오디오 모듈 활성화
         agoraEngine.enableAudio()
-        // 프로필 설정: 높은 음질, 스테레오, 낮은 지연 시간
         agoraEngine.setAudioProfile(.musicHighQualityStereo)
     }
-    
 }
 
 extension AgoraManager: AgoraRtcEngineDelegate {
+    // 내가 채널에 성공적으로 입장했을 때
     public func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinChannel channel: String, withUid uid: UInt, elapsed: Int) {
+        print("🎙️ [DELEGATE] ✅ Local user (uid: \(uid)) successfully joined channel '\(channel)'")
         didJoinChannelPublisher.send(uid)
     }
     
+    // 내가 채널에서 퇴장했을 때
     public func rtcEngine(_ engine: AgoraRtcEngineKit, didLeaveChannelWith stats: AgoraChannelStats) {
+        print("🎙️ [DELEGATE] ✅ Local user successfully left the channel.")
         didLeaveChannelPublisher.send(())
     }
     
+    // 다른 사용자가 채널에 입장했을 때 (가장 중요!)
     public func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
+        print("🎙️ [DELEGATE] 🤝 Remote user (uid: \(uid)) joined the channel. Sending publisher event.")
         userDidJoinPublisher.send(uid)
     }
     
+    // 다른 사용자가 채널에서 퇴장했을 때
     public func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
+        print("🎙️ [DELEGATE] 👋 Remote user (uid: \(uid)) left the channel. Reason code: \(reason.rawValue)")
         userDidLeavePublisher.send(uid)
     }
     
+    // 에러가 발생했을 때
     public func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurError errorCode: AgoraErrorCode) {
+        print("🎙️ [DELEGATE] 🔴 An error occurred. Code: \(errorCode.rawValue)")
         errorPublisher.send(errorCode)
     }
 }
-

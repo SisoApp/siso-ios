@@ -31,6 +31,9 @@ public struct MatchingMainView: View {
                 }
             }
             .ignoresSafeArea()
+            if viewModel.isProfileWriteDemanded {
+                ProfileDemandingView(matchingViewModel: viewModel, delegate: delegate)
+            }
         }
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }
@@ -42,12 +45,10 @@ public struct MatchingMainView: View {
                 print("👀 Now Watching: \(newWatchingCard.nickname)")
             }
         }
-        .onAppear(){
+        .onAppear() {
             viewModel.injectDelegateToCards()
         }
-        if viewModel.isProfileWriteDemanded {
-            ProfileDemandingView(matchingViewModel: viewModel)
-        }
+        
         
     }
 }
@@ -61,9 +62,3 @@ private func makeView(for cardViewModel: CardViewModel, geometry: GeometryProxy)
 }
 
 
-// Preview Provider
-struct MatchingShortsVerticalView_Previews: PreviewProvider {
-    static var previews: some View {
-        MatchingMainView(viewModel: MatchingViewModel( cards: []), delegate: nil)
-    }
-}

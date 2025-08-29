@@ -10,7 +10,12 @@ import designSystem
 
 public struct ProfileDemandingView: View {
     @ObservedObject var matchingViewModel: MatchingViewModel
-   
+    var delegate: MatchingCoordinatorDelegate?
+    
+    public init(matchingViewModel: MatchingViewModel, delegate: MatchingCoordinatorDelegate? = nil) {
+        self.matchingViewModel = matchingViewModel
+        self.delegate = delegate
+    }
     
     public var body: some View {
         ZStack {
@@ -20,7 +25,7 @@ public struct ProfileDemandingView: View {
                 HStack {
                     Spacer()
                     Button {
-                        matchingViewModel.isProfileWriteDemanded = false
+                        matchingViewModel.isProfileWriteDemanded = true
                     } label: {
                         Image(systemName: "xmark")
                             .resizable()
@@ -50,6 +55,9 @@ public struct ProfileDemandingView: View {
                 VStack{
                     Button {
                         print("상세 프로필 작성하러 가기")
+                        matchingViewModel.isProfileWriteDemanded = false
+                        delegate?.changeMatchingToProfile()
+                        
                         // TODO: 상세 프로필 작성하는 마이페이지로 이동
                     } label: {
                         Text("상세 프로필 작성하러 가기")
@@ -61,10 +69,11 @@ public struct ProfileDemandingView: View {
                                 RoundedRectangle(cornerRadius: 30)
                                     .foregroundStyle(Color.Siso.Primary._40)
                             )
+                            .padding(.horizontal)
                     }
                     
                     Button {
-                        matchingViewModel.isProfileWriteDemanded = true
+                        matchingViewModel.isProfileWriteDemanded = false
                     } label: {
                         Text("닫기")
                             .font(.system(size: 18, weight: .semibold))

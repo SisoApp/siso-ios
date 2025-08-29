@@ -167,7 +167,7 @@ let chat: Target = .target(
     infoPlist: .default,
     sources: ["siso-ios/Chat/**"],
     dependencies: [
-        .target(name: "model")
+        .target(name: "designSystem"),
     ]
 )
 

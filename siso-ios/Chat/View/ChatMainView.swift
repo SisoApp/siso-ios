@@ -11,40 +11,75 @@ import designSystem
 
 
 public struct ChatMainView: View {
-    @State private var selectedList: ContactType = .recentChat
-    @State private var isToolbarVisible: Bool = true
+    @State private var selectedList: ContactType = .callList
     
     // 삭제 기능을 위해 상태 변수로 관리합니다.
     @State private var callHistory: [Contact] = []
     @State private var recentChats: [RecentChat] = []
+    var delegate: ChatCoordinatorDelegate?
     
-    public init() {}
+    public init(delegate: ChatCoordinatorDelegate?) {
+        self.delegate = delegate
+    }
     
     public var body: some View {
         VStack {
-            List {
+            Group {
                 switch selectedList {
                 case .callList:
-                    ForEach(callHistory) { contact in
-                        ContactView(userName: contact.userName, icon: contact.icon, time: formatTime(date: contact.time), type: .callList)
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    print("delete!!")
-                                } label: {
-                                    Text("인연 끊기")
-                                        .fontWeight(.semibold)
-                                }
+                    if callHistory.isEmpty {
+                        Image("smartphone")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                        Text("첫 전화를 기다리고 있어요.\n 마음 맞는 분께 목소리로 인사해보세요.")
+                            .font(.system(size: 20))
+                            .lineLimit(10)
+                            .tracking(-0.01)
+                            .multilineTextAlignment(.center)
+                            .padding(.top)
+                            .foregroundStyle(Color.Siso.Gray._70)
+                    }else {
+                        List {
+                            ForEach(callHistory) { contact in
+                                ContactView(contact: contact, type: selectedList)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            print("delete!!")
+                                        } label: {
+                                            Text("인연 끊기")
+                                                .fontWeight(.semibold)
+                                        }
+                                        .tint(Color.Siso.Red._60)
+                                    }
                             }
+                        }
+                        
                     }
                 case .recentChat:
-                    ForEach(recentChats) { contact in
-                        ContactView(userName: contact.userName, icon: contact.icon, time: formatTime(date: contact.time), type: .recentChat, hasMessage: contact.hasMessages, recentMessage: contact.recentMessage)
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                print("나가기")
-                            } label: {
-                                Text("나가기")
-                                    .fontWeight(.semibold)
+                    if recentChats.isEmpty {
+                        Image("coffeecup")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                        Text("아직 대화한 기록이 없어요.\n 좋은 인연과 이야기를 나눠보세요.")
+                            .font(.system(size: 20))
+                            .lineLimit(10)
+                            .tracking(-0.01)
+                            .multilineTextAlignment(.center)
+                            .padding(.top)
+                            .foregroundStyle(Color.Siso.Gray._70)
+                    }else {
+                        List {
+                            ForEach(recentChats) { chat in
+                                ContactView(chat: chat, type: selectedList)
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        print("나가기")
+                                    } label: {
+                                        Text("나가기")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .tint(Color.Siso.Red._60)
+                                }
                             }
                         }
                     }
@@ -84,20 +119,7 @@ public struct ChatMainView: View {
             // View가 나타날 때 초기 데이터를 State 변수에 로드합니다.
             self.recentChats = chats
             self.callHistory = calls
-            self.isToolbarVisible = true
         }
-        .onDisappear {
-            self.isToolbarVisible = false
-        }
-        .toolbar(isToolbarVisible ? .visible : .hidden, for: .navigationBar)
-    }
-    
-    // Date Format Convert String
-    private func formatTime(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "a h:mm"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter.string(from: date)
     }
 }
 
@@ -156,9 +178,9 @@ public extension ChatMainView {
     }
 }
 
-
-#Preview {
-    NavigationStack {
-        ChatMainView()
-    }
-}
+//
+//#Preview {
+//    NavigationStack {
+//        ChatMainView()
+//    }
+//}

@@ -12,10 +12,10 @@ import model
 // 발신자의 첫 화면
 public struct CallMannerView: View {
     // 전달은 홈에서 부터
-    var opponentProfile: UserProfileServer
+    var opponentProfile: MatchingProfile
     var delegate: CallCoordinatorDelegate?
     
-    public init(opponentProfile: UserProfileServer, delegate: CallCoordinatorDelegate? = nil) {
+    public init(opponentProfile: MatchingProfile, delegate: CallCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.delegate = delegate
     }
@@ -31,6 +31,9 @@ public struct CallMannerView: View {
             Text("🤝 전화 시작 전 약속")
                 .font(.system(size: 24, weight: .bold))
                 .padding(.top, 30)
+                .onAppear(){
+                    print("MANNER ON")
+                }
             
             Spacer()
             HStack {
@@ -46,9 +49,10 @@ public struct CallMannerView: View {
             
             Button {
                 print("확인했어요 전화 시작")
-                delegate?.pushCall(.connecting(opponentProfile: opponentProfile))
                 // 전화 시작
                 CallManager.shared.startCall(to: opponentProfile)
+                
+                delegate?.pushCall(.activeCall)
             } label: {
                 Text("확인했어요")
                     .font(.system(size: 18))

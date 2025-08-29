@@ -12,10 +12,12 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
 public struct ConnectingView: View {
-   @ObservedObject var callViewModel: CallViewModel
-   
-    public init(callViewModel: CallViewModel) {
-        self.callViewModel = callViewModel
+    var opponentProfile: MatchingProfile
+    var delegate: CallCoordinatorDelegate?
+    
+    public init(opponentProfile: MatchingProfile, delegate: CallCoordinatorDelegate? = nil) {
+        self.opponentProfile = opponentProfile
+        self.delegate = delegate
     }
     
     // MARK: - Body
@@ -25,16 +27,16 @@ public struct ConnectingView: View {
             Spacer()
             
             // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
-            Text("\(callViewModel.opponentProfile.nickname) 님과\n연결중이에요")
+            Text("\(opponentProfile.nickname) 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
                 .padding()
-
+            
             // 이 뷰는 이미 존재한다고 가정합니다.
-             CallingWaveformView(count: 15, height: 100, isplaying: true)
-                 .frame(width: 300)
-                 .padding()
+            CallingWaveformView(count: 15, height: 100, isplaying: true)
+                .frame(width: 300)
+                .padding()
             
             // TabView를 사용하여 대화 팁을 보여줍니다.
             TabView {
@@ -45,39 +47,57 @@ public struct ConnectingView: View {
             .frame(height: 150) // 콘텐츠에 맞게 높이 조절
             
             // 취소 버튼 추가 (사용자 경험을 위해 중요)
-                       Button {
-                           // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
-                           CallManager.shared.endCall(reason: .cancelled)
-                       } label: {
-                           ZStack {
-                               RoundedRectangle(cornerRadius: 24)
-                                   .fill(Color.Siso.Gray._5)
-                                   .stroke(Color.Siso.Gray._30, lineWidth: 1)
-                           }
-                           VStack {
-                               Image("endcall")
-                                   .resizable()
-                                   .scaledToFit()
-                                   .frame(width: 40, height: 40)
-                               Text("전화 종료")
-                                   .font(.headline)
-                                   .foregroundColor(.black)
-                                   .padding()
-                           }
-                          
-                       }
-                       .padding()
+            Button {
+                // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
+                CallManager.shared.endCall(reason: .cancelled)
+                delegate?.popToRoot()
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.Siso.Gray._5)
+                        .stroke(Color.Siso.Gray._30, lineWidth: 1)
+                    VStack {
+                        Image("endcall")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                        Text("전화 종료")
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .padding()
+                        // ================== 테스트 코드 추가 시작 ==================
+                                  #if DEBUG // DEBUG 빌드에서만 이 버튼이 보이도록 합니다.
+                                  Button("TEST: 상대방이 전화 받음") {
+                                      // CallManager의 상태를 강제로 .inCall로 변경합니다.
+                                      // 실제 앱에서는 이 부분이 Agora 이벤트에 의해 자동으로 호출됩니다.
+                                      
+                                      // 현재 callState가 .connecting일 때만 동작하도록 방어 코드 추가
+                                      if case .connecting(let info) = CallManager.shared.callState {
+                                          print("🧪 TEST: Forcing call state to .inCall")
+                                          CallManager.shared.forceUpdateState(to: .inCall(info: info))
+                                      }
+                                  }
+                                  .padding()
+                                  .background(Color.yellow)
+                                  .foregroundColor(.black)
+                                  .clipShape(Capsule())
+                                  #endif
+                                  // ================== 테스트 코드 추가 끝 ==================
+                    }
+                }
+            }
+            .padding()
             
             Spacer()
         }
         .onAppear(){
-           // TODO: 연결 시도 로직 시작 (예: 타이머, 실제 연결 요청 등)
+            // TODO: 연결 시도 로직 시작 (예: 타이머, 실제 연결 요청 등)
         }
     }
     
     // MARK: - Subviews
     @ViewBuilder
-    private func profileImageView(profile: UserProfileServer) -> some View {
+    private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
         if profile.profileImageUrls.isEmpty {
             placeholderImage

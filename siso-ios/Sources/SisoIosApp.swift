@@ -4,12 +4,14 @@ import auth
 import coordinator
 import profile
 import matching
+import model
+import call
 
 @main
 struct SisoIosApp: App {
     @StateObject var userProfile: UserProfile
     @StateObject private var coordinator: Coordinator
-    
+    @StateObject private var appSettings = AppSettings()
     @StateObject var matchingViewModel: MatchingViewModel
     @StateObject var authVM: SocialLoginView.LoginViewModel
     @StateObject var locationViewModel: LocationViewModel
@@ -25,12 +27,13 @@ struct SisoIosApp: App {
         let matchingViewModel = MatchingViewModel(cards: [])
         let authViewModel = SocialLoginView.LoginViewModel()
         let locationViewModel: LocationViewModel = .init()
-
+        
         self._userProfile = StateObject(wrappedValue: userProfile)
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         self._authVM = StateObject(wrappedValue: authViewModel)
         self._locationViewModel = StateObject(wrappedValue: locationViewModel)
-
+        self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
+        
         self._coordinator = StateObject(
             wrappedValue: Coordinator(
                 userProfile: userProfile,
@@ -43,20 +46,7 @@ struct SisoIosApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $coordinator.path) {
-                //coordinator.build(.signUp)
-                coordinator.start()
-                    .navigationDestination(for: IntegrationPage.self, destination: { page in
-                        coordinator.build(page)
-                    })
-                    .sheet(item: $coordinator.profileSheet) { sheet in
-                        coordinator.build(sheet: sheet)
-                    }
-                    .sheet(item: $coordinator.matchingSheet) { sheet in
-                        coordinator.build(sheet: sheet)
-                    }
-            }
-            .id(coordinator.stackID)
+            coordinator.start()
         }
     }
 }

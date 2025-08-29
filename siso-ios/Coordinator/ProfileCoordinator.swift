@@ -26,7 +26,13 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
 
     // Profile Page
     public func pushProfile(_ page: ProfilePage) {
-        path.append(toIntegrationPage(page))
+        if selectedTab == 2 {
+            // 마이페이지에서 프로필 화면을 보여줄 때
+            myPagePath.append(toIntegrationPage(page))
+        } else {
+            // 최초 로그인 시점에 프로필을 등록할 때
+            path.append(toIntegrationPage(page))
+        }
     }
     
     public func pushFullScreenProfileImageView() {

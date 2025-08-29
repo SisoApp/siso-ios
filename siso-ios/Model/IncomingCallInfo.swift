@@ -1,7 +1,7 @@
 import Foundation
 
 public struct IncomingCallInfo: Identifiable {
-    public init(channelId: String, token: String, opponentProfile: UserProfileServer) {
+    public init(channelId: String, token: String, opponentProfile: MatchingProfile) {
         self.channelId = channelId
         self.token = token
         self.opponentProfile = opponentProfile
@@ -9,7 +9,7 @@ public struct IncomingCallInfo: Identifiable {
     public let id: UUID = UUID()
     public let channelId: String
     public let token: String
-    public let opponentProfile: UserProfileServer // 상대방 정보
+    public let opponentProfile: MatchingProfile // 상대방 정보
 }
 
 
@@ -25,7 +25,7 @@ public extension IncomingCallInfo {
             
             // 제공해주신 UserProfileServer.sampleMessi를 직접 사용합니다.
             // 이제 통화 정보와 프로필 정보가 일관성을 가지게 됩니다.
-            opponentProfile: UserProfileServer.sampleMessi
+            opponentProfile: MatchingProfile.sampleMessi
         )
     }
 }

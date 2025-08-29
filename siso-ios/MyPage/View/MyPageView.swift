@@ -23,22 +23,20 @@ public struct MyPageView: View {
     }
     
     public var body: some View {
-        NavigationStack {
-            VStack {
-                profileBox()
-                profileProgressView()
-                userInfoList()
-                
-                Spacer()
-            }
-            .padding(EdgeInsets(top: 30, leading: 16, bottom: 0, trailing: 16))
-            .navigationTitle("내 정보")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    settingButton()
-                }
+        VStack {
+            profileBox()
+            profileProgressView()
+            userInfoList()
+            
+            Spacer()
+        }
+        .padding(EdgeInsets(top: 30, leading: 16, bottom: 0, trailing: 16))
+        .navigationTitle("내 정보")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                settingButton()
             }
         }
     }

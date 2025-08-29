@@ -16,7 +16,7 @@ public enum SocialLoginType: String, Codable, Sendable {
 // MARK: TOKEN RESPONSE
 public struct Token: Codable, Sendable {
     let refreshToken: String
-    let registrationStatus: String
+    var registrationStatus: String
     let hasProfile: Bool
 }
 

@@ -9,8 +9,6 @@ import Foundation
 import Alamofire
 import CryptoKit
 
-
-
 // MARK: - Network Manager
 
 public final actor LoginNetworkManager: Sendable {
@@ -52,9 +50,12 @@ public final actor LoginNetworkManager: Sendable {
             .validate(statusCode: 200..<300)
             .responseDecodable(of: Token.self) { [weak self] response in
                 switch response.result {
-                case .success(let token):
+                case .success(var token):
                     // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
                     self?.keychain.save(token: token.refreshToken, for: "refreshToken")
+                    if token.hasProfile  {
+                        token.registrationStatus = "REGISTER" // 동의 항목 이동
+                    }
                     completionHandler(token.registrationStatus, nil)
                 case .failure(let error):
                     completionHandler("", error)

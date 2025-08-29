@@ -10,9 +10,6 @@ public struct MatchingCardView: View {
     @ObservedObject var cardViewModel: CardViewModel
     @ObservedObject var audioPlayer: AudioPlayerManager
     
-    //@State private var isPlaying = false
-    //public var delegate: MatchingCoordinatorDelegate?
-    
     public init(cardViewModel: CardViewModel, audioPlayer: AudioPlayerManager) {
         self._cardViewModel = .init(wrappedValue: cardViewModel)
         self._audioPlayer = .init(wrappedValue: audioPlayer)
@@ -44,13 +41,11 @@ public struct MatchingCardView: View {
             interestTagsSection
             
             introductionSection
-            
+          
             actionButtonsSection
             
             Spacer()
-        }
-        .background {
-           // backgroundView
+         
         }
         
     }
@@ -188,8 +183,6 @@ public struct MatchingCardView: View {
                     // 현재 이 카드의 오디오가 재생 중이면 -> 일시정지
                     audioPlayer.pause()
                 } else {
-                    // 다른 오디오가 재생 중이거나, 아무것도 재생 중이 아닐 때
-                    // -> 이 카드의 오디오를 처음부터 재생
                     audioPlayer.play(from: voiceURL)
                 }
             }
@@ -200,7 +193,6 @@ public struct MatchingCardView: View {
     /// 관심사 태그들을 표시하는 뷰
     private var interestTagsSection: some View {
         HStack {
-            // Group은 ForEach가 여러 뷰를 생성할 때 컨테이너 역할을 합니다. 여기서는 생략 가능.
             ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in // 태그가 너무 많으면 잘릴 수 있으므로 prefix 사용 고려
                 HStack(spacing: 2) {
                     Text("#")
@@ -270,6 +262,7 @@ public struct MatchingCardView: View {
 // #Preview는 기존과 동일합니다.
 #Preview {
     let cardViewModel = CardViewModel(
+        baseProfile: MatchingProfile.sampleMessi,
         nickname: "삼성전자회장이나야",
         age: 58,
         isOnline: true,

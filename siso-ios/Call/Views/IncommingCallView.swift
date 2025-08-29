@@ -15,6 +15,7 @@ public struct IncommingCallView: View {
     // ViewModel 대신, 필요한 데이터 모델을 직접 받습니다.
     let callInfo: IncomingCallInfo
     var delegate: CallCoordinatorDelegate
+    
     public init(callInfo: IncomingCallInfo, delegate: CallCoordinatorDelegate) {
         self.callInfo = callInfo
         self.delegate = delegate
@@ -40,7 +41,7 @@ public struct IncommingCallView: View {
     // MARK: - View Components (Functions)
     
     /// 전화가 걸려온 사람을 표시하는 섹션
-    private func callFromSection(profile: UserProfileServer) -> some View {
+    private func callFromSection(profile: MatchingProfile) -> some View {
         Text("\(profile.nickname) 님으로부터\n전화가 걸려왔어요")
             .multilineTextAlignment(.center)
             .font(.system(size: 24, weight: .bold))
@@ -48,7 +49,7 @@ public struct IncommingCallView: View {
     }
     
     /// 프로필 이미지를 표시하는 뷰
-    private func profileImageAnimatedView(profile: UserProfileServer) -> some View {
+    private func profileImageAnimatedView(profile: MatchingProfile) -> some View {
         // profileImageUrls 배열의 첫 번째 이미지를 사용하되, nil-coalescing으로 안전하게 처리합니다.
         // URL(string:) 생성자도 옵셔널을 반환하므로 if let으로 처리하는 것이 더 안전합니다.
         let imageUrl = URL(string: profile.profileImageUrls.first ?? "")
@@ -73,7 +74,7 @@ public struct IncommingCallView: View {
     }
     
     /// 사용자 이름과 나이를 표시하는 뷰
-    private func userInfoSection(profile: UserProfileServer) -> some View {
+    private func userInfoSection(profile: MatchingProfile) -> some View {
         HStack(spacing: 8) {
             Text(profile.nickname)
                 .font(.system(size: 24, weight: .bold))
@@ -86,7 +87,7 @@ public struct IncommingCallView: View {
     }
     
     /// 관심사 태그들을 표시하는 뷰
-    private func interestTagsSection(profile: UserProfileServer) -> some View {
+    private func interestTagsSection(profile: MatchingProfile) -> some View {
         // 태그가 많을 경우를 대비해 스크롤 뷰를 사용하고, 최대 5개까지만 표시
         HStack {
             ForEach(profile.interestTags.prefix(5), id: \.self) { interest in
@@ -102,7 +103,7 @@ public struct IncommingCallView: View {
     }
     
     /// 자기소개 텍스트를 표시하는 뷰
-    private func introductionSection(profile: UserProfileServer) -> some View {
+    private func introductionSection(profile: MatchingProfile) -> some View {
         Text(profile.introduce)
             .foregroundStyle(.secondary) // 본문 텍스트에 적합한 색상
             .font(.system(size: 16))
