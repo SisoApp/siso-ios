@@ -262,7 +262,7 @@ public struct MatchingCardView: View {
 // #Preview는 기존과 동일합니다.
 #Preview {
     let cardViewModel = CardViewModel(
-        baseProfile: UserProfileServer.sampleMessi,
+        baseProfile: MatchingProfile.sampleMessi,
         nickname: "삼성전자회장이나야",
         age: 58,
         isOnline: true,

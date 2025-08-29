@@ -9,7 +9,7 @@ import SwiftUI
 import model
 
 struct CallNotificationSnackBar: View {
-    var profile: UserProfileServer
+    var profile: MatchingProfile
     var body: some View {
         VStack {
             HStack {
@@ -53,7 +53,7 @@ struct CallNotificationSnackBar: View {
     }
     
     /// 프로필 이미지를 표시하는 뷰
-    private func profileImageAnimatedView(profile: UserProfileServer) -> some View {
+    private func profileImageAnimatedView(profile: MatchingProfile) -> some View {
         // profileImageUrls 배열의 첫 번째 이미지를 사용하되, nil-coalescing으로 안전하게 처리합니다.
         // URL(string:) 생성자도 옵셔널을 반환하므로 if let으로 처리하는 것이 더 안전합니다.
         let imageUrl = URL(string: profile.profileImageUrls.first ?? "")
@@ -79,5 +79,5 @@ struct CallNotificationSnackBar: View {
 }
 
 #Preview {
-    CallNotificationSnackBar(profile: UserProfileServer.sampleMessi)
+    CallNotificationSnackBar(profile: MatchingProfile.sampleMessi)
 }

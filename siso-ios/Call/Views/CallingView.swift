@@ -106,7 +106,7 @@ public struct CallingView: View {
     
     // MARK: - View Components (Functions)
     @ViewBuilder
-    private func profileImageView(profile: UserProfileServer) -> some View {
+    private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
         if profile.profileImageUrls.isEmpty {
             placeholderImage
@@ -143,7 +143,7 @@ public struct CallingView: View {
     }
     
     /// 사용자 이름과 나이를 표시하는 뷰
-    private func userInfoSection(profile: UserProfileServer) -> some View {
+    private func userInfoSection(profile: MatchingProfile) -> some View {
         HStack {
             Text("\(profile.nickname),")
                 .font(.system(size: 24, weight: .bold))
@@ -158,7 +158,7 @@ public struct CallingView: View {
     }
     
     /// 위치 정보를 표시하는 뷰
-    private func locationInfoSection(profile: UserProfileServer) -> some View {
+    private func locationInfoSection(profile: MatchingProfile) -> some View {
         HStack {
             Image("locationicon_inverse") // 에셋 이름 확인 필요
             Text(profile.location) // UserProfileServer에 location이 옵셔널로 있다고 가정
@@ -170,7 +170,7 @@ public struct CallingView: View {
     }
     
     /// 자기소개 텍스트를 표시하는 뷰
-    private func introductionSection(profile: UserProfileServer) -> some View {
+    private func introductionSection(profile: MatchingProfile) -> some View {
         Text(profile.introduce)
             .foregroundStyle(.black)
             .font(.system(size: 16))
@@ -179,7 +179,7 @@ public struct CallingView: View {
             .padding(.horizontal)
     }
     
-    private func commonInterestView(profile: UserProfileServer) -> some View {
+    private func commonInterestView(profile: MatchingProfile) -> some View {
         HStack {
             Text("공통 관심사")
                 .font(.system(size: 18, weight: .medium))
@@ -265,5 +265,5 @@ public struct CallingView: View {
 
 // MARK: - Preview
 #Preview {
-    CallingView(inCallViewModel: CallViewModel(opponentProfile: UserProfileServer.sampleMessi))
+    CallingView(inCallViewModel: CallViewModel(opponentProfile: MatchingProfile.sampleMessi))
 }

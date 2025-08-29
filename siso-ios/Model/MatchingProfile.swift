@@ -7,8 +7,8 @@
 
 import Foundation
 
-public struct UserProfileServer: Equatable, Identifiable {
-    public let id = UUID()
+public struct MatchingProfile: Equatable, Identifiable, Codable {
+    public var id = UUID()
     
     public let nickname: String // 닉네임
     public let sex: String // 성별
@@ -23,7 +23,7 @@ public struct UserProfileServer: Equatable, Identifiable {
     public var location: String
     
     /// 리오넬 메시를 테마로 한 샘플 프로필 데이터
-    public static let sampleMessi: UserProfileServer = .init(
+    public static let sampleMessi: MatchingProfile = .init(
         nickname: "리오넬 메시",
         sex: "남자",
         age: 37,

@@ -29,7 +29,7 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
     @Published public var callPage: CallPage?
     @Published public var callSheet: CallSheet?
     @Published public var activeCallInfo: IncomingCallInfo?
-    @Published public var afterCallSheetProfile: UserProfileServer?
+    @Published public var afterCallSheetProfile: MatchingProfile?
     
     private let callManager = CallManager.shared
     private var cancellables = Set<AnyCancellable>()
