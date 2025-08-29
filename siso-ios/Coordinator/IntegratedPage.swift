@@ -32,7 +32,7 @@ public enum IntegrationPage: Hashable, Identifiable {
     // Call
     // ✨ [수정] manner 케이스는 어떤 상대방과의 통화인지 알아야 하므로
     // opponentProfile 연관값을 갖도록 수정합니다.
-    case manner(opponentProfile: UserProfileServer)
+    case manner(opponentProfile: MatchingProfile)
     
     // ✨ [수정] connecting, calling, incomingCall을 'activeCall' 하나로 통합합니다.
     case activeCall

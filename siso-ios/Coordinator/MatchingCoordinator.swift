@@ -34,7 +34,7 @@ extension Coordinator {
         path.append(IntegrationPage.profile)
     }
     
-    public func changeMatchingToCall(opponentProfile: UserProfileServer) {
+    public func changeMatchingToCall(opponentProfile: MatchingProfile) {
         print("Call operation launched")
         print("콜함수 씨발아 호출되라고 2 \(opponentProfile.nickname)")
         matchingPath.append(IntegrationPage.manner(opponentProfile: opponentProfile))

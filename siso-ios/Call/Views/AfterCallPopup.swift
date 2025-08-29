@@ -9,9 +9,9 @@ import SwiftUI
 import model
 
 public struct AfterCallPopup: View {
-    var opponentProfile: UserProfileServer
+    var opponentProfile: MatchingProfile
     
-    public init(opponentProfile: UserProfileServer){
+    public init(opponentProfile: MatchingProfile){
         self.opponentProfile = opponentProfile
     }
     
@@ -91,5 +91,5 @@ public struct AfterCallPopup: View {
 }
 
 #Preview {
-    AfterCallPopup(opponentProfile: UserProfileServer.sampleMessi)
+    AfterCallPopup(opponentProfile: MatchingProfile.sampleMessi)
 }

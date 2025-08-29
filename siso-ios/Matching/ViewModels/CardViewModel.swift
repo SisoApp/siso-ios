@@ -20,12 +20,12 @@ public class CardViewModel: ObservableObject, Identifiable  {
     
     public weak var homeCardDelegate: HomeCardDelegate?
     
-    public init(baseProfile: UserProfileServer ,delegate: MatchingCoordinatorDelegate? = nil) {
+    public init(baseProfile: MatchingProfile ,delegate: MatchingCoordinatorDelegate? = nil) {
         self.delegate = delegate
         self.baseProfile = baseProfile
     }
     
-    public var baseProfile: UserProfileServer
+    public var baseProfile: MatchingProfile
     
     
     public let uuid: UUID = UUID()
@@ -39,7 +39,7 @@ public class CardViewModel: ObservableObject, Identifiable  {
     public var location: String = ""
     // let backgroundImage: UIImage
     
-    public init(baseProfile: UserProfileServer ,nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String, location: String) {
+    public init(baseProfile: MatchingProfile ,nickname: String, age: Int, isOnline: Bool, interestTags: [String], profileImages: [URL], voiceSample: URL?, introduction: String, location: String) {
         self.baseProfile = baseProfile
         self.nickname = nickname
         self.age = age
@@ -55,7 +55,6 @@ public class CardViewModel: ObservableObject, Identifiable  {
     func call() { // 화면전환 -> 매너 뷰
        
         homeCardDelegate?.cardViewModelDidRequestCall(on: self)
-        print("콜함수 씨발아 호출되라고 1 \(self.baseProfile.nickname)")
         delegate?.changeMatchingToCall(opponentProfile: self.baseProfile)
         
     }
@@ -66,7 +65,7 @@ public class CardViewModel: ObservableObject, Identifiable  {
 }
 extension CardViewModel {
     static let testModel: CardViewModel = .init(
-        baseProfile: UserProfileServer.sampleMessi, nickname: "삼성전자회장이나야",
+        baseProfile: MatchingProfile.sampleMessi, nickname: "삼성전자회장이나야",
         age: 58,
         isOnline: true,
         interestTags: ["여행✈️", "사진", "카페투어"],

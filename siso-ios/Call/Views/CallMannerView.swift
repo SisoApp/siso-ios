@@ -12,10 +12,10 @@ import model
 // 발신자의 첫 화면
 public struct CallMannerView: View {
     // 전달은 홈에서 부터
-    var opponentProfile: UserProfileServer
+    var opponentProfile: MatchingProfile
     var delegate: CallCoordinatorDelegate?
     
-    public init(opponentProfile: UserProfileServer, delegate: CallCoordinatorDelegate? = nil) {
+    public init(opponentProfile: MatchingProfile, delegate: CallCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.delegate = delegate
     }

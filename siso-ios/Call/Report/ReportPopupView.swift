@@ -32,9 +32,9 @@ public struct ReportPopupView: View {
     @State private var selectedType: ReportReasonType? = nil
     
     
-    var opponentProfile: UserProfileServer
+    var opponentProfile: MatchingProfile
     
-    public init(opponentProfile: UserProfileServer) {
+    public init(opponentProfile: MatchingProfile) {
         self.opponentProfile = opponentProfile
     }
     
@@ -79,7 +79,7 @@ public struct ReportPopupView: View {
     }
     
     @ViewBuilder
-    private func profileImageView(profile: UserProfileServer) -> some View {
+    private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
         if profile.profileImageUrls.isEmpty {
             placeholderImage
@@ -140,5 +140,5 @@ public struct ReportPopupView: View {
 }
 
 #Preview {
-    ReportPopupView(opponentProfile: UserProfileServer.sampleMessi)
+    ReportPopupView(opponentProfile: MatchingProfile.sampleMessi)
 }

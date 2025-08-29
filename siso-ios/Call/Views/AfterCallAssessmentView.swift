@@ -11,13 +11,13 @@ import chat
 import matching
 
 public struct AfterCallAssessmentView: View {
-    var opponentProfile: UserProfileServer
+    var opponentProfile: MatchingProfile
     
     var matchingDelegate: MatchingCoordinatorDelegate?
     // ChatCoordinator
     
     
-    public init(opponentProfile: UserProfileServer, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
+    public init(opponentProfile: MatchingProfile, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.matchingDelegate = matchingDelegate
     }
@@ -143,5 +143,5 @@ public struct AfterCallAssessmentView: View {
 
 
 #Preview {
-    AfterCallAssessmentView(opponentProfile: UserProfileServer.sampleMessi)
+    AfterCallAssessmentView(opponentProfile: MatchingProfile.sampleMessi)
 }

@@ -13,7 +13,7 @@ public final class CallManager: ObservableObject {
     public static let shared = CallManager()
     
     @Published public private(set) var callState: CallState = .idle
-    public let showAfterCallPopupPublisher = PassthroughSubject<UserProfileServer, Never>()
+    public let showAfterCallPopupPublisher = PassthroughSubject<MatchingProfile, Never>()
     
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
@@ -30,7 +30,7 @@ public final class CallManager: ObservableObject {
     }
     #endif
     
-    public func startCall(to opponent: UserProfileServer) {
+    public func startCall(to opponent: MatchingProfile) {
         let channelId = "test"
         let token = "007eJxTYLjwn7sjd6eW1rbHqxLcxffzPDv8/cibPPXGxdMNW8sWvZqpwJBoaWiSmpJoYW6cbGCSZmCZaG6UmmqelGKcampkZGxg8LF3fUZDICPDWRUBVkYGCATxWRhKUotLGBgA95Mhlw=="
         let info = IncomingCallInfo(channelId: channelId, token: token, opponentProfile: opponent)
@@ -67,7 +67,7 @@ public final class CallManager: ObservableObject {
     }
     
     public func endCall(reason: CallEndReason) {
-        let opponent: UserProfileServer?
+        let opponent: MatchingProfile?
         let currentState = callState // 로그를 위해 현재 상태 저장
         
         switch callState {

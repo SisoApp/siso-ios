@@ -20,7 +20,7 @@ public protocol MatchingCoordinatorDelegate: AnyObject {
     
     func changeMatchingToAuth()
     /// 전화로 전환
-    func changeMatchingToCall(opponentProfile: UserProfileServer)
+    func changeMatchingToCall(opponentProfile: MatchingProfile)
     
     /// 프로필 수정으로 보내기
     func changeMatchingToProfile()

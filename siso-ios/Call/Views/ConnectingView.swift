@@ -12,10 +12,10 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
 public struct ConnectingView: View {
-    var opponentProfile: UserProfileServer
+    var opponentProfile: MatchingProfile
     var delegate: CallCoordinatorDelegate?
     
-    public init(opponentProfile: UserProfileServer, delegate: CallCoordinatorDelegate? = nil) {
+    public init(opponentProfile: MatchingProfile, delegate: CallCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.delegate = delegate
     }
@@ -97,7 +97,7 @@ public struct ConnectingView: View {
     
     // MARK: - Subviews
     @ViewBuilder
-    private func profileImageView(profile: UserProfileServer) -> some View {
+    private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
         if profile.profileImageUrls.isEmpty {
             placeholderImage
