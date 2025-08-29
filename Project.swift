@@ -156,7 +156,18 @@ let call: Target = .target(
     ]
 )
 
-
+let chat: Target = .target(
+    name: "chat",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).chat",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Chat/**"],
+    dependencies: [
+        .target(name: "designSystem"),
+    ]
+)
 
 let profile: Target = .target(
     name: "profile",
