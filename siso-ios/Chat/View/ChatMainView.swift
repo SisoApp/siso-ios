@@ -41,7 +41,7 @@ public struct ChatMainView: View {
                     }else {
                         List {
                             ForEach(callHistory) { contact in
-                                ContactView(userName: contact.userName, icon: contact.icon, time: formatTime(date: contact.time), type: .callList)
+                                ContactView(contact: contact, type: selectedList)
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
                                             print("delete!!")
@@ -49,6 +49,7 @@ public struct ChatMainView: View {
                                             Text("인연 끊기")
                                                 .fontWeight(.semibold)
                                         }
+                                        .tint(Color.Siso.Red._60)
                                     }
                             }
                         }
@@ -68,8 +69,8 @@ public struct ChatMainView: View {
                             .foregroundStyle(Color.Siso.Gray._70)
                     }else {
                         List {
-                            ForEach(recentChats) { contact in
-                                ContactView(userName: contact.userName, icon: contact.icon, time: formatTime(date: contact.time), type: .recentChat, hasMessage: contact.hasMessages, recentMessage: contact.recentMessage)
+                            ForEach(recentChats) { chat in
+                                ContactView(chat: chat, type: selectedList)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         print("나가기")
@@ -77,6 +78,7 @@ public struct ChatMainView: View {
                                         Text("나가기")
                                             .fontWeight(.semibold)
                                     }
+                                    .tint(Color.Siso.Red._60)
                                 }
                             }
                         }
@@ -112,24 +114,15 @@ public struct ChatMainView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Image(systemName: "bell")
                     .onTapGesture {
-                        print("이거 아님?")
                         delegate?.pushChat(.notificationChat)
                     }
             }
         }
         .onAppear {
             // View가 나타날 때 초기 데이터를 State 변수에 로드합니다.
-//            self.recentChats = chats
-//            self.callHistory = calls
+            self.recentChats = chats
+            self.callHistory = calls
         }
-    }
-    
-    // Date Format Convert String
-    private func formatTime(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "a h:mm"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter.string(from: date)
     }
 }
 

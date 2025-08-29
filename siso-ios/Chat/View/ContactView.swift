@@ -6,77 +6,36 @@
 //
 
 import SwiftUI
+import designSystem
 
 extension ChatMainView {
     struct ContactView: View {
-        let userName: String
-        let icon: String
-        let time: String
+        let contact: Contact?
+        let chat: RecentChat?
         let type: ContactType
-        var hasMessage: Bool?
-        var recentMessage: String?
-        
-        init(userName: String, icon: String, time: String, type: ContactType, hasMessage: Bool? = nil, recentMessage: String? = nil) {
-            self.userName = userName
-            self.icon = icon
-            self.time = time
+        init(contact: Contact? = nil, chat: RecentChat? = nil, type: ContactType) {
+            self.contact = contact
+            self.chat = chat
             self.type = type
-            self.hasMessage = hasMessage
-            self.recentMessage = recentMessage
         }
         
         // TODO: 각 연락처 내부 정보 뷰
         var body: some View {
             HStack {
-                Image(systemName: icon)
-                    .resizable()
-                    .frame(width: 56, height: 56)
-                
                 switch type {
                     case .callList:
-                        Text(userName)
-                            .font(.system(size: 18))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineSpacing(5.4)
-                            .lineLimit(1)
-                        Text(time)
-                            .foregroundStyle(Color.Siso.Gray._50)
-                            .font(.system(size: 15, weight: .regular))
-                            .tracking(-0.15)
-                    case .recentChat:
-                        VStack(alignment: .leading) {
-                            Text(userName)
-                                .font(.system(size: 18))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .lineSpacing(5.4)
-                                .lineLimit(1)
-                            Spacer()
-                            if let recentMessage = recentMessage {
-                                Text(recentMessage)
-                                    .lineLimit(1)
-                                    .font(.system(size: 18)).fontWeight(.regular)
-                                    .foregroundStyle(Color.Siso.Gray._50)
-                                    .tracking(-0.54)
-                            }
+                        if let contact = contact {
+                            Image(systemName: contact.icon)
+                                .resizable()
+                                .frame(width: 56, height: 56)
+                            callView(username: contact.userName, time: Date.formatTime(date: contact.time))
                         }
-                        VStack(alignment: .trailing) {
-                            Text(time)
-                                .foregroundStyle(Color.Siso.Gray._50)
-                                .font(.system(size: 15, weight: .regular))
-                                .tracking(-0.15)
-                            if let hasMessage = hasMessage {
-                                if hasMessage {
-                                    ZStack {
-                                        Circle()
-                                            .frame(maxWidth: 24)
-                                            .foregroundStyle(Color.Siso.Primary.main)
-                                        Text("N")
-                                            .font(.system(size: 16, weight: .semibold))
-                                    }
-                                }else {
-                                    Spacer()
-                                }
-                            }
+                    case .recentChat:
+                    if let chat = chat {
+                            Image(systemName: chat.icon)
+                                .resizable()
+                                .frame(width: 56, height: 56)
+                        recentChatView(username: chat.userName, recentMessage: chat.recentMessage, time: Date.formatTime(date: chat.time), hasMessages: chat.hasMessages)
                         }
                 }
                 
@@ -91,6 +50,65 @@ extension ChatMainView {
                     .foregroundColor(Color.Siso.Gray._30),
                 alignment: .bottom
             )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if type == .recentChat {
+                    print("채팅 Detail로 드가자~")
+                }
+            }
+        }
+        
+        private func callView(username: String, time: String) -> some View {
+            Group {
+                Text(username)
+                    .font(.system(size: 18))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineSpacing(5.4)
+                    .lineLimit(1)
+                Text(time)
+                    .foregroundStyle(Color.Siso.Gray._50)
+                    .font(.system(size: 15, weight: .regular))
+                    .tracking(-0.15)
+            }
+        }
+        
+        private func recentChatView(username: String, recentMessage: String? = nil, time: String, hasMessages: Bool? = nil) -> some View {
+            Group {
+                VStack(alignment: .leading) {
+                    Text(username)
+                        .font(.system(size: 18))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineSpacing(5.4)
+                        .lineLimit(1)
+                    Spacer()
+                    if let recentMessage = recentMessage {
+                        Text(recentMessage)
+                            .lineLimit(1)
+                            .font(.system(size: 18)).fontWeight(.regular)
+                            .foregroundStyle(Color.Siso.Gray._50)
+                            .tracking(-0.54)
+                    }
+                }
+                VStack(alignment: .trailing) {
+                    Text(time)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .font(.system(size: 15, weight: .regular))
+                        .tracking(-0.15)
+                    if let hasMessage = hasMessages {
+                        if hasMessage {
+                            ZStack {
+                                Circle()
+                                    .frame(maxWidth: 24)
+                                    .foregroundStyle(Color.Siso.Primary.main)
+                                Text("N")
+                                    .font(.system(size: 16, weight: .semibold))
+                            }
+                        }else {
+                            Spacer()
+                        }
+                    }
+                }
+            }
         }
     }
 }

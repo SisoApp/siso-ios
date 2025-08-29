@@ -204,7 +204,10 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
         case .detail:
             AnyView(ChatMainView.ChatDetailView(chat: .init(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true)))
         case .notificationChat:
-            AnyView(NotificationChatView())
+            AnyView(
+                NotificationChatView()
+                    .navigationBarBackButtonHidden()
+            )
         }
     }
 }
