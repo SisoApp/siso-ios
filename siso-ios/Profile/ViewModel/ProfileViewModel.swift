@@ -23,7 +23,7 @@ public extension ProfileView {
                 "preferenceSex": userProfile.targetSex
             ]
             
-            try? await ProfileNetworkManager.shard.registerProfile(parameters)
+            try? await ProfileNetworkManager.shared.registerProfile(parameters)
         }
     }
 }

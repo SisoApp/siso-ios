@@ -139,7 +139,7 @@ public struct BasicProfileView: View {
             ]
             
             Task {
-                try? await ProfileNetworkManager.shard.registerProfile(parameters)
+                try await ProfileNetworkManager.shared.registerProfile(parameters)
                 currentPage = .image
             }
         }

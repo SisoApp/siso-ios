@@ -145,7 +145,7 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func uploadVoice() async {
-        try? await ProfileNetworkManager.shard.uploadVoice()
+        try? await VoiceNetworkManager.shared.uploadVoice()
     }
 }
 

@@ -197,7 +197,7 @@ public struct ImageProfileView: View {
         
         return PrimaryButton(title: "계속하기", isActive: isActive) {
             Task {
-                try? await ProfileNetworkManager.shard.uploadImages(userProfile.profileImages)
+                try await ImageNetworkManager.shared.uploadImages(userProfile.profileImages)
             }
         
             switch mode {
