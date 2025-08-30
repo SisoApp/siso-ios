@@ -9,11 +9,10 @@ import SwiftUI
 
 enum Religion: String, Identifiable, CaseIterable {
     case christianity = "기독교"
-    case catholic = "천주교"
     case buddhism = "불교"
-    case wonBuddhism = "원불교"
+    case catholic = "천주교"
     case none = "무교"
-    case other = "기타/(직접입력)"
+    case other = "기타 종교"
     
     var id: String { rawValue }
 }

@@ -26,8 +26,6 @@ public final actor LoginNetworkManager: Sendable {
         guard let baseURL = baseURL else { throw AFError.invalidURL(url: "base URL is Not Found") }
         let urlString = "\(baseURL)/api/auth/kakao"
         
-        print(urlString)
-        
         guard let url = URL(string: urlString) else {
             throw AFError.invalidURL(url: urlString)
         }

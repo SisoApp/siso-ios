@@ -20,14 +20,23 @@ public final actor ProfileNetworkManager: Sendable {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
         guard let refreshToken = KeyChainManager.shared.get(for: "refreshToken") else {
             throw AFError.invalidURL(url: "refreshToken -> nil")
         }
         
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(refreshToken)",
+            "Authorization": "Bearer \(accessToken)",
             "Content-Type": "application/json"
         ]
+        
+        print("----------------Register Profile------------------")
+        print("url: \(url)")
+        print("accessToken: \(accessToken)")
         
         AF.request(url,
                    method: .post,

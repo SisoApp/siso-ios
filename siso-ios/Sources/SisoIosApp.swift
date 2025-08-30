@@ -21,7 +21,7 @@ struct SisoIosApp: App {
     init() {
         let userProfile: UserProfile = .init(
             nickname: "", age: 0, sex: "", targetSex: "", profileImageUrl: [],
-            interests: [], introduce: "", religion: "", smoking: "", drinking: "",
+            interests: [], introduce: "", religion: "", smoking: false, drinking: "",
             meeting: [], mbti: "", location: "")
         
         let matchingViewModel = MatchingViewModel(cards: [])

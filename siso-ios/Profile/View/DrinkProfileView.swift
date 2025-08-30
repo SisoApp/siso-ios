@@ -10,7 +10,7 @@ import SwiftUI
 enum DrinkFrequency: String, Identifiable, CaseIterable {
     case often = "자주 마셔요 (주 3회이상)"
     case sometimes = "가끔 마셔요 (주 1회 ~ 한달에 한번)"
-    case none = "전혀 안해요"
+    case none = "전혀 안 마셔요"
     
     var id: String { self.rawValue }
 }

@@ -171,7 +171,7 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
                         self.build(sheet: sheet)
                     }
                 }
-                    .tint(Color.Siso.Primary._100)
+                .tint(Color.Siso.Primary._100)
             )
             
         case .tutorial:

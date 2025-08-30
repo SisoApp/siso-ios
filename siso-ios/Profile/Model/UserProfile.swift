@@ -18,7 +18,7 @@ public class UserProfile: ObservableObject {
         interests: [],
         introduce: "",
         religion: "",
-        smoking: "",
+        smoking: false,
         drinking: "",
         meeting: [],
         mbti: "",
@@ -34,7 +34,7 @@ public class UserProfile: ObservableObject {
     @Published var introduce: String // 자기소개
     @Published var voice: Bool // 목소리
     @Published var religion: String // 종교
-    @Published var smoking: String // 흡연
+    @Published var smoking: Bool // 흡연
     @Published var drinking: String // 음주
     @Published var meeting: [String] // 모임
     @Published var mbti: String // mbti
@@ -42,7 +42,7 @@ public class UserProfile: ObservableObject {
     
     public init(nickname: String, age: Int, sex: String, targetSex: String,
                 profileImageUrl: [UIImage], interests: [String], introduce: String,
-                religion: String, smoking: String, drinking: String,
+                religion: String, smoking: Bool, drinking: String,
                 meeting: [String], mbti: String, location: String) {
         self.nickname = nickname
         self.age = age

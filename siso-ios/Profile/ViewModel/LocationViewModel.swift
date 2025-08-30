@@ -92,6 +92,18 @@ final public class LocationViewModel: NSObject, ObservableObject {
             return ["서귀포시", "제주시"]
         }
     }
+    
+    func shortRegionName(from area: String) -> String {
+        switch area {
+        case "충청북도": return "충북"
+        case "충청남도": return "충남"
+        case "전라북도": return "전북"
+        case "전라남도": return "전남"
+        case "경상북도": return "경북"
+        case "경상남도": return "경남"
+        default: return area.prefix(2).description
+        }
+    }
 }
 
 extension LocationViewModel: CLLocationManagerDelegate {
@@ -131,10 +143,12 @@ extension LocationViewModel: CLLocationManagerDelegate {
             let geoCoder: CLGeocoder = CLGeocoder()
             
             geoCoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+                guard let self = self else { return }
+                
                 DispatchQueue.main.async {
                     if let error = error {
                         print("geoCoder error: \(error.localizedDescription)")
-                        self?.isLoading = false
+                        self.isLoading = false
                         return
                     }
                     
@@ -143,15 +157,15 @@ extension LocationViewModel: CLLocationManagerDelegate {
                         let address: [String] = placemark.description.components(separatedBy: country)[1].components(separatedBy: " ")
                         
                         if address.count > 2 {
-                            let province: String = address[1].prefix(2).description
+                            let province: String = self.shortRegionName(from: address[1])
                             let city: String = address[2]
                             
-                            self?.location = "\(province) \(city)"
+                            self.location = "\(province) \(city)"
                         } else {
                             print("Address Parsing Error: Out of Index...")
                         }
                         
-                        self?.isLoading = false
+                        self.isLoading = false
                     }
                 }
             }

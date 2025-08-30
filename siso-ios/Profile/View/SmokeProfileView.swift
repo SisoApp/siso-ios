@@ -7,18 +7,29 @@
 
 import SwiftUI
 
-enum SmokingFrequency: String, Identifiable, CaseIterable {
-    case veryOften = "매우 자주 피워요 (하루에 1갑 이상)"
-    case often = "자주 피워요 (하루에 반갑 이상)"
-    case sometimes = "가끔 피워요 (일주일에 몇 번 정도)"
-    case none = "비흡연자"
+enum SmokingStatus: CaseIterable {
+    case yes, no
     
-    var id: String { self.rawValue }
+    var rawValue: Bool {
+        switch self {
+        case .yes:
+            return true
+        case .no:
+            return false
+        }
+    }
+    
+    var text: String {
+        switch self {
+        case .yes: return "흡연자"
+        case .no: return "비흡연자"
+        }
+    }
 }
 
 public struct SmokeProfileView: View {
     @ObservedObject private var userProfile: UserProfile
-    @State private var smoking: String
+    @State private var smoking: Bool
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -65,22 +76,22 @@ public struct SmokeProfileView: View {
     }
     
     private func buttonGroup() -> some View {
-        return VStack(alignment: .leading, spacing: 12) {
-            ForEach(SmokingFrequency.allCases, id: \.self) { item in
-                smokingButton(item.rawValue)
+        return HStack(spacing: 12) {
+            ForEach(SmokingStatus.allCases, id: \.self) { item in
+                smokingButton(item)
             }
+            Spacer()
         }
         .padding(.top, 24)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func smokingButton(_ title: String) -> some View {
-        let isContain: Bool = self.smoking == title
+    private func smokingButton(_ status: SmokingStatus) -> some View {
+        let isContain: Bool = smoking == status.rawValue
         
         return Button {
-            self.smoking = isContain ? "" : title
+            self.smoking = status.rawValue
         } label: {
-            Text(title)
+            Text(status.text)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._90)
@@ -89,15 +100,13 @@ public struct SmokeProfileView: View {
         }
         .frame(height: 48)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 48 / 2)
                 .fill(isContain ? Color.Siso.Primary.main : Color.Siso.Gray._20)
         )
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = !smoking.isEmpty
-        
-        return PrimaryButton(title: "완료하기", isActive: isActive) {
+        return PrimaryButton(title: "완료하기", isActive: true) {
             userProfile.smoking = smoking
             delegate?.pop()
         }

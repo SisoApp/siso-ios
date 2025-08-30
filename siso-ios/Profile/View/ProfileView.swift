@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import network
 
 public enum ProfileMode {
     case signUp, edit
@@ -295,7 +296,7 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.religion)
                 }
             
-            inputView(title: "흡연", item: userProfile.smoking)
+            inputView(title: "흡연", item: userProfile.smoking ? "흡연자" : "비흡연자")
                 .onTapGesture {
                     delegate?.pushProfile(.smoke)
                 }
@@ -440,19 +441,34 @@ public struct ProfileView: View {
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = introduce.count >= 5
+        let isActive: Bool = true
+        //let isActive: Bool = introduce.count >= 5
         
         return PrimaryButton(title: "완료하기", isActive: isActive) {
-            guard let sex = sex, let targetSex = targetSex else { return }
+            // guard let sex = sex, let targetSex = targetSex else { return }
             
-            userProfile.age = Int(age) ?? 0
-            userProfile.introduce = introduce
-            userProfile.sex = sex.text
-            userProfile.targetSex = targetSex.text
+//            userProfile.age = Int(age) ?? 0
+//            userProfile.introduce = introduce
+//            userProfile.sex = sex.text
+//            userProfile.targetSex = targetSex.text
+            
+            
             
 //            Task {
 //                await viewModel.registerProfile(userProfile)
 //            }
+            
+            let parameters: [String: Any] = [
+                "nickname": "안녕",
+                "age": "50",
+                "sex": "MALE",
+                "preference_sex": "FEMALE"
+            ]
+            
+            Task {
+                print("click!")
+                try? await ProfileNetworkManager.shared.registerProfile(parameters)
+            }
             
             delegate?.pop()
         }

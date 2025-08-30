@@ -61,7 +61,7 @@ public struct SocialLoginView: View {
             .padding()
         }
         .onChange(of: vm.userState) {
-            delegate?.popToRoot()
+            //delegate?.popToRoot()
         }
         .alert("오류", isPresented: $vm.showAlert) {
             Button("확인") {
