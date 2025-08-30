@@ -82,16 +82,16 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // --- 2. JSON 데이터를 IncomingCallInfo 모델로 디코딩 ---
         do {
             // JSONDecoder를 사용하여 Data를 우리가 정의한 IncomingCallInfo 구조체로 파싱합니다.
-            let callInfo = try JSONDecoder().decode(IncomingCallInfo.self, from: data)
+            let callInfo = try JSONDecoder().decode(FCMDTO.self, from: data)
             
             // --- 3. 파싱된 데이터의 유효성 검사 및 CallManager 호출 ---
             // 'type' 필드를 확인하여 이것이 정말 전화 알림인지 확인합니다.
             // 이는 일반 공지사항 푸시와 전화 푸시를 구분하는 데 중요합니다.
-            guard callInfo.type == "INCOMING_CALL" else {
-                print("ℹ️ This push is not an incoming call type. Ignoring.")
-                return
-            }
-            
+//            guard callInfo.type == "INCOMING_CALL" else {
+//                print("ℹ️ This push is not an incoming call type. Ignoring.")
+//                return
+//            }
+//            
             // ✅ 모든 것이 정상이면, 파싱된 callInfo 객체를 CallManager에 전달합니다.
             print("✅ Successfully parsed incoming call info. Notifying CallManager.")
             CallManager.shared.handleIncomingCall(with: callInfo)
