@@ -10,6 +10,7 @@ import AVFoundation
 import model
 import network
 
+@MainActor
 public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     public func getNowWatchingCardViewModel() -> CardViewModel? {
         return nowWatching
@@ -20,11 +21,14 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     
     public init(delegate: MatchingCoordinatorDelegate? = nil, cards: [CardViewModel]) {
         self.delegate = delegate
-        self.cards = [card1, card2, card3, card4]
+        self.cards = []
+       
     }
     
     @Published public var cards: [CardViewModel] = []
     @Published var isProfileWriteDemanded: Bool = true
+    @Published var errorMessage: String = ""
+    
     
     public func injectDelegateToCards() {
         print("main delegate")
@@ -41,90 +45,25 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
         print("👀 nowWatching이 \(viewModel.nickname)(으)로 업데이트 되었습니다.")
     }
     
-    
-    
-}
-extension MatchingViewModel {
-    
-    // 정적(static) 프로퍼티로 샘플 데이터를 만듭니다.
-    // 이렇게 하면 MatchingViewModel.sample 로 어디서든 접근 가능합니다.
-    public static var sample: MatchingViewModel {
-        let viewModel = MatchingViewModel( delegate: nil, cards: [])
-        
-       
-
-        // 생성된 카드들을 viewModel의 cards 배열에 추가합니다.
-        viewModel.cards = [card1, card2, card3, card4]
-        return viewModel
+    func fetchCards() async {
+        do {
+            // 네트워크 매니저를 통해 프로필 데이터를 비동기적으로 가져옵니다.
+            let newProfiles = try await NetworkManager.shared.getMatchingProfiles()
+            
+            // 받아온 MatchingProfile 데이터를 CardViewModel로 변환합니다.
+            let newCards = newProfiles.map { profile in
+                CardViewModel(profile: profile, delegate: self.delegate) // CardViewModel의 생성자가 profile을 받는다고 가정
+            }
+            
+            // 기존 카드 목록에 새로운 카드를 추가합니다.
+            self.cards.append(contentsOf: newCards)
+            
+            print("✅ \(newCards.count)개의 새 카드를 성공적으로 불러왔습니다.")
+            
+        } catch {
+            // 오류 발생 시 콘솔에 로그를 남기고, UI에 표시할 에러 메시지를 설정합니다.
+            print("🔴 카드 데이터를 불러오는 중 오류 발생: \(error.localizedDescription)")
+            self.errorMessage = "프로필을 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요."
+        }
     }
 }
-
-
-// 여러 개의 CardViewModel 샘플을 생성합니다.
-let card1 = CardViewModel(
-    baseProfile: MatchingProfile.sampleMessi,
-    nickname: "제인",
-    age: 28,
-    isOnline: true,
-    interestTags: ["여행✈️", "사진", "카페투어"],
-    profileImages: [
-        // Lorem Picsum 서비스를 사용하여 실제 이미지를 가져옵니다. seed를 사용해 항상 같은 이미지가 나오도록 합니다.
-        // 샘플 코드이므로 강제 언래핑(!)을 사용했지만, 실제 앱에서는 guard let으로 안전하게 처리해야 합니다.
-        URL(string: "https://picsum.photos/seed/jane1/600/400")!,
-        URL(string: "https://picsum.photos/seed/jane2/400/600")!,
-        URL(string: "https://picsum.photos/seed/jane3/400/600")!
-    ],
-    // 실제 작동하는 샘플 오디오 파일 (출처: Google)
-    voiceSample: URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"),
-    introduction: "안녕하세요! 좋은 인연을 찾고 있어요. 함께 맛있는 거 먹으러 다녀요.",
-    location: "서울 마포구"
-    
-)
-
-let card2 = CardViewModel(
-    baseProfile: MatchingProfile.sampleMessi,
-    nickname: "마이크",
-    age: 32,
-    isOnline: false,
-    interestTags: ["운동💪", "영화감상", "음악"],
-    profileImages: [
-        URL(string: "https://picsum.photos/seed/mike1/400/600")!,
-        URL(string: "https://picsum.photos/seed/mike2/400/600")!
-    ],
-    // 음성 샘플이 없는 경우 nil로 처리
-    voiceSample: nil,
-    introduction: "서울에서 직장 다니고 있습니다. 주말에 같이 운동하거나 영화 볼 분 찾아요!",
-    location: "인천 중구"
-)
-
-let card3 = CardViewModel(
-    baseProfile: MatchingProfile.sampleMessi,
-    nickname: "클로이",
-    age: 25,
-    isOnline: true,
-    interestTags: ["개발💻", "독서", "산책"],
-    profileImages: [
-        URL(string: "https://picsum.photos/seed/chloe1/400/600")!,
-        URL(string: "https://picsum.photos/seed/chloe2/400/600")!,
-        URL(string: "https://picsum.photos/seed/chloe3/400/600")!,
-        URL(string: "https://picsum.photos/seed/chloe4/400/600")!
-    ],
-    voiceSample: URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"),
-    introduction: "조용한 성격이지만 친해지면 말 많아요. 커피 한 잔 하면서 얘기 나눠요.",
-    location: "서울 중구"
-)
-
-let card4 = CardViewModel(
-    baseProfile: MatchingProfile.sampleMessi,
-    nickname: "알렉스",
-    age: 30,
-    isOnline: true,
-    interestTags: ["요리🍳", "캠핑", "강아지"],
-    profileImages: [
-        URL(string: "https://picsum.photos/seed/alex1/400/600")!
-    ],
-    voiceSample: nil,
-    introduction: "직접 만든 요리를 대접하는 걸 좋아해요. 같이 캠핑가서 맛있는 거 해먹어요.",
-    location: "서울 중구"
-)
-

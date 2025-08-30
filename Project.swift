@@ -44,7 +44,10 @@ let sisoApp: Target = .target(
                         "NSIncludesSubdomains": true,
                     ]
                 ]
-            ]
+            ],
+            "UIBackgroundModes": [
+                           "remote-notification"
+                       ]
         ]
     ),
     sources: ["siso-ios/Sources/**",],
@@ -125,7 +128,7 @@ let matching: Target = .target(
     sources: ["siso-ios/Matching/**"],
     dependencies: [
         .target(name: "model"),
-        
+        .target(name: "network"),
     ]
 )
 
@@ -140,6 +143,8 @@ let call: Target = .target(
     dependencies: [
         .target(name: "model"),
         .target(name: "matching"),
+        .target(name: "network"),
+        
         .xcframework(path: .relativeToRoot("Frameworks/libs/AgoraRtcKit.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/aosl.xcframework")),
         .xcframework(path: .relativeToRoot("Frameworks/libs/Agoraffmpeg.xcframework")),
@@ -211,7 +216,9 @@ let coordinator: Target = .target(
         .target(name: "profile"),
         .target(name: "call"),
         .target(name: "model"),
-        .target(name: "mypage")
+        .target(name: "mypage"),
+        .target(name: "chat"),
+        
     ]
 )
 let designSystem: Target = .target(
@@ -264,7 +271,7 @@ let project = Project(
         coordinator,
         designSystem,
         model,
-        chat,
-        call
+        call,
+        chat
     ]
 )

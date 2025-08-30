@@ -1,36 +1,47 @@
 import SwiftUI
 
-
 public struct MatchingMainView: View {
+    // MARK: - Properties
+    
     @ObservedObject private var viewModel: MatchingViewModel
     @StateObject private var audioPlayer = AudioPlayerManager()
     public var delegate: MatchingCoordinatorDelegate?
     
-    @State var currentCardId: UUID?
+    // 🔥 1. id 타입 변경: UUID? -> Int?
+    // CardViewModel의 id 타입이 Int로 변경되었으므로, 스크롤 위치를 추적하는 상태 변수도 Int?로 변경합니다.
+    @State private var currentCardId: Int?
+    
+    // MARK: - Initializer
     
     public init(viewModel: MatchingViewModel, delegate: MatchingCoordinatorDelegate?) {
         self._viewModel = .init(wrappedValue: viewModel)
         self.delegate = delegate
     }
     
+    // MARK: - Body
+    
     public var body: some View {
-        // 동적 데이터 처리를 위해서 LazyVStack으로 처리
         ZStack {
+            // 메인 카드 스크롤 뷰
+            // 로딩 및 에러 처리를 위한 ZStack 구성은 이전 답변을 참고하여 추가할 수 있습니다.
             GeometryReader { geometry in
-                VStack {
-                    ScrollView {
-                        LazyVStack(spacing: 0){
-                            ForEach(viewModel.cards) { item in
-                                makeView(for: item, geometry: geometry)
-                            }
+                ScrollView(.vertical) {
+                    LazyVStack(spacing: 0) {
+                        ForEach(viewModel.cards) { cardViewModel in
+                            makeView(for: cardViewModel, geometry: geometry)
+                                // 🔥 2. id 프로퍼티 사용
+                                // CardViewModel의 id는 이제 서버의 고유 userId(Int)입니다.
+                                .id(cardViewModel.id)
                         }
-                        .scrollTargetLayout()
                     }
-                    .scrollTargetBehavior(.paging)
-                    .scrollPosition(id: $currentCardId)
+                    .scrollTargetLayout()
                 }
+                .scrollTargetBehavior(.paging)
+                .scrollPosition(id: $currentCardId) // $currentCardId는 이제 Int? 타입과 바인딩됩니다.
             }
             .ignoresSafeArea()
+            
+            // 프로필 작성 요구 뷰 (조건부 표시)
             if viewModel.isProfileWriteDemanded {
                 ProfileDemandingView(matchingViewModel: viewModel, delegate: delegate)
             }
@@ -38,27 +49,39 @@ public struct MatchingMainView: View {
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }
             
-            // 변경된 ID에 해당하는 카드를 viewModel에서 찾습니다.
-            if let newWatchingCard = viewModel.cards.first(where: { $0.uuid == newID }) {
-                // viewModel의 nowWatching 프로퍼티를 업데이트합니다.
+            // 🔥 3. id로 카드 찾기
+            // 'uuid'가 아닌 'id' 프로퍼티로 현재 카드를 찾습니다.
+            if let currentIndex = viewModel.cards.firstIndex(where: { $0.id == newID }) {
+                let newWatchingCard = viewModel.cards[currentIndex]
                 viewModel.nowWatching = newWatchingCard
-                print("👀 Now Watching: \(newWatchingCard.nickname)")
+                
+                print("👀 Now Watching: \(newWatchingCard.nickname), Index: \(currentIndex)")
+                
+                // 무한 스크롤 로직 (비동기 호출은 Task로 감싸야 합니다)
+                if Double(currentIndex) / Double(viewModel.cards.count) > 0.8 {
+                    Task {
+                        await viewModel.fetchCards()
+                    }
+                }
             }
         }
-        .onAppear(){
+        .onAppear {
             viewModel.injectDelegateToCards()
+            
+            // 🔥 4. 첫 번째 카드의 id 설정
+            // 뷰가 나타날 때 첫 번째 카드의 id (Int?)를 currentCardId에 할당합니다.
+            currentCardId = viewModel.cards.first?.id
         }
-        
-        
+        .task {
+            await viewModel.fetchCards()
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    @ViewBuilder
+    private func makeView(for cardViewModel: CardViewModel, geometry: GeometryProxy) -> some View {
+        MatchingCardView(cardViewModel: cardViewModel, audioPlayer: self.audioPlayer)
+            .frame(width: geometry.size.width, height: geometry.size.height)
     }
 }
-
-
-@ViewBuilder
-private func makeView(for cardViewModel: CardViewModel, geometry: GeometryProxy) -> some View {
-    // 카드 뷰 생성 뷰빌더
-    MatchingCardView(cardViewModel: cardViewModel, audioPlayer: AudioPlayerManager() )
-        .frame(width: geometry.size.width, height: geometry.size.height)
-}
-
-

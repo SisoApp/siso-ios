@@ -15,7 +15,7 @@ public struct FullScreenProfileView: View {
     public var body: some View {
         ZStack {
             TabView {
-                ForEach(cardViewModel.profileImages,id: \.self) { url in
+                ForEach(cardViewModel.profileImageURLs,id: \.self) { url in
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
@@ -33,6 +33,3 @@ public struct FullScreenProfileView: View {
     }
 }
 
-#Preview {
-    FullScreenProfileView(cardViewModel: CardViewModel.testModel)
-}

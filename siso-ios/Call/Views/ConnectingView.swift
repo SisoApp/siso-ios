@@ -99,10 +99,10 @@ public struct ConnectingView: View {
     @ViewBuilder
     private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
-        if profile.profileImageUrls.isEmpty {
+        if profile.imageUrls.isEmpty {
             placeholderImage
         } else {
-            let urlString = profile.profileImageUrls.first!
+            let urlString = profile.imageUrls.first!
             AsyncImage(url: URL(string: urlString)) { image in
                 image
                     .resizable()

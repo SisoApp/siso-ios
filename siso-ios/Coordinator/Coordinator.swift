@@ -12,8 +12,9 @@ import chat
 
 
 
+
 @MainActor
-public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
+public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
     
     // MARK: - Navigation Paths
@@ -28,7 +29,7 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
     @Published public var matchingSheet: MatchingSheet?
     @Published public var callPage: CallPage?
     @Published public var callSheet: CallSheet?
-    @Published public var activeCallInfo: IncomingCallInfo?
+    @Published public var activeCallInfo: FCMDTO?
     @Published public var afterCallSheetProfile: MatchingProfile?
     
     private let callManager = CallManager.shared
@@ -191,9 +192,11 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
             // Call (Enum 수정이 필요합니다)
         case .manner(let opponentProfile):
             AnyView(CallMannerView(opponentProfile: opponentProfile, delegate: self))
+                .navigationBarBackButtonHidden(true)
             
         case .activeCall:
             AnyView(ActiveCallView(delegate: self))
+                .navigationBarBackButtonHidden(true)
             
         case .reportFeedbackPopup:
             AnyView(ReportFeedBackView(delegate: self))
@@ -210,13 +213,4 @@ public class Coordinator: ObservableObject, MatchingCoordinatorDelegate {
             )
         }
     }
-}
-
-
-#Preview {
-    // Preview용 UserProfile
-    @Previewable @StateObject var coordinator = Coordinator(userProfile: UserProfile.empty, matchingViewModel: MatchingViewModel.sample, authViewModel: SocialLoginView.LoginViewModel(), locationViewModel: LocationViewModel())
-
-    // TabView 테스트
-    coordinator.build(.home)
 }

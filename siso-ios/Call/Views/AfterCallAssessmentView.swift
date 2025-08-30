@@ -7,7 +7,6 @@
 
 import SwiftUI
 import model
-import chat
 import matching
 
 public struct AfterCallAssessmentView: View {
@@ -125,7 +124,7 @@ public struct AfterCallAssessmentView: View {
     private var profileImageView: some View {
         ZStack {
             
-            AsyncImage(url: URL(string: opponentProfile.profileImageUrls.first ?? "testimg")){ image in
+            AsyncImage(url: URL(string: opponentProfile.imageUrls.first ?? "testimg")){ image in
                 
                 image
                     .resizable()

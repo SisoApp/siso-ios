@@ -2,8 +2,11 @@ import UIKit
 import call
 import UserNotifications // 푸시 알림을 위한 프레임워크
 import FirebaseCore
+import FirebaseMessaging
+import model
+
 // SwiftUI 앱에 연결되기 위해 NSObject와 UIApplicationDelegate를 상속받습니다.
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     // MARK: - 1. 앱 시작 시 초기 설정
     
@@ -22,6 +25,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         application.registerForRemoteNotifications()
         
         FirebaseApp.configure()
+        Messaging.messaging().delegate = self
         return true
     }
 
@@ -32,7 +36,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Device Token은 Data 형태로 전달됩니다. 서버로 보내기 위해 16진수 문자열로 변환합니다.
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         print("✅ APNs Device Token: \(tokenString)")
-        
+        Messaging.messaging().apnsToken = deviceToken
         // 🚨 중요: 이 tokenString을 사용자의 ID와 함께 백엔드 서버로 전송해야 합니다.
         // 예: ApiClient.shared.sendDeviceToken(token: tokenString)
         // 백엔드는 이 토큰을 저장해두었다가, 해당 사용자에게 푸시를 보낼 때 사용합니다.
@@ -41,6 +45,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     /// Device Token 등록에 실패했을 때 호출됩니다.
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("🛑 Failed to register for remote notifications: \(error.localizedDescription)")
+        
         // 시뮬레이터에서는 항상 실패합니다. 실제 기기에서 테스트해야 합니다.
     }
 
@@ -66,26 +71,42 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     /// userInfo 딕셔너리를 파싱하여 CallManager의 상태를 업데이트하는 헬퍼 함수입니다.
     private func handleIncomingCall(userInfo: [AnyHashable: Any]) {
-        // 백엔드에서 약속한 "call_info" 키가 있는지, 그리고 그 값이 딕셔너리 형태인지 확인합니다.
-        guard let callInfo = userInfo["call_info"] as? [String: Any],
-              // 딕셔너리 안에서 필요한 값들을 타입에 맞게 추출합니다.
-              let channelId = callInfo["channel_id"] as? String,
-              let token = callInfo["rtc_token"] as? String,
-              let callerName = callInfo["caller_name"] as? String else {
-            // "call_info"가 없거나 내부 형식이 다르면, 일반 알림이거나 잘못된 푸시이므로 무시합니다.
-            print("푸시 페이로드에 통화 정보가 없거나 형식이 올바르지 않습니다.")
+        
+        // --- 1. userInfo 딕셔너리를 JSON 데이터로 변환 ---
+        // JSONSerialization을 사용하여 Dictionary를 Data 타입으로 변환합니다.
+        guard let data = try? JSONSerialization.data(withJSONObject: userInfo, options: []) else {
+            print("🔴 handleIncomingCall: Failed to serialize userInfo to JSON data.")
             return
         }
         
-        // 모든 정보가 정상적으로 파싱되었다면, CallManager 싱글톤 인스턴스를 통해
-        // 전화가 왔음을 알립니다. 이 함수 호출 하나로 SwiftUI 뷰가 반응하게 됩니다.
-        
+        // --- 2. JSON 데이터를 IncomingCallInfo 모델로 디코딩 ---
+        do {
+            // JSONDecoder를 사용하여 Data를 우리가 정의한 IncomingCallInfo 구조체로 파싱합니다.
+            let callInfo = try JSONDecoder().decode(FCMDTO.self, from: data)
+            
+            // --- 3. 파싱된 데이터의 유효성 검사 및 CallManager 호출 ---
+            // 'type' 필드를 확인하여 이것이 정말 전화 알림인지 확인합니다.
+            // 이는 일반 공지사항 푸시와 전화 푸시를 구분하는 데 중요합니다.
+//            guard callInfo.type == "INCOMING_CALL" else {
+//                print("ℹ️ This push is not an incoming call type. Ignoring.")
+//                return
+//            }
+//            
+            // ✅ 모든 것이 정상이면, 파싱된 callInfo 객체를 CallManager에 전달합니다.
+            print("✅ Successfully parsed incoming call info. Notifying CallManager.")
+            CallManager.shared.handleIncomingCall(with: callInfo)
+            
+        } catch {
+            // 디코딩에 실패한 경우 (예: 서버가 보낸 JSON 구조가 모델과 다를 때)
+            print("🔴 handleIncomingCall: Failed to decode JSON payload to IncomingCallInfo: \(error)")
+            return
+        }
     }
 }
 
 // MARK: - UNUserNotificationCenterDelegate 구현
 
-extension AppDelegate: UNUserNotificationCenterDelegate {
+extension AppDelegate {
     
     /// **앱이 포그라운드(화면 맨 앞에 활성화) 상태일 때** 알림이 도착하면 호출됩니다.
     /// 이 메서드를 구현하지 않으면, 포그라운드 상태에서는 푸시 알림이 사용자에게 보이지 않습니다.
@@ -116,10 +137,30 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 }
 
+// MARK: - ✨ Firebase Messaging Delegate Extension ✨
+// FCM 토큰 관리 관련 델리게이트
+extension AppDelegate: MessagingDelegate {
+    
+    /// FCM 등록 토큰이 갱신될 때마다 호출되는 메서드입니다.
+    /// - 토큰은 앱 재설치, 사용자 데이터 삭제, 앱 업데이트 시 등 다양한 경우에 갱신될 수 있습니다.
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let token = fcmToken else {
+            print("🔴 FCM token is nil.")
+            return
+        }
+        
+        print("🔥 FCM Registration Token: \(token)")
+        
+        // 🚨 중요: 이 새로운/갱신된 FCM 토큰을 백엔드 서버로 전송하여
+        // 사용자의 정보와 함께 저장해야 합니다.
+        // 예: ApiClient.shared.sendFCMTokenToServer(token: token)
+    }
+}
 
-// MARK: - Helper Methods
 
+// MARK: - Helper Methods Extension
 private extension AppDelegate {
+    
     /// 사용자에게 알림 권한을 요청하는 함수
     func requestNotificationAuthorization() {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
@@ -132,7 +173,6 @@ private extension AppDelegate {
                 print("✅ Notification authorization granted.")
             } else {
                 print("❌ Notification authorization denied.")
-                // 사용자에게 설정에서 알림을 켜달라고 유도하는 UI를 보여주는 것이 좋습니다.
             }
         }
     }
