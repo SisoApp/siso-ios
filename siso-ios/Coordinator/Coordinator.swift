@@ -29,7 +29,7 @@ public class Coordinator: ObservableObject {
     @Published public var matchingSheet: MatchingSheet?
     @Published public var callPage: CallPage?
     @Published public var callSheet: CallSheet?
-    @Published public var activeCallInfo: FCMDTO?
+    @Published public var activeCallInfo: CallInfoDto?
     @Published public var afterCallSheetProfile: MatchingProfile?
     
     private let callManager = CallManager.shared
