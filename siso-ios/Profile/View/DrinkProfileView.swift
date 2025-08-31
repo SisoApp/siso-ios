@@ -7,17 +7,11 @@
 
 import SwiftUI
 
-enum DrinkFrequency: String, Identifiable, CaseIterable {
-    case often = "자주 마셔요 (주 3회이상)"
-    case sometimes = "가끔 마셔요 (주 1회 ~ 한달에 한번)"
-    case none = "전혀 안 마셔요"
-    
-    var id: String { self.rawValue }
-}
-
 public struct DrinkProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var drinking: String
+    
+    private var viewModel: DrinkProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -65,19 +59,19 @@ public struct DrinkProfileView: View {
     
     private func buttonGroup() -> some View {
         return VStack(alignment: .leading, spacing: 12) {
-            ForEach(DrinkFrequency.allCases, id: \.self) { item in
-                drinkingButton(title: item.rawValue)
+            ForEach(ProfileOptions.getDrinkingCapacityOptions(), id: \.0) { (value, title) in
+                drinkingButton(title: title, value: value)
             }
         }
         .padding(.top, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func drinkingButton(title: String) -> some View {
-        let isContain: Bool = drinking == title
+    private func drinkingButton(title: String, value: String) -> some View {
+        let isContain: Bool = drinking == value
         
         return Button {
-            drinking = isContain ? "" : title
+            drinking = isContain ? "" : value
         } label: {
             Text(title)
                 .font(.system(size: 18))

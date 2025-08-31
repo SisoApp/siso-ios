@@ -14,8 +14,8 @@ public struct BasicProfileView: View {
     @Binding private var currentPage: SignUpProfilePage
     @State private var nickname: String = ""
     @State private var age: String = ""
-    @State private var sex: Sex? = nil
-    @State private var targetSex: TargetSex? = nil
+    @State private var sex: String? = nil
+    @State private var targetSex: String? = nil
     
     @FocusState private var nicknameFocus: Bool
     @FocusState private var ageFocus: Bool
@@ -63,11 +63,11 @@ public struct BasicProfileView: View {
                             hideKeyboard()
                         }
                     
-                    RadioButtonGroup(title: "내 성별", options: Sex.allCases, selection: $sex)
+                    RadioButtonGroup(title: "내 성별", options: ProfileOptions.getSexOptions(), selection: $sex)
                     
                     RadioButtonGroup(title: "매칭 성별",
                                      subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
-                                     options: TargetSex.allCases,
+                                     options: ProfileOptions.getPreferenceSexOptions(),
                                      selection: $targetSex)
                 }
                 .onTapGesture {
@@ -126,8 +126,8 @@ public struct BasicProfileView: View {
             
             userProfile.nickname = nickname
             userProfile.age = Int(age) ?? 0
-            userProfile.sex = sex.text
-            userProfile.targetSex = targetSex.text
+            userProfile.sex = sex
+            userProfile.targetSex = targetSex
             
             currentPage = .image
             

@@ -37,20 +37,13 @@ public struct Voice: Codable, Sendable {
     let userId: Int
     let url: String
     let duration: Int
-    
-    enum CodingKeys: String, CodingKey {
-        case userId = "foreign"
-        case id, url, duration
-    }
+    let fileSize: Int
 }
 
 public struct Image: Codable, Sendable {
     let id: Int
     let userId: Int
     let path: String
-    
-    enum CodingKeys: String, CodingKey {
-        case userId = "foreign"
-        case id, path 
-    }
+    let serverImageName: String
+    let originalName: String
 }

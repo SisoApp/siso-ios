@@ -8,35 +8,13 @@
 import SwiftUI
 import designSystem
 
-public protocol RadioButtonOption: Hashable {
-    var value: String { get }
-    var text: String { get }
-}
-
-public enum Sex: String, CaseIterable, RadioButtonOption {
-    case female = "여성"
-    case male = "남성"
-    
-    public var value: String { self.rawValue }
-    public var text: String { String(describing: self).uppercased() }
-}
-
-public enum TargetSex: String, CaseIterable, RadioButtonOption {
-    case female = "여성"
-    case male = "남성"
-    case other = "상관없음"
-    
-    public var value: String { self.rawValue }
-    public var text: String { String(describing: self).uppercased() }
-}
-
-public struct RadioButtonGroup<T: RadioButtonOption>: View {
+public struct RadioButtonGroup: View {
     let title: String
     let subTitle: String?
-    let options: [T]
-    @Binding var selection: T?
+    let options: [(value: String, title: String)]
+    @Binding var selection: String?
     
-    public init(title: String, subTitle: String? = nil, options: [T], selection: Binding<T?>) {
+    public init(title: String, subTitle: String? = nil, options: [(value: String, title: String)], selection: Binding<String?>) {
         self.title = title
         self.subTitle = subTitle
         self.options = options
@@ -78,18 +56,18 @@ public struct RadioButtonGroup<T: RadioButtonOption>: View {
     
     private func optionView() -> some View {
         return HStack(spacing: 0) {
-            ForEach(options, id: \.self) { option in
-                radioButton(for: option)
+            ForEach(options.indices, id: \.self) { index in
+                radioButton(for: options[index])
             }
             Spacer()
         }
     }
     
-    private func radioButton(for option: T) -> some View {
-        let isSelect: Bool = selection == option
+    private func radioButton(for option: (value: String, title: String)) -> some View {
+        let isSelect: Bool = selection == option.value
         
         return HStack(spacing: 0) {
-            Text(option.value)
+            Text(option.title)
                 .padding(.trailing, 2)
                 .font(.system(size: 20))
                 .fontWeight(.semibold)
@@ -103,7 +81,7 @@ public struct RadioButtonGroup<T: RadioButtonOption>: View {
         }
         .padding(.top, 12)
         .onTapGesture {
-            selection = option
+            selection = option.value
         }
     }
 }

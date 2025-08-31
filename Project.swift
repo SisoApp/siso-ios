@@ -112,7 +112,8 @@ let network: Target = .target(
     ),
     sources: ["siso-ios/Network/**"],
     dependencies: [
-        .external(name: "Alamofire")
+        .external(name: "Alamofire"),
+        .target(name: "model")
     ]
 )
 

@@ -7,20 +7,11 @@
 
 import SwiftUI
 
-enum Religion: String, Identifiable, CaseIterable {
-    case christianity = "기독교"
-    case buddhism = "불교"
-    case catholic = "천주교"
-    case none = "무교"
-    case other = "기타 종교"
-    
-    var id: String { rawValue }
-}
-
 public struct ReligionProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var religion: String
     
+    private var viewModel: ReligionProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -59,40 +50,21 @@ public struct ReligionProfileView: View {
     }
     
     private func religionButtonGroup() -> some View {
-        let first = Religion.allCases.prefix(Religion.allCases.count / 2)
-        let second = Religion.allCases.suffix(Religion.allCases.count / 2)
-        
-        return VStack {
-            HStack(spacing: 12) {
-                ForEach(first) { religion in
-                    religionButton(religion)
-                }
-                Spacer()
-            }
-            .padding(.top, 24)
-            .padding(.bottom, 4)
-            
-            HStack(spacing: 12) {
-                ForEach(second) { religion in
-                    religionButton(religion)
-                }
-                Spacer()
+        return TagGroup {
+            ForEach(ProfileOptions.getReligionOptions(), id: \.0) { (value, title) in
+                religionButton(title: title, value: value)
             }
         }
     }
     
-    private func religionButton(_ item: Religion) -> some View {
-        let isContain: Bool = religion == item.rawValue
+    private func religionButton(title: String, value: String) -> some View {
+        let isContain: Bool = religion == value
         
         return Button {
-            switch item {
-            case .other:
-                delegate?.presentProfile(sheet: .religion)
-            default:
-                religion = isContain ? "" : item.rawValue
-            }
+            religion = isContain ? "" : value
+            print(religion)
         } label: {
-            Text(item.rawValue)
+            Text(title)
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Siso.Gray._90)

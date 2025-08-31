@@ -16,9 +16,38 @@ public final actor VoiceNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
+    public func getVoice() async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/voice-samples/user"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        AF.request(url,
+                   method: .get,
+                   headers: headers)
+        .validate(statusCode: 200..<300)
+        .responseDecodable(of: VoiceResponseDTO.self) { response in
+            switch response.result {
+            case .success(let voice):
+                print("녹음파일 조회 성공")
+                print(voice.url)
+                break
+            case .failure(let error):
+                print("녹음파일 조회 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     public func uploadVoice() async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
-        let urlString: String = baseUrl + "/api/voice-samples/upload"
+        let urlString: String = baseUrl + "/api/voice-samples/user"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {

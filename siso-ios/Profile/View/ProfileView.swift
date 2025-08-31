@@ -12,15 +12,13 @@ public enum ProfileMode {
     case signUp, edit
 }
 
-
-
 public struct ProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
-    @State private var sex: Sex? = nil
-    @State private var targetSex: TargetSex? = nil
+    @State private var sex: String? = nil
+    @State private var targetSex: String? = nil
     @State private var isPlaying: Bool = false
     @State private var religion: String = ""
     @State private var meetings: [String] = []
@@ -37,8 +35,8 @@ public struct ProfileView: View {
         self._nickname = State(wrappedValue: userProfile.nickname)
         self._age = State(wrappedValue: userProfile.age.description)
         self._introduce = State(wrappedValue: userProfile.introduce)
-        self._sex = State(wrappedValue: Sex(rawValue: userProfile.sex))
-        self._targetSex = State(wrappedValue: TargetSex(rawValue: userProfile.targetSex))
+        self._sex = State(wrappedValue: userProfile.sex)
+        self._targetSex = State(wrappedValue: userProfile.targetSex)
     }
     
     public var body: some View {
@@ -81,8 +79,9 @@ public struct ProfileView: View {
             }
         }
         .task {
-            try? await ProfileNetworkManager.shared.getMyProfile()
-            try? await ProfileNetworkManager.shared.getProfiles()
+            //try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            //try? await ProfileNetworkManager.shared.getProfiles()
+            try? await VoiceNetworkManager.shared.getVoice()
         }
     }
     
@@ -175,36 +174,42 @@ public struct ProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
   
             recordView()
-            
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.Siso.Gray._20)
-                    .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
-                    .frame(height: 195)
-                
-                TextEditor(text: $introduce)
-                    .focused($introduceFocus)
-                    .background(.clear)
-                    .scrollContentBackground(.hidden)
-                    .font(.system(size: 20, weight: .semibold))
-                    .padding()
-                    .onChange(of: introduce) { _, newValue in
-                        introduce = newValue.prefix(50).description
-                    }
-                
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Text("\(introduce.count)/50")
-                            .font(.system(size: 18))
-                            .foregroundStyle(Color.Siso.Gray._50)
-                    }
-                }
-                .padding()
-            }
-            .padding(.top)
+            textView()
         }
+    }
+    
+    private func textView() -> some View {
+        let isActive: Bool = introduce.count >= 5
+        
+        return ZStack {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.Siso.Gray._20)
+                .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
+                .stroke(!isActive ? .red : .clear)
+                .frame(height: 195)
+            
+            TextEditor(text: $introduce)
+                .focused($introduceFocus)
+                .background(.clear)
+                .scrollContentBackground(.hidden)
+                .font(.system(size: 20, weight: .semibold))
+                .padding()
+                .onChange(of: introduce) { _, newValue in
+                    introduce = newValue.prefix(50).description
+                }
+            
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("\(introduce.count)/50")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Color.Siso.Gray._50)
+                }
+            }
+            .padding()
+        }
+        .padding(.top)
     }
     
     private func recordView() -> some View {
@@ -278,10 +283,10 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
             
-            RadioButtonGroup(title: "내 성별", options: Sex.allCases, selection: $sex)
+            RadioButtonGroup(title: "내 성별", options: ProfileOptions.getSexOptions(), selection: $sex)
                 .padding(.top)
             
-            RadioButtonGroup(title: "매칭 성별", options: TargetSex.allCases, selection: $targetSex)
+            RadioButtonGroup(title: "매칭 성별", options: ProfileOptions.getPreferenceSexOptions(), selection: $targetSex)
                 .padding(.top)
             
             inputView(title: "지역", item: userProfile.location)
@@ -305,7 +310,7 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.smoke)
                 }
             
-            inputView(title: "음주", item: userProfile.drinking)
+            inputView(title: "음주", item: ProfileOptions.getDrinkingCapacityDescription(rawValue: userProfile.drinking) ?? "")
                 .onTapGesture {
                     delegate?.pushProfile(.drink)
                 }
