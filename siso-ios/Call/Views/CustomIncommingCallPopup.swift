@@ -27,7 +27,7 @@ public struct CustomIncommingCallPopup: View {
     }
     private var profileImageView: some View {
         ZStack {
-            AsyncImage(url: URL(string: incommingCall.profileImageUrl ?? <#default value#>)){ image in
+            AsyncImage(url: URL(string: incommingCall.profileImageUrl ?? "https://imgur.com/a/24214AF")){ image in
                 
                 image
                     .resizable() // 1. 크기 조절 가능하게 설정 (필수!)

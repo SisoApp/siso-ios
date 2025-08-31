@@ -28,15 +28,15 @@ public struct ActiveCallView: View {
                 }
             
         case .connecting(let info):
-            ConnectingView(opponentProfile: info.opponentProfile, delegate: delegate)
+            ConnectingView(receiverCallInfo: info, delegate: delegate)
             
         case .receiving(let info):
-            IncommingCallView(callInfo: info, delegate: delegate)
+            DummyView()
             
         case .inCall(let info):
             // callState가 .inCall로 바뀌면, 이 뷰가 자동으로 렌더링됩니다.
             // 여기서 CallViewModel을 생성하여 CallingView에 전달합니다.
-            let viewModel = CallViewModel(opponentProfile: info.opponentProfile)
+            let viewModel = CallViewModel(opponentCallInfo: info)
             CallingView(inCallViewModel: viewModel, delegate: delegate)
         }
     }

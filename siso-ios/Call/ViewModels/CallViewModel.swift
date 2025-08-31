@@ -23,7 +23,7 @@ public class CallViewModel: ObservableObject, Identifiable {
     
     // MARK: - Properties
     
-    public let opponentProfile: MatchingProfile
+    public let opponentCallInfo: CallInfoDto
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
     
@@ -32,8 +32,8 @@ public class CallViewModel: ObservableObject, Identifiable {
 
     // MARK: - Initializer
     
-    public init(opponentProfile: MatchingProfile) {
-        self.opponentProfile = opponentProfile
+    public init(opponentCallInfo: CallInfoDto) {
+        self.opponentCallInfo = opponentCallInfo
         self.remainingSeconds = initialCallDuration
         self.remainTime = timeString(from: initialCallDuration)
         
