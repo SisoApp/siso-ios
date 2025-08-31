@@ -80,6 +80,10 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._90)
             }
         }
+        .task {
+            try? await ProfileNetworkManager.shared.getMyProfile()
+            try? await ProfileNetworkManager.shared.getProfiles()
+        }
     }
     
     private func profileImageView() -> some View {

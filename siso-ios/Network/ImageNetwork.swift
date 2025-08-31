@@ -23,12 +23,12 @@ public final actor ImageNetworkManager: Sendable {
         
         print(urlString)
         
-        guard let refreshToken = KeyChainManager.shared.get(for: "refreshToken") else {
-            throw AFError.invalidURL(url: "refreshToken -> nil")
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(refreshToken)",
+            "Authorization": "Bearer \(accessToken)",
             "Content-Type": "multipart/form-data"
         ]
         
