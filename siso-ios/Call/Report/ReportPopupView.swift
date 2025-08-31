@@ -32,9 +32,9 @@ public struct ReportPopupView: View {
     @State private var selectedType: ReportReasonType? = nil
     
     
-    var opponentProfile: MatchingProfile
+    var opponentProfile: CallInfoDto
     
-    public init(opponentProfile: MatchingProfile) {
+    public init(opponentProfile: CallInfoDto) {
         self.opponentProfile = opponentProfile
     }
     
@@ -79,12 +79,12 @@ public struct ReportPopupView: View {
     }
     
     @ViewBuilder
-    private func profileImageView(profile: MatchingProfile) -> some View {
+    private func profileImageView(profile: CallInfoDto) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
-        if profile.imageUrls.isEmpty {
+        if profile.profileImageUrl == nil {
             placeholderImage
         } else {
-            let urlString = profile.imageUrls.first!
+            let urlString = profile.profileImageUrl ?? "https://imgur.com/a/24214AF"
             AsyncImage(url: URL(string: urlString)) { image in
                 image
                     .resizable()
@@ -137,8 +137,4 @@ public struct ReportPopupView: View {
            
         }
     }
-}
-
-#Preview {
-    ReportPopupView(opponentProfile: MatchingProfile.sampleMessi)
 }

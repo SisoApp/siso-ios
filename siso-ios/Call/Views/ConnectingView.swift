@@ -11,12 +11,13 @@ import model // UserProfileServer 모델을 사용하기 위해 import
 import designSystem // Color.Siso 등을 사용하기 위해 import
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
+///  기본적으로는 발신자 전용임
 public struct ConnectingView: View {
-    var opponentProfile: MatchingProfile
+    var receiverCallInfo: CallInfoDto
     var delegate: CallCoordinatorDelegate?
     
-    public init(opponentProfile: MatchingProfile, delegate: CallCoordinatorDelegate? = nil) {
-        self.opponentProfile = opponentProfile
+    public init(receiverCallInfo: CallInfoDto, delegate: CallCoordinatorDelegate? = nil) {
+        self.receiverCallInfo = receiverCallInfo
         self.delegate = delegate
     }
     
@@ -27,7 +28,7 @@ public struct ConnectingView: View {
             Spacer()
             
             // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
-            Text("\(opponentProfile.nickname) 님과\n연결중이에요")
+            Text("\(receiverCallInfo.nickname) 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
@@ -65,24 +66,6 @@ public struct ConnectingView: View {
                             .font(.headline)
                             .foregroundColor(.black)
                             .padding()
-                        // ================== 테스트 코드 추가 시작 ==================
-                                  #if DEBUG // DEBUG 빌드에서만 이 버튼이 보이도록 합니다.
-                                  Button("TEST: 상대방이 전화 받음") {
-                                      // CallManager의 상태를 강제로 .inCall로 변경합니다.
-                                      // 실제 앱에서는 이 부분이 Agora 이벤트에 의해 자동으로 호출됩니다.
-                                      
-                                      // 현재 callState가 .connecting일 때만 동작하도록 방어 코드 추가
-                                      if case .connecting(let info) = CallManager.shared.callState {
-                                          print("🧪 TEST: Forcing call state to .inCall")
-                                          CallManager.shared.forceUpdateState(to: .inCall(info: info))
-                                      }
-                                  }
-                                  .padding()
-                                  .background(Color.yellow)
-                                  .foregroundColor(.black)
-                                  .clipShape(Capsule())
-                                  #endif
-                                  // ================== 테스트 코드 추가 끝 ==================
                     }
                 }
             }

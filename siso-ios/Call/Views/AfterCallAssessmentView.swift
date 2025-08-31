@@ -10,13 +10,13 @@ import model
 import matching
 
 public struct AfterCallAssessmentView: View {
-    var opponentProfile: MatchingProfile
+    var opponentProfile: CallInfoDto
     
     var matchingDelegate: MatchingCoordinatorDelegate?
     // ChatCoordinator
     
     
-    public init(opponentProfile: MatchingProfile, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
+    public init(opponentProfile: CallInfoDto, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.matchingDelegate = matchingDelegate
     }
@@ -124,7 +124,7 @@ public struct AfterCallAssessmentView: View {
     private var profileImageView: some View {
         ZStack {
             
-            AsyncImage(url: URL(string: opponentProfile.imageUrls.first ?? "testimg")){ image in
+            AsyncImage(url: URL(string: opponentProfile.profileImageUrl ?? "testimg")){ image in
                 
                 image
                     .resizable()
@@ -138,9 +138,4 @@ public struct AfterCallAssessmentView: View {
             }
         }
     }
-}
-
-
-#Preview {
-    AfterCallAssessmentView(opponentProfile: MatchingProfile.sampleMessi)
 }
