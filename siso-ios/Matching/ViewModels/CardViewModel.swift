@@ -30,9 +30,9 @@ public class CardViewModel: ObservableObject, Identifiable {
     // --- 뷰를 위한 계산 프로퍼티 ---
     public var nickname: String { profile.nickname }
     public var age: Int { profile.age }
-    public var location: String { profile.location }
+    public var location: String { profile.location ?? "비공개" }
     public var interestTags: [String] { profile.interests }
-    public var introduction: String { profile.introduce }
+    public var introduction: String { profile.introduce ?? "" }
     
     public var profileImageURLs: [URL] {
         profile.imageUrls.compactMap { URL(string: $0) }
