@@ -9,9 +9,9 @@ import SwiftUI
 import model
 
 public struct AfterCallPopup: View {
-    var opponentProfile: MatchingProfile
+    var opponentProfile: CallInfoDto
     
-    public init(opponentProfile: MatchingProfile){
+    public init(opponentProfile: CallInfoDto){
         self.opponentProfile = opponentProfile
     }
     
@@ -73,7 +73,7 @@ public struct AfterCallPopup: View {
     
     private var profileImageView: some View {
         ZStack {
-            AsyncImage(url: URL(string: opponentProfile.imageUrls.first ?? "testimg")){ image in
+            AsyncImage(url: URL(string: opponentProfile.profileImageUrl ?? "https://imgur.com/a/24214AF")){ image in
                 
                 image
                     .resizable() // 1. 크기 조절 가능하게 설정 (필수!)
@@ -90,6 +90,3 @@ public struct AfterCallPopup: View {
     
 }
 
-#Preview {
-    AfterCallPopup(opponentProfile: MatchingProfile.sampleMessi)
-}

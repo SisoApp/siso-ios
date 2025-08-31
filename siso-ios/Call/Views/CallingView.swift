@@ -30,14 +30,14 @@ public struct CallingView: View {
         VStack {
             
             HStack {
-                profileImageView(profile: callViewModel.opponentProfile)
+                profileImageView(profile: callViewModel.opponentCallInfo)
                 VStack(alignment: .leading, spacing: 0){
-                    Text("\(callViewModel.opponentProfile.nickname)")
+                    Text("\(callViewModel.opponentCallInfo.nickname)")
                         .font(.system(size: 24, weight: .bold))
                     HStack {
-                        Text("\(callViewModel.opponentProfile.age)세")
+                        Text("\(callViewModel.opponentCallInfo.age)세")
                             .font(.system(size: 22, weight: .medium))
-                        locationInfoSection(profile: callViewModel.opponentProfile)
+                        locationInfoSection(profile: callViewModel.opponentCallInfo)
                     }
                     
                 }
@@ -81,23 +81,10 @@ public struct CallingView: View {
                     }
                     
                 }
-                // ================== 테스트 코드 추가 시작 ==================
-                            #if DEBUG
-                            Button("TEST: 상대방이 전화 끊음") {
-                                print("🧪 TEST: Forcing call state to .idle")
-                                CallManager.shared.forceUpdateState(to: .idle)
-                            }
-                            .padding()
-                            .background(Color.orange)
-                            .foregroundColor(.black)
-                            .clipShape(Capsule())
-                            #endif
-                            // ================== 테스트 코드 추가 끝 ==================
-                
             }
             
             Spacer()
-            commonInterestView(profile: callViewModel.opponentProfile)
+            commonInterestView(profile: callViewModel.opponentCallInfo)
             
             actionButtonsSection()
         }
@@ -106,12 +93,12 @@ public struct CallingView: View {
     
     // MARK: - View Components (Functions)
     @ViewBuilder
-    private func profileImageView(profile: MatchingProfile) -> some View {
+    private func profileImageView(profile: CallInfoDto) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
-        if profile.imageUrls.isEmpty {
+        if profile.profileImageUrl == nil {
             placeholderImage
         } else {
-            let urlString = profile.imageUrls.first!
+            let urlString = profile.profileImageUrl!
             AsyncImage(url: URL(string: urlString)) { image in
                 image
                     .resizable()
@@ -143,7 +130,7 @@ public struct CallingView: View {
     }
     
     /// 사용자 이름과 나이를 표시하는 뷰
-    private func userInfoSection(profile: MatchingProfile) -> some View {
+    private func userInfoSection(profile: CallInfoDto) -> some View {
         HStack {
             Text("\(profile.nickname),")
                 .font(.system(size: 24, weight: .bold))
@@ -158,10 +145,10 @@ public struct CallingView: View {
     }
     
     /// 위치 정보를 표시하는 뷰
-    private func locationInfoSection(profile: MatchingProfile) -> some View {
+    private func locationInfoSection(profile: CallInfoDto) -> some View {
         HStack {
             Image("locationicon_inverse") // 에셋 이름 확인 필요
-            Text(profile.location) // UserProfileServer에 location이 옵셔널로 있다고 가정
+            Text(profile.location ?? "비공개") // UserProfileServer에 location이 옵셔널로 있다고 가정
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer()
@@ -170,16 +157,16 @@ public struct CallingView: View {
     }
     
     /// 자기소개 텍스트를 표시하는 뷰
-    private func introductionSection(profile: MatchingProfile) -> some View {
-        Text(profile.introduce)
-            .foregroundStyle(.black)
-            .font(.system(size: 16))
-            .lineLimit(2)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
-    }
+//    private func introductionSection(profile: CallInfoDto) -> some View {
+//        Text(profile.introduce)
+//            .foregroundStyle(.black)
+//            .font(.system(size: 16))
+//            .lineLimit(2)
+//            .frame(maxWidth: .infinity, alignment: .leading)
+//            .padding(.horizontal)
+//    }
     
-    private func commonInterestView(profile: MatchingProfile) -> some View {
+    private func commonInterestView(profile: CallInfoDto) -> some View {
         HStack {
             Text("공통 관심사")
                 .font(.system(size: 18, weight: .medium))
@@ -263,7 +250,3 @@ public struct CallingView: View {
 }
 
 
-// MARK: - Preview
-#Preview {
-    CallingView(inCallViewModel: CallViewModel(opponentProfile: MatchingProfile.sampleMessi))
-}

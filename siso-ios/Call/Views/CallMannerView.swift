@@ -50,7 +50,9 @@ public struct CallMannerView: View {
             Button {
                 print("확인했어요 전화 시작")
                 // 전화 시작
-                CallManager.shared.startCall(to: opponentProfile)
+                Task{
+                    await CallManager.shared.startCall(to: opponentProfile)
+                }
                 
                 delegate?.pushCall(.activeCall)
             } label: {

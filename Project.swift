@@ -67,7 +67,12 @@ let sisoApp: Target = .target(
         .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
-    ]
+    ],
+    settings: .settings(
+           base: [
+               "OTHER_LDFLAGS": "-ObjC"
+           ]
+       )
 )
 
 let sisoAppTest: Target = .target(
