@@ -27,16 +27,14 @@ public struct User: Sendable, Codable {
     let socialLogin: SocialLoginType
     let email: String
     let phoneNumber: String
-    let isDeleted: Bool
-    let isBlock: Bool
+    let presenceStatus: String
     
     enum CodingKeys: String, CodingKey {
         case userId = "id"
         case socialLogin = "provider"
         case email
         case phoneNumber
-        case isDeleted = "deleted"
-        case isBlock = "block"
+        case presenceStatus
     }
 }
 

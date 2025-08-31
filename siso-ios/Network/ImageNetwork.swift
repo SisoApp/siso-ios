@@ -18,7 +18,7 @@ public final actor ImageNetworkManager: Sendable {
     
     public func getImages() async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
-        let urlString: String = baseUrl + "/api/images/user"
+        let urlString: String = baseUrl + "/api/images/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
@@ -61,7 +61,7 @@ public final actor ImageNetworkManager: Sendable {
         
         AF.upload(
             multipartFormData: { multipartFormData in
-                for (index, image) in images.enumerated() {
+                for image in images {
                     let uuid: String = UUID().uuidString
                     
                     if let imageData = image.jpegData(compressionQuality: 1.0) {

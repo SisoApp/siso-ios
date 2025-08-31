@@ -148,8 +148,6 @@ public final actor ProfileNetworkManager: Sendable {
             "Content-Type": "application/json"
         ]
         
-        print(profile)
-        
         AF.request(url,
                    method: .patch,
                    parameters: profile,

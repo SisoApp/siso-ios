@@ -11,7 +11,6 @@ public struct MeetingProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var meetings: [String] = []
     
-    private var viewModel: MeetingProfileViewModel = MeetingProfileViewModel()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -56,16 +55,16 @@ public struct MeetingProfileView: View {
         }
     }
     
-    private func meetingButton(_ title: String) -> some View {
-        let isActive: Bool = meetings.contains(title)
+    private func meetingButton(title: String, value: String) -> some View {
+        let isActive: Bool = meetings.contains(value)
         
         return Button {
             if isActive {
-                guard let index = meetings.firstIndex(of: title) else { return }
+                guard let index = meetings.firstIndex(of: value) else { return }
                 meetings.remove(at: index)
             } else {
                 if meetings.count < 7 {
-                    meetings.append(title)
+                    meetings.append(value)
                 }
             }
         } label: {
@@ -82,8 +81,8 @@ public struct MeetingProfileView: View {
     private func meetingButtonScrollView() -> some View {
         return ScrollView {
             TagGroup {
-                ForEach(viewModel.meetings, id: \.self) { item in
-                    meetingButton(item)
+                ForEach(ProfileOptions.getMeetingOptions(), id: \.0) { (value, title) in
+                    meetingButton(title: title, value: value)
                 }
             }
         }

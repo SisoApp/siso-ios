@@ -42,4 +42,30 @@ struct ProfileOptions {
     static func getReligionDescription(rawValue: String) -> String? {
         return Religion.description(for: rawValue)
     }
+    
+    static func getMeetingOptions() -> [(String, String)] {
+        return Meeting.allCases.map { ($0.rawValue, $0.description) }
+    }
+    
+    static func getMeetingDescription(rawValue: String) -> String? {
+        return Meeting.description(for: rawValue)
+    }
+    
+    static func getInterestOptions() -> [(InterestCategory, [(String, String)])] {
+        return InterestCategory.allCases.map { category in
+            let options = Interest.allCases
+                .filter { $0.category == category }
+                .map { ($0.rawValue, $0.description) }
+            return (category, options)
+        }
+    }
+    
+    static func getInterestDescription(rawValue: String) -> String? {
+        return Interest.description(for: rawValue)
+    }
+    
+    static func getInterestCategoryDescription(rawValue: String) -> String? {
+        print(rawValue)
+        return InterestCategory.description(for: rawValue)
+    }
 }

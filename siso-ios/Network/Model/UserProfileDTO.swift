@@ -68,13 +68,6 @@ public struct UserProfileRequestDto: Codable {
     
 }
 
-public struct UserProfileResponseDTO: Codable {
-    let success: Bool
-    let code: String
-    let message: String
-    let data: UserProfileRequestDto
-}
-
 // MARK: - Enums (별도의 파일에 관리하는 것을 추천)
 
 public enum DrinkingCapacity: String, Codable, CaseIterable {
@@ -224,65 +217,124 @@ public enum Meeting: String, Codable, CaseIterable {
         case .makeConnection: return "#인연만들기"
         }
     }
+    
+    public static func description(for rawValue: String) -> String? {
+        guard let meeting: Meeting = .init(rawValue: rawValue) else { return nil }
+        return meeting.description
+    }
 }
 
-public enum Interest: String, CodingKey, CaseIterable {
-    // 문화 & 예술 (Culture & Arts)
-    case music = "MUSIC"
-    case art = "ART"
-    case classicalMusic = "CLASSICAL_MUSIC"
-    case reading = "READING"
-    case performances = "PERFORMANCES"
-    // 취미 & 여가 (Hobbies & Leisure)
-    case travel = "TRAVEL"
-    case hiking = "HIKING"
-    case golf = "GOLF"
-    case fishing = "FISHING"
-    case cooking = "COOKING"
-    case photography = "PHOTOGRAPHY"
-    case movies = "MOVIES"
-    // 자기 계발 (Self-Improvement)
-    case languageLearning = "LANGUAGE_LEARNING"
-    case financialManagement = "FINANCIAL_MANAGEMENT"
-    case volunteering = "VOLUNTEERING"
-    case healthFitness = "HEALTH_FITNESS"
-    
-    // 일상 & 교류 (Daily Life & Socializing)
-    case pets = "PETS"
-    case diningOut = "DINING_OUT"
-    case havingTea = "HAVING_TEA"
-    case chatting = "CHATTING"
+public enum InterestCategory: String, CaseIterable {
+    case cultureArts = "CURTURE_ART"
+    case hobbiesLeisure = "HOBBIES_LEISURE"
+    case dailyLifeSocializing = "DAILY_LIFE_SOCIALIZING"
     
     public var description: String {
         switch self {
-            // 취미 & 여가
-        case .travel: return "여행"
-        case .hiking: return "등산"
-        case .golf: return "골프"
-        case .fishing: return "낚시"
-        case .cooking: return "요리"
-        case .photography: return "사진 촬영"
-        case .movies: return "영화 시청"
-            
-            // 문화 & 예술
-        case .music: return "음악 감상"
-        case .art: return "미술 전시회 관람"
-        case .classicalMusic: return "클래식"
-        case .reading: return "독서"
-        case .performances: return "공연 관람"
-            
-            // 자기 계발
-        case .languageLearning: return "외국어 학습"
-        case .financialManagement: return "재테크"
-        case .volunteering: return "자원 봉사"
-        case .healthFitness: return "건강/운동"
-            
-            // 일상 & 교류
-        case .pets: return "반려 동물"
-        case .diningOut: return "맛집 탐방"
-        case .havingTea: return "차 마시기"
-        case .chatting: return "수다/이야기"
+        case .cultureArts: return "문화 & 예술"
+        case .hobbiesLeisure: return "운동 & 야외활동"
+        case .dailyLifeSocializing: return "여가 & 취미"
         }
+    }
+    
+    public static func description(for rawValue: String) -> String? {
+        guard let interest: InterestCategory = .init(rawValue: rawValue) else { return nil }
+        return interest.description
+    }
+}
+
+public enum Interest: String, Codable, CaseIterable {
+    // 문화 & 예술
+    case music = "MUSIC"
+    case photography = "PHOTOGRAPHY"
+    case calligraphy = "CALIGRAPHY"
+    case writing = "WRITING"
+    case playInstrument = "PLAY_INSTRUMENT"
+    case movies = "MOVIES"
+    case art = "ART"
+    case classicalMusic = "CLASSICAL_MUSIC"
+    case singing = "SINGING"
+    case dance = "DANCE"
+    
+    // 운동 & 야외활동
+    case hiking = "HIKING"
+    case fishing = "FISHING"
+    case yoga = "YOGA"
+    case golf = "GOLF"
+    case bike = "BIKE"
+    case camping = "CAMPING"
+    case swimming = "SWIMMING"
+    case go = "GO"
+    case bowling = "BOWLING"
+    case tableTennis = "TABLE_TENNIS"
+    case flower = "FLOWER"
+    case drive = "DRIVE"
+    
+    // 여가 취미
+    case reading = "READING"
+    case baking = "BAKING"
+    case sewing = "SEWING"
+    case drawArt = "DRAWART"
+    case travel = "TRAVEL"
+    case goodRestaurant = "GOOD_RESTAURANT"
+    case video = "VIDEO"
+    case wine = "WINE"
+    case cooking = "COOKING"
+    case interior = "INTERIOR"
+    
+    public var description: String {
+        switch self {
+        case .music: return "#음악감상"
+        case .photography: return "#사진촬영"
+        case .calligraphy: return "#서예"
+        case .writing: return "#글쓰기"
+        case .playInstrument: return "#악기연주"
+        case .movies: return "#영화감상"
+        case .art: return "#미술 전시회 관람"
+        case .classicalMusic: return "#클래식 감상"
+        case .singing: return "#노래부르기"
+        case .dance: return "#댄스"
+            
+        case .hiking: return "#등산"
+        case .fishing: return "#낚시"
+        case .yoga: return "#요가"
+        case .golf: return "#골프"
+        case .bike: return "#자전거"
+        case .camping: return "#캠핑"
+        case .swimming: return "#수영"
+        case .go: return "#바둑"
+        case .bowling: return "#볼링"
+        case .tableTennis: return "#탁구"
+        case .flower: return "#꽃꽃이"
+        case .drive: return "#드라이브"
+            
+        case .reading: return "#독서"
+        case .baking: return "#베이킹"
+        case .sewing: return "#뜨개질"
+        case .drawArt: return "#원예"
+        case .travel: return "#여행"
+        case .goodRestaurant: return "#맛집"
+        case .video: return "#영상"
+        case .wine: return "#와인"
+        case .cooking: return "#요리"
+        case .interior: return "#인테리어"
+        }
+    }
+    
+    public var category: InterestCategory {
+        switch self {
+        case .music, .photography, .calligraphy, .writing, .playInstrument, .movies, .art, .classicalMusic, .singing, .dance:
+            return .cultureArts
+        case .hiking, .fishing, .yoga, .golf, .bike, .camping, .swimming, .go, .bowling, .tableTennis, .flower, .drive:
+            return .hobbiesLeisure
+        case .reading, .baking, .sewing, .drawArt, .travel, .goodRestaurant, .video, .wine, .cooking, .interior:
+            return .dailyLifeSocializing
+        }
+    }
+    
+    public static func description(for rawValue: String) -> String? {
+        guard let interest: Interest = .init(rawValue: rawValue) else { return nil }
+        return interest.description
     }
 }
 

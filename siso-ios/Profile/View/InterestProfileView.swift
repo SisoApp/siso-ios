@@ -12,7 +12,6 @@ public struct InterestProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var interests: [String] = []
     
-    private let viewModel: InterestProfileViewModel = InterestProfileViewModel()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -57,16 +56,16 @@ public struct InterestProfileView: View {
         }
     }
     
-    private func interestButton(_ title: String) -> some View {
-        let isActive: Bool = interests.contains(title)
+    private func interestButton(title: String, value: String) -> some View {
+        let isActive: Bool = interests.contains(value)
         
         return Button {
             if isActive {
-                guard let index: Int = interests.firstIndex(of: title) else { return }
+                guard let index: Int = interests.firstIndex(of: value) else { return }
                 interests.remove(at: index)
             } else {
                 if interests.count < 7 {
-                    interests.append(title)
+                    interests.append(value)
                 }
             }
         } label: {
@@ -83,8 +82,8 @@ public struct InterestProfileView: View {
     private func interestButtonScrollView() -> some View {
         return ScrollView {
             VStack(spacing: 12) {
-                ForEach(InterestType.allCases, id: \.self) { type in
-                    Text(type.id)
+                ForEach(ProfileOptions.getInterestOptions(), id: \.0) { category, options in
+                    Text(ProfileOptions.getInterestCategoryDescription(rawValue: category.rawValue) ?? "")
                         .font(.system(size: 18))
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -92,8 +91,8 @@ public struct InterestProfileView: View {
                         .padding(.top, 12)
                     
                     TagGroup {
-                        ForEach(viewModel.getInterests(type), id: \.self) { item in
-                            interestButton(item)
+                        ForEach(options, id: \.0) { (value, title) in
+                            interestButton(title: title, value: value)
                         }
                     }
                 }

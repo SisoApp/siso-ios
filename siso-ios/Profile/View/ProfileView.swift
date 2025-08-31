@@ -82,6 +82,7 @@ public struct ProfileView: View {
             //try? await ProfileNetworkManager.shared.getCurrentUserProfile()
             //try? await ProfileNetworkManager.shared.getProfiles()
             try? await VoiceNetworkManager.shared.getVoice()
+            try? await ImageNetworkManager.shared.getImages()
         }
     }
     
