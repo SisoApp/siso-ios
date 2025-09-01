@@ -1,5 +1,6 @@
 import Foundation
 import model // UserProfileServer를 사용하기 위해 필요
+import chat
 
 public enum IntegrationPage: Hashable, Identifiable {
     // Auth
@@ -41,7 +42,7 @@ public enum IntegrationPage: Hashable, Identifiable {
     
     // Chat
     case main
-    case detail
+    case detail(chat: RecentChat)
     case notificationChat
     
     // MARK: - Identifiable Conformance
@@ -72,7 +73,7 @@ public enum IntegrationPage: Hashable, Identifiable {
         case .activeCall: return "activeCall"
         case .reportFeedbackPopup: return "reportFeedbackPopup"
         case .main: return "main"
-        case .detail: return "detail"
+        case .detail(let chat): return "detail-\(chat.id)"
         case .notificationChat: return "notificationChat"
         }
     }

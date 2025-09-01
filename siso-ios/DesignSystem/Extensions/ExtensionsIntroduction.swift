@@ -6,10 +6,18 @@ import Foundation
 
 public extension Date {
     // Date Format Convert String
-    public static func formatTime(date: Date) -> String {
+    static func formatTime(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "a h:mm"
         formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: date)
+    }
+    
+    static func formatDate(date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 MM월 dd일"
+        formatter.locale = Locale(identifier: "ko_KR")
+        
         return formatter.string(from: date)
     }
 }
