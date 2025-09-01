@@ -6,13 +6,13 @@ import matching
 import network
 import model
 
-extension Coordinator: MatchingCoordinatorDelegate {
+extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
     
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: MatchingPage) -> IntegrationPage {
         switch page {
-        case .tutorial: return .home
-        case .home: return .tutorial
+        case .tutorial: return .tutorial
+        case .home: return .home
         }
     }
     
@@ -20,7 +20,7 @@ extension Coordinator: MatchingCoordinatorDelegate {
    
     public func pushMatching(_ page: MatchingPage) {
         print("Push Matching \(page)")
-        path.append(toIntegrationPage(page))
+        matchingPath.append(toIntegrationPage(.home))
     }
     
     // 변소

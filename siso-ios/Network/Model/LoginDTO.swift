@@ -27,22 +27,23 @@ public struct User: Sendable, Codable {
     let socialLogin: SocialLoginType
     let email: String
     let phoneNumber: String
-    let presenceStatus: String
+    let isDeleted: Bool
+    let isBlock: Bool
     
     enum CodingKeys: String, CodingKey {
         case userId = "id"
         case socialLogin = "provider"
         case email
         case phoneNumber
-        case presenceStatus
+        case isDeleted = "deleted"
+        case isBlock = "block"
     }
 }
 
 // TODO: AUTO LOGIN RESPONSE OBJECT
-public struct AutoLoginResponse: Sendable, Codable {
-    let accessToken: String
+public struct AutoLoginResponse: Sendable ,Codable {
     let user: User
-    let token: Token
+    var token: Token
 }
 
 

@@ -34,7 +34,6 @@ struct SisoIosApp: App {
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         self._authVM = StateObject(wrappedValue: authViewModel)
         self._locationViewModel = StateObject(wrappedValue: locationViewModel)
-        self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         
         self._coordinator = StateObject(
             wrappedValue: Coordinator(

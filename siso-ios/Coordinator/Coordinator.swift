@@ -10,9 +10,6 @@ import model
 import call
 import chat
 
-
-
-
 @MainActor
 public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
@@ -86,6 +83,9 @@ public class Coordinator: ObservableObject {
     
     public func popToRoot() {
         path = NavigationPath()
+        matchingPath = NavigationPath()
+        chatPath = NavigationPath()
+        myPagePath = NavigationPath()
     }
     
     public func present(sheet: MatchingSheet) {
