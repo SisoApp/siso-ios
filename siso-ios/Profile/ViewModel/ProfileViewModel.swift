@@ -14,14 +14,18 @@ public extension ProfileView {
             let parameters: [String: Any] = [
                 "drinkingCapacity": userProfile.drinking,
                 "religion": userProfile.religion,
-                "isSmoke": false,
+                "smoke": false,
                 "age": userProfile.age,
                 "nickname": userProfile.nickname,
                 "introduce": userProfile.introduce,
                 "location": userProfile.location,
                 "sex": userProfile.sex,
-                "preferenceSex": userProfile.targetSex
+                "preferenceSex": userProfile.targetSex,
+                "mbti": userProfile.mbti,
+                "meetings": userProfile.meeting
             ]
+            
+            print(parameters)
             
             try? await ProfileNetworkManager.shared.registerProfile(parameters)
         }

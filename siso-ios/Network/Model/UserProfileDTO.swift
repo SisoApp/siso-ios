@@ -8,7 +8,7 @@
 import Foundation
 
 /// 서버에 사용자 프로필 생성을 요청할 때 사용하는 데이터 모델
-public struct UserProfileRequestDto: Codable {
+public struct UserProfileRequestDto: Codable, Sendable {
     public let drinkingCapacity: DrinkingCapacity?
     public let religion: Religion?
     public let smoke: Bool?
@@ -65,12 +65,35 @@ public struct UserProfileRequestDto: Codable {
             self.meetings = nil
         }
     }
-    
 }
+
+public struct UserProfileResponse: Codable, Sendable {
+    let success: Bool
+    let code: String
+    let message: String
+    let data: UserProfileResponseDto
+}
+
+public struct UserProfileResponseDto: Codable, Sendable {
+    public let drinkingCapacity: DrinkingCapacity?
+    public let religion: Religion?
+    public let smoke: Bool?
+    public let age: Int
+    public let nickname: String
+    public let introduce: String?
+    public let location: String?
+    public let sex: Sex?
+    public let preferenceSex: PreferenceSex?
+    public let profileImage: MainProfileImage
+    public let mbti: Mbti?
+    public let meetings: [Meeting]?
+}
+
+
 
 // MARK: - Enums (별도의 파일에 관리하는 것을 추천)
 
-public enum DrinkingCapacity: String, Codable, CaseIterable {
+public enum DrinkingCapacity: String, Codable, CaseIterable, Sendable {
     case frequently = "FREQUENTLY"
     case occasionally = "OCCASIONALLY"
     case never = "NEVER"
@@ -89,7 +112,7 @@ public enum DrinkingCapacity: String, Codable, CaseIterable {
     }
 }
 
-public enum Religion: String, Codable, CaseIterable {
+public enum Religion: String, Codable, CaseIterable, Sendable {
     case none = "NONE"
     case christianity = "CHRISTIANITY"
     case catholic = "CATHOLIC"
@@ -112,13 +135,13 @@ public enum Religion: String, Codable, CaseIterable {
     }
 }
 
-public enum PreferenceContact: String, Codable, CaseIterable {
+public enum PreferenceContact: String, Codable, CaseIterable, Sendable {
     case kakaoTalk = "KAKAO_TALK"
     case instagram = "INSTAGRAM"
     // ... 다른 케이스들
 }
 
-public enum Sex: String, Codable, CaseIterable {
+public enum Sex: String, Codable, CaseIterable, Sendable {
     case male = "MALE"
     case female = "FEMALE"
     
@@ -135,7 +158,7 @@ public enum Sex: String, Codable, CaseIterable {
     }
 }
 
-public enum PreferenceSex: String, Codable, CaseIterable {
+public enum PreferenceSex: String, Codable, CaseIterable, Sendable {
     case male = "MALE"
     case female = "FEMALE"
     case other = "OTHER"
@@ -154,18 +177,18 @@ public enum PreferenceSex: String, Codable, CaseIterable {
     }
 }
 
-public struct MainProfileImage: Codable {
+public struct MainProfileImage: Codable, Sendable {
     let url: String
     let isMain: Bool
 }
 
-public enum Mbti: String, Codable, CaseIterable {
+public enum Mbti: String, Codable, CaseIterable, Sendable {
     case infp = "INFP"
     case entj = "ENTJ"
     // ... 다른 케이스들
 }
 
-public enum Meeting: String, Codable, CaseIterable {
+public enum Meeting: String, Codable, CaseIterable, Sendable {
     case clubActivity = "CLUB_ACTIVITY"
     case volunteerActivity = "VOLUNTEER_ACTIVITY"
     case hobbyGroup = "HOBBY_GROUP"
@@ -224,7 +247,7 @@ public enum Meeting: String, Codable, CaseIterable {
     }
 }
 
-public enum InterestCategory: String, CaseIterable {
+public enum InterestCategory: String, CaseIterable, Sendable {
     case cultureArts = "CURTURE_ART"
     case hobbiesLeisure = "HOBBIES_LEISURE"
     case dailyLifeSocializing = "DAILY_LIFE_SOCIALIZING"
@@ -243,7 +266,7 @@ public enum InterestCategory: String, CaseIterable {
     }
 }
 
-public enum Interest: String, Codable, CaseIterable {
+public enum Interest: String, Codable, CaseIterable, Sendable {
     // 문화 & 예술
     case music = "MUSIC"
     case photography = "PHOTOGRAPHY"
@@ -338,7 +361,7 @@ public enum Interest: String, Codable, CaseIterable {
     }
 }
 
-public enum Provider: String, Codable {
+public enum Provider: String, Codable, Sendable {
     case kakao = "KAKAO"
     case apple = "APPLE"
 }

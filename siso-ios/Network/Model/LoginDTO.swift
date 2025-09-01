@@ -39,7 +39,7 @@ public struct User: Sendable, Codable {
 }
 
 // TODO: AUTO LOGIN RESPONSE OBJECT
-public struct AutoLoginResponse: Sendable ,Codable {
+public struct AutoLoginResponse: Sendable, Codable {
     let accessToken: String
     let user: User
     let token: Token

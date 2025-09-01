@@ -79,7 +79,7 @@ public struct ProfileView: View {
             }
         }
         .task {
-            //try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            try? await ProfileNetworkManager.shared.getCurrentUserProfile()
             //try? await ProfileNetworkManager.shared.getProfiles()
             try? await VoiceNetworkManager.shared.getVoice()
             try? await ImageNetworkManager.shared.getImages()

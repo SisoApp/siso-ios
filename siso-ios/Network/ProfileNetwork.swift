@@ -39,65 +39,67 @@ public final actor ProfileNetworkManager: Sendable {
         AF.request(url,
                    method: .get,
                    headers: headers)
-            .validate(statusCode: 200..<300)
-            .response { response in
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
-                
-                switch response.result {
-                case .success:
-                    print("전체 프로필 조회 성공!")
-                    break
-                case .failure(let error):
-                    print("전체 프로필 조회 실패!")
-                    print(error)
-                    break
-                }
+        .validate(statusCode: 200..<300)
+        .response { response in
+            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
+                print("body: \(body)")
             }
+            
+            switch response.result {
+            case .success:
+                print("전체 프로필 조회 성공!")
+                break
+            case .failure(let error):
+                print("전체 프로필 조회 실패!")
+                print(error)
+                break
+            }
+        }
     }
     
     public func getUserProfile(for id: Int) async throws {
-        try await fetchProfile(for: id)
-    }
-    
-    public func getCurrentUserProfile() async throws {
-        guard let userId: Int = UserDefaultsManager.shared.getCurrentUserId() else {
-            throw AFError.invalidURL(url: "could not found user id")
-        }
-        try await fetchProfile(for: userId)
-    }
-    
-    private func fetchProfile(for id: Int) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles/\(id)"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
+        try await fetchProfile(url: url)
+    }
+    
+    public func getCurrentUserProfile() async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/profiles/me"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        try await fetchProfile(url: url)
+    }
+    
+    private func fetchProfile(url: URL) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-Type": "application/json"
+            "Authorization": "Bearer \(accessToken)"
         ]
+        
+        print("-------------accessToken: \(accessToken)")
         
         AF.request(url,
                    method: .get,
                    headers: headers)
         .validate(statusCode: 200..<300)
-            .response { response in
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
-                
-                switch response.result {
-                case .success:
-                    print("프로필 조회 성공!")
-                case .failure(let error):
-                    print("프로필 조회 실패: \(error)")
-                }
+        .responseDecodable(of: UserProfileRequestDto.self) { response in
+            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
+                print("body: \(body)")
             }
+            
+            switch response.result {
+            case .success(let profile):
+                print("프로필 조회 성공!: \(profile)")
+            case .failure(let error):
+                print("프로필 조회 실패: \(error)")
+            }
+        }
     }
     
     public func registerProfile(_ parameters: [String: Any]) async throws {
@@ -110,8 +112,7 @@ public final actor ProfileNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-Type": "application/json"
+            "Authorization": "Bearer \(accessToken)"
         ]
         
         AF.request(url,
@@ -119,19 +120,19 @@ public final actor ProfileNetworkManager: Sendable {
                    parameters: parameters,
                    encoding: JSONEncoding.default,
                    headers: headers)
-            .validate(statusCode: 200..<300)
-            .response { response in
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
-                
-                switch response.result {
-                case .success:
-                    print("프로필 등록 성공!")
-                case .failure(let error):
-                    print("프로필 등록 실패: ", error.localizedDescription)
-                }
+        .validate(statusCode: 200..<300)
+        .response { response in
+            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
+                print("body: \(body)")
             }
+            
+            switch response.result {
+            case .success:
+                print("프로필 등록 성공!")
+            case .failure(let error):
+                print("프로필 등록 실패: ", error.localizedDescription)
+            }
+        }
     }
     
     public func updateProfile(_ profile: UserProfileRequestDto) async throws {
@@ -152,18 +153,18 @@ public final actor ProfileNetworkManager: Sendable {
                    method: .patch,
                    parameters: profile,
                    headers: headers)
-            .validate(statusCode: 200..<300)
-            .response { response in
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
-                
-                switch response.result {
-                case .success:
-                    print("프로필 수정 성공!")
-                case .failure(let error):
-                    print("프로필 수정 실패: ", error.localizedDescription)
-                }
+        .validate(statusCode: 200..<300)
+        .response { response in
+            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
+                print("body: \(body)")
             }
+            
+            switch response.result {
+            case .success:
+                print("프로필 수정 성공!")
+            case .failure(let error):
+                print("프로필 수정 실패: ", error.localizedDescription)
+            }
+        }
     }
 }

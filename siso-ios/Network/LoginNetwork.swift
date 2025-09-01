@@ -39,7 +39,6 @@ public final actor LoginNetworkManager: Sendable {
             "accessToken": accessToken,
         ]
         
-        
         AF.request(url,
                    method: .post,
                    parameters: parameters,
@@ -74,7 +73,6 @@ public final actor LoginNetworkManager: Sendable {
             /// refreshToken을 가지고 서버에 보내서 비교
             /// 만료되었다면 다시 로그인 시키고 아직 만료까지 남아있다면 토근 재발급 해서 갱신하기
             let res = try await getRefreshToken(refreshToken: refreshToken)
-            UserDefaultsManager.shared.saveCurrent(userId: res.user.userId)
             return .success(res)
         } catch {
             return .failure(.sessionInvalidated(error: error))
