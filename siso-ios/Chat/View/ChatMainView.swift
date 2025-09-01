@@ -24,7 +24,6 @@ public struct ChatMainView: View {
     
     public var body: some View {
         VStack {
-            Group {
                 switch selectedList {
                 case .callList:
                     if callHistory.isEmpty {
@@ -41,7 +40,7 @@ public struct ChatMainView: View {
                     }else {
                         List {
                             ForEach(callHistory) { contact in
-                                ContactView(contact: contact, type: selectedList)
+                                ContactView(contact: contact, type: selectedList, delegate: delegate)
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
                                             print("delete!!")
@@ -53,6 +52,8 @@ public struct ChatMainView: View {
                                     }
                             }
                         }
+                        .listStyle(.plain)
+                        .background(.clear)
                         
                     }
                 case .recentChat:
@@ -70,7 +71,7 @@ public struct ChatMainView: View {
                     }else {
                         List {
                             ForEach(recentChats) { chat in
-                                ContactView(chat: chat, type: selectedList)
+                                ContactView(chat: chat, type: selectedList, delegate: delegate)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         print("나가기")
@@ -82,11 +83,11 @@ public struct ChatMainView: View {
                                 }
                             }
                         }
+                        .listStyle(.plain)
+                        .background(.clear)
                     }
                 }
-            }
-            .listStyle(.plain)
-            .background(.clear)
+            
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -123,38 +124,6 @@ public struct ChatMainView: View {
             self.recentChats = chats
             self.callHistory = calls
         }
-    }
-}
-
-
-// TODO: Type Define
-public extension ChatMainView {
-    struct Contact: Identifiable {
-        public let id: UUID = UUID()
-        let userName: String
-        let icon: String
-        let time: Date
-    }
-
-    struct RecentChat: Identifiable {
-        public let id: UUID = UUID()
-        let userName: String
-        let icon: String
-        let time: Date
-        let hasMessages: Bool
-        let recentMessage: String = "닉네임닉네임님과의 채팅방이 개설되었습니다."
-        
-        public init(userName: String, icon: String, time: Date, hasMessages: Bool) {
-            self.userName = userName
-            self.icon = icon
-            self.time = time
-            self.hasMessages = hasMessages
-        }
-    }
-    
-    enum ContactType {
-        case callList
-        case recentChat
     }
 }
 

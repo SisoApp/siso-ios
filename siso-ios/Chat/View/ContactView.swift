@@ -13,10 +13,12 @@ extension ChatMainView {
         let contact: Contact?
         let chat: RecentChat?
         let type: ContactType
-        init(contact: Contact? = nil, chat: RecentChat? = nil, type: ContactType) {
+        let delegate: ChatCoordinatorDelegate?
+        init(contact: Contact? = nil, chat: RecentChat? = nil, type: ContactType, delegate: ChatCoordinatorDelegate?) {
             self.contact = contact
             self.chat = chat
             self.type = type
+            self.delegate = delegate
         }
         
         // TODO: 각 연락처 내부 정보 뷰
@@ -52,8 +54,8 @@ extension ChatMainView {
             )
             .contentShape(Rectangle())
             .onTapGesture {
-                if type == .recentChat {
-                    print("채팅 Detail로 드가자~")
+                if type == .recentChat, let chat {
+                    delegate?.pushChat(.detail(chat: chat))
                 }
             }
         }

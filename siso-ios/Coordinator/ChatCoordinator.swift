@@ -13,7 +13,7 @@ extension Coordinator: @preconcurrency ChatCoordinatorDelegate {
     private func toIntegrationPage(_ page: ChatPage) -> IntegrationPage {
         switch page {
             case .main: return .main
-            case .detail: return .detail
+            case .detail(let chat): return .detail(chat: chat)
             case .notificationChat: return .notificationChat
         }
     }
