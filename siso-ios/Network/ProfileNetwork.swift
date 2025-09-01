@@ -106,9 +106,6 @@ public final actor ProfileNetworkManager: Sendable {
             "Content-Type": "application/json"
         ]
         
-        print("-------------accessToken: \(accessToken)")
-        print(parameters)
-        
         AF.request(url,
                    method: .post,
                    parameters: parameters,
@@ -129,7 +126,7 @@ public final actor ProfileNetworkManager: Sendable {
         }
     }
     
-    public func updateProfile(_ parameters: UserProfileDTO) async throws {
+    public func updateProfile(_ parameters: UserProfileDTO, completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -148,16 +145,13 @@ public final actor ProfileNetworkManager: Sendable {
                    encoder: JSONParameterEncoder.default,
                    headers: headers)
         .validate(statusCode: 200..<300)
-        .response { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
-            }
-            
+        .responseDecodable(of: UserProfileDTO.self) { response in
             switch response.result {
-            case .success:
-                print("프로필 수정 성공!")
+            case .success(let profile):
+                print("프로필 등록 성공!")
+                completion(profile)
             case .failure(let error):
-                print("프로필 수정 실패: ", error.localizedDescription)
+                print("프로필 수정 실패: \(error.localizedDescription)")
             }
         }
     }

@@ -468,8 +468,11 @@ public struct ProfileView: View {
             userProfile.targetSex = targetSex
             
             Task {
-                await viewModel.updateProfile(userProfile)
-                delegate?.pop()
+                await viewModel.updateProfile(userProfile) { profile in
+                    appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
+                    delegate?.pop()
+                }
+                
             }
         }
         .padding(.horizontal)

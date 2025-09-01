@@ -101,7 +101,7 @@ public extension ProfileView {
             
         }
         
-        func updateProfile(_ userProfile: UserProfile) async {
+        func updateProfile(_ userProfile: UserProfile, completion: @escaping (UserProfileDTO) -> Void) async {
             guard let drinkingCapacity = DrinkingCapacity(rawValue: userProfile.drinking),
                   let religion = Religion(rawValue: userProfile.religion),
                   let sex = Sex(rawValue: userProfile.sex),
@@ -126,7 +126,9 @@ public extension ProfileView {
             
             //관심사도 해야함
             
-            try? await ProfileNetworkManager.shared.updateProfile(request)
+            try? await ProfileNetworkManager.shared.updateProfile(request) { profile in
+                completion(profile)
+            }
         }
     }
 }
