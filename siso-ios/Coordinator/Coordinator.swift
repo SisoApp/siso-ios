@@ -10,9 +10,6 @@ import model
 import call
 import chat
 
-
-
-
 @MainActor
 public class Coordinator: ObservableObject {
     @Published public var stackID: UUID = UUID()
@@ -86,6 +83,9 @@ public class Coordinator: ObservableObject {
     
     public func popToRoot() {
         path = NavigationPath()
+        matchingPath = NavigationPath()
+        chatPath = NavigationPath()
+        myPagePath = NavigationPath()
     }
     
     public func present(sheet: MatchingSheet) {
@@ -165,13 +165,18 @@ public class Coordinator: ObservableObject {
                     ))  {
                         MyPageView(delegate: self)
                             .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in
-                                self.build(page)
-                            }
+                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
+         
                     }
                     .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
+                    .sheet(item: Binding(
+                        get: { self.profileSheet },
+                        set: { self.profileSheet = $0 }
+                    )) { sheet in
+                        self.build(sheet: sheet)
+                    }
                 }
-                    .tint(Color.Siso.Primary._100)
+                .tint(Color.Siso.Primary._100)
             )
             
         case .tutorial:
@@ -189,6 +194,7 @@ public class Coordinator: ObservableObject {
         case .signUp: AnyView(SignUpProfileView(delegate: self, userProfile: userProfile))
         case .interest: AnyView(InterestProfileView(delegate: self, userProfile: userProfile))
         case .voice: AnyView(RecordProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit))
+        case .image: AnyView(ImageProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit))
             
             // MyPage
         case .my: AnyView(MyPageView(delegate: self))

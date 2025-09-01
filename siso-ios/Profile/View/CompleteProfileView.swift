@@ -54,16 +54,8 @@ public struct CompleteProfileView: View {
     }
     
     private func completeButton() -> some View {
-        return Button {
+        return PrimaryButton(title: "인연 만나기") {
             delegate?.changeProfileToMatching()
-        } label: {
-            Text("인연 만나기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
-                .clipShape(.rect(cornerRadius: 27))
         }
     }
 }

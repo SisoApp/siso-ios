@@ -114,9 +114,6 @@ public struct ChatMainView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Image(systemName: "bell")
-                    .onTapGesture {
-                        delegate?.pushChat(.notificationChat)
-                    }
             }
         }
         .onAppear {

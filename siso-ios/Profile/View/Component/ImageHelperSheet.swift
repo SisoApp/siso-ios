@@ -15,7 +15,7 @@ public struct ImageHelperSheet: View {
     public weak var delegate: ProfileCoordinatorDelegate?
     public var completion: ([UIImage]) -> Void
     private let limit: Int = 5
-    private var available: Int { return limit - userProfile.profileImageUrl.count }
+    private var available: Int { return limit - userProfile.profileImages.count }
     
     public init(delegate: ProfileCoordinatorDelegate?,
                 userProfile: UserProfile,
@@ -33,13 +33,30 @@ public struct ImageHelperSheet: View {
                 delegate?.dismissProfileSheet()
                 
                 Task {
-                    var images: [UIImage] = []
-                    
-                    for item in items {
-                        if let data: Data = try? await item.loadTransferable(type: Data.self),
-                           let image: UIImage = UIImage(data: data) {
-                            images.append(image)
+                    let images: [UIImage] = await withTaskGroup(of: (Int, UIImage?).self) { group in
+                        for (index, item) in items.enumerated() {
+                            group.addTask {
+                                if let data = try? await item.loadTransferable(type: Data.self),
+                                   let image = UIImage(data: data) {
+                                    
+                                    if let compressedData = image.jpegData(compressionQuality: 0.3),
+                                       let compressedImage: UIImage = .init(data: compressedData) {
+                                        
+                                        return (index, compressedImage)
+                                    }
+                                }
+                                
+                                return (index, nil)
+                            }
                         }
+                        
+                        var results: [UIImage?] = .init(repeating: nil, count: items.count)
+                        
+                        for await (index, image) in group {
+                            results[index] = image
+                        }
+                        
+                        return results.compactMap { $0 }
                     }
                     
                     await MainActor.run {

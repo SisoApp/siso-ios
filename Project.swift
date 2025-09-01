@@ -45,9 +45,10 @@ let sisoApp: Target = .target(
                     ]
                 ]
             ],
+            "NSLocationWhenInUseUsageDescription": "현재 위치를 가져오기 위해 위치 접근 권한이 필요합니다.",
             "UIBackgroundModes": [
-                           "remote-notification"
-                       ]
+                "remote-notification"
+            ]
         ]
     ),
     sources: ["siso-ios/Sources/**",],
@@ -119,7 +120,8 @@ let network: Target = .target(
     ),
     sources: ["siso-ios/Network/**"],
     dependencies: [
-        .external(name: "Alamofire")
+        .external(name: "Alamofire"),
+        .target(name: "model")
     ]
 )
 
@@ -189,7 +191,8 @@ let profile: Target = .target(
     infoPlist: .default,
     sources: ["siso-ios/Profile/**"],
     dependencies: [
-        .target(name: "designSystem")
+        .target(name: "designSystem"),
+        .target(name: "network")
     ]
 )
 

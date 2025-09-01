@@ -7,17 +7,11 @@
 
 import SwiftUI
 
-enum DrinkFrequency: String, Identifiable, CaseIterable {
-    case often = "자주 마셔요 (주 3회이상)"
-    case sometimes = "가끔 마셔요 (주 1회 ~ 한달에 한번)"
-    case none = "전혀 안해요"
-    
-    var id: String { self.rawValue }
-}
-
 public struct DrinkProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var drinking: String
+    
+    private var viewModel: DrinkProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -65,19 +59,19 @@ public struct DrinkProfileView: View {
     
     private func buttonGroup() -> some View {
         return VStack(alignment: .leading, spacing: 12) {
-            ForEach(DrinkFrequency.allCases, id: \.self) { item in
-                drinkingButton(title: item.rawValue)
+            ForEach(ProfileOptions.getDrinkingCapacityOptions(), id: \.0) { (value, title) in
+                drinkingButton(title: title, value: value)
             }
         }
         .padding(.top, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func drinkingButton(title: String) -> some View {
-        let isContain: Bool = drinking == title
+    private func drinkingButton(title: String, value: String) -> some View {
+        let isContain: Bool = drinking == value
         
         return Button {
-            drinking = isContain ? "" : title
+            drinking = isContain ? "" : value
         } label: {
             Text(title)
                 .font(.system(size: 18))
@@ -96,21 +90,10 @@ public struct DrinkProfileView: View {
     private func completeButton() -> some View {
         let isActive: Bool = !drinking.isEmpty
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             userProfile.drinking = drinking
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
         .padding(.bottom, 38)
     }
 }

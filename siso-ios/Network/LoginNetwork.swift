@@ -8,6 +8,7 @@
 import Foundation
 import Alamofire
 import CryptoKit
+import model
 
 // MARK: - Network Manager
 
@@ -59,7 +60,12 @@ public final actor LoginNetworkManager: Sendable {
                     completionHandler("", error)
                     return
                 }
+                completionHandler(token.registrationStatus, nil)
+            case .failure(let error):
+                completionHandler("", error)
+                return
             }
+        }
     }
     
     /// ** MARK: 저장된 리프레시 토큰을 사용하여 자동으로 로그인합니다.
@@ -67,7 +73,7 @@ public final actor LoginNetworkManager: Sendable {
         guard let refreshToken = keychain.get(for: "refreshToken") else {
             return .failure(.invalidURL(url: "refreshToken -> nil"))
         }
-
+        
         do {
             /// refreshToken을 가지고 서버에 보내서 비교
             /// 만료되었다면 다시 로그인 시키고 아직 만료까지 남아있다면 토근 재발급 해서 갱신하기

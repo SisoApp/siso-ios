@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import network
 
 public struct BasicProfileView: View {
     @ObservedObject private var userProfile: UserProfile
@@ -13,15 +14,15 @@ public struct BasicProfileView: View {
     @Binding private var currentPage: SignUpProfilePage
     @State private var nickname: String = ""
     @State private var age: String = ""
-    @State private var sex: String = ""
-    @State private var targetSex: String = ""
+    @State private var sex: String? = nil
+    @State private var targetSex: String? = nil
     
     @FocusState private var nicknameFocus: Bool
     @FocusState private var ageFocus: Bool
     
     private var isActive: Bool {
         return !nickname.isEmpty && !age.isEmpty &&
-                !sex.isEmpty && !targetSex.isEmpty
+                sex != nil && targetSex != nil
     }
     
     private var isScroll: Bool {
@@ -42,12 +43,12 @@ public struct BasicProfileView: View {
                     textFieldView(field: "닉네임", placeholder: "이것은 닉네임입니다.", binding: $nickname, isFocused: nicknameFocus)
                         .focused($nicknameFocus)
                         .submitLabel(.done)
-                        .onChange(of: userProfile.nickname) { _, newValue in
-                            userProfile.nickname = String(newValue.prefix(20))
+                        .onChange(of: nickname) { _, newValue in
+                            nickname = String(newValue.prefix(8))
                         }
                         .onSubmit {
-                            nicknameFocus = false
                             ageFocus = true
+                            nicknameFocus = false
                         }
                     
                     textFieldView(field: "나이", placeholder: "나이를 입력해주세요.", binding: $age, isFocused: ageFocus)
@@ -61,14 +62,13 @@ public struct BasicProfileView: View {
                         .onSubmit {
                             hideKeyboard()
                         }
-                    RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
                     
-                    RadioButtonView(
-                        title: "매칭 성별",
-                        subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
-                        options: ["동성", "이성"],
-                        binding: $targetSex
-                    )
+                    RadioButtonGroup(title: "내 성별", options: ProfileOptions.getSexOptions(), selection: $sex)
+                    
+                    RadioButtonGroup(title: "매칭 성별",
+                                     subTitle: "동성 선택시 동성 친구, 이성 선택시 이성 친구를 추천해 드려요.",
+                                     options: ProfileOptions.getPreferenceSexOptions(),
+                                     selection: $targetSex)
                 }
                 .onTapGesture {
                     nicknameFocus = false
@@ -99,12 +99,6 @@ public struct BasicProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._50)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            ZStack {
-                RoundedRectangle(cornerRadius: 27)
-                    .fill(Color.Siso.Gray._20)
-                    .stroke(isFocused ? Color.Siso.Primary._60 : .clear)
-                    .frame(height: 54)
-                
                 HStack {
                     TextField(placeholder, text: binding)
                         .frame(height: 48)
@@ -116,80 +110,39 @@ public struct BasicProfileView: View {
                         .frame(width: 24)
                         .padding(.trailing, 16)
                 }
-            }
+                .background(
+                    RoundedRectangle(cornerRadius: 54 / 2)
+                        .fill(Color.Siso.Gray._20)
+                        .stroke(isFocused ? Color.Siso.Primary._60 : .clear)
+                        .frame(height: 54)
+                )
         }
         .padding(.top, 24)
     }
     
-    private func RadioButtonView(title: String, subTitle: String? = nil, options: [String], binding: Binding<String>) -> some View {
-        return VStack(spacing: 0) {
-            Text(title)
-                .padding(.top, 16)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            if let subTitle = subTitle {
-                Text(subTitle)
-                    .padding(.top, 6)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundStyle(Color.Siso.Gray._50)
-                    .font(.system(size: 18))
-                    .lineSpacing(5)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            
-            HStack(spacing: 0) {
-                ForEach(options, id: \.self) { option in
-                    let isSelect: Bool = binding.wrappedValue == option
-                    
-                    HStack(spacing: 0) {
-                        Text(option)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .padding(.top, 12)
-                    .onTapGesture {
-                        binding.wrappedValue = option
-                    }
-                }
-                
-                Spacer()
-            }
-        }
-        .padding(.top)
-    }
-    
     private func nextButton() -> some View {
-        return Button {
+        return PrimaryButton(title: "계속하기", isActive: isActive) {
+            guard let sex = sex, let targetSex = targetSex else { return }
+            
             userProfile.nickname = nickname
-            userProfile.age = age
+            userProfile.age = Int(age) ?? 0
             userProfile.sex = sex
             userProfile.targetSex = targetSex
             
             currentPage = .image
-        } label: {
-            Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
+            
+            let parameters: [String: Any] = [
+                "nickname": userProfile.nickname,
+                "age": userProfile.age,
+                "sex": userProfile.sex,
+                "preference_sex": userProfile.targetSex
+            ]
+            
+            Task {
+                try await ProfileNetworkManager.shared.registerProfile(parameters)
+                currentPage = .image
+            }
         }
-        .disabled(!isActive)
-        .frame(height: 54)
         .padding(.bottom, 8)
     }
     

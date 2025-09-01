@@ -8,9 +8,13 @@
 import AVFoundation
 import Combine
 import SwiftUI
+import network
 
 enum RecordStatus {
-    case pending, recording, waiting, playing
+    case pending // 녹음 대기
+    case recording // 녹음중
+    case waiting // 녹음 완료, 사용자 동작 대기 상태
+    case playing // 녹음본 재생
 }
 
 class RecordProfileViewModel: NSObject, ObservableObject {
@@ -18,12 +22,12 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     @Published var status: RecordStatus = .pending
     @Published var playTime: Int = 0
     
-    private var recoder: AVAudioRecorder?
+    private var recorder: AVAudioRecorder?
     private var player: AVAudioPlayer?
     private var fileName: String = "voice.m4a"
     
-    var timer: Timer.TimerPublisher?
-    var cancellable: Cancellable?
+    private var timer: Timer.TimerPublisher?
+    private var cancellables: Set<AnyCancellable> = .init()
     
     var audioFileUrl: URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -55,26 +59,36 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     
     init(userProfile: UserProfile) {
         self.userProfile = userProfile
+        super.init()
+        setupNotificationObservers()
+    }
+    
+    deinit {
+        cleanUp()
+        NotificationCenter.default.removeObserver(self)
     }
     
     func startTimer(max: Int = 20) {
+        removeTimer() // 기존 타이머 정리
+        
         timer = Timer.publish(every: 1.0, on: .main, in: .common)
         playTime = 0
         
-        cancellable = timer?.autoconnect().sink { [weak self] _ in
-            guard let self = self else { return }
-            
-            if self.playTime < max {
-                self.playTime += 1
-            } else {
-                self.stopTimer()
+        timer?.autoconnect()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                
+                if self.playTime < max {
+                    self.playTime += 1
+                } else {
+                    self.removeTimer()
+                }
             }
-        }
+            .store(in: &cancellables)
     }
     
-    func stopTimer() {
-        cancellable?.cancel()
-        cancellable = nil
+    func removeTimer() {
+        cancellables.removeAll()
         timer = nil
     }
     
@@ -93,8 +107,8 @@ class RecordProfileViewModel: NSObject, ObservableObject {
             ]
             
             status = .recording
-            recoder = try AVAudioRecorder(url: audioFileUrl, settings: settings)
-            recoder?.record()
+            recorder = try AVAudioRecorder(url: audioFileUrl, settings: settings)
+            recorder?.record()
             startTimer()
         } catch {
             print("Failed to start recording:", error)
@@ -102,10 +116,13 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func stopRecording() {
-        stopTimer()
-        recoder?.stop()
+        removeTimer()
+        recorder?.stop()
+        recorder = nil
         status = .waiting
         userProfile.voice = true
+        
+        try? AVAudioSession.sharedInstance().setActive(false) // AVAudioSession 비활성화
     }
     
     func startPlaying() {
@@ -121,8 +138,61 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func stopPlaying() {
-        stopTimer()
+        removeTimer()
+        player?.stop()
+        player = nil
         status = .waiting
+    }
+    
+    func uploadVoice() async {
+        try? await VoiceNetworkManager.shared.uploadVoice()
+    }
+}
+
+extension RecordProfileViewModel {
+    private func setupNotificationObservers() {
+        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            .sink { [weak self] _ in
+                self?.handleAppDidEnterBackground() // 앱이 백그라운드로 갈 때 녹음/재생 정지
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func cleanUp() {
+        // 타이머 정리
+        removeTimer()
+        
+        // 녹음 정리
+        if let recorder = recorder, recorder.isRecording {
+            recorder.stop()
+        }
+        recorder = nil
+        
+        // 재생 정리
+        if let player = player, player.isPlaying {
+            player.stop()
+        }
+        player = nil
+        
+        // AVAudioSession 정리
+        try? AVAudioSession.sharedInstance().setActive(false)
+        
+        // Combine 구독 정리
+        cancellables.removeAll()
+        
+        status = .pending // 녹음 대기 상태로 전환
+    }
+    
+    @objc private func handleAppDidEnterBackground() {
+        // 백그라운드에서 녹음/재생 정지
+        switch status {
+        case .recording:
+            stopRecording()
+        case .playing:
+            stopPlaying()
+        default:
+            break
+        }
     }
 }
 

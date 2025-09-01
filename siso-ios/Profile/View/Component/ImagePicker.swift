@@ -44,7 +44,10 @@ public struct ImagePicker: UIViewControllerRepresentable {
         public func imagePickerController(_ picker: UIImagePickerController,
                                             didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
-                parent.userProfile.profileImageUrl.append(image)
+                if let compressedData = image.jpegData(compressionQuality: 0.3),
+                   let compressedImage: UIImage = UIImage(data: compressedData) {
+                    parent.userProfile.profileImages.append(compressedImage)
+                }
             }
             
             parent.presentationMode.wrappedValue.dismiss()

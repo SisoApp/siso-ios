@@ -24,7 +24,7 @@ extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
     }
     
     public func changeAuthToProfile() {
-        pushProfile(.signUp)
+        path.append(IntegrationPage.signUp)
     }
     
     public func changeAuthToMatching() {

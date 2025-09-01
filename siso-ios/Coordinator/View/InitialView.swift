@@ -34,6 +34,8 @@ public struct InitialView: View {
                                 coordinator.build(page)
                             }
                     }
+                    .sheet(item: $coordinator.profileSheet) { sheet in
+                        coordinator.build(sheet: sheet)
                 case .logout, .undefined:
                     if authVM.userState == .undefined {
                         // 비로그인 상태이거나, 회원가입 플로우가 필요한 경우 로그인 뷰를 보여줍니다.

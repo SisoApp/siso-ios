@@ -5,6 +5,7 @@
 //  Created by 멘태 on 8/24/25.
 //
 import Combine
+import CoreLocation
 
 enum Province: String, Identifiable, CaseIterable {
     case seoul = "서울"
@@ -28,10 +29,25 @@ enum Province: String, Identifiable, CaseIterable {
     var id: String { rawValue }
 }
 
-final public class LocationViewModel: ObservableObject {
+final public class LocationViewModel: NSObject, ObservableObject {
     @Published var location: String = ""
+    @Published var isLoading: Bool = false
     
-    public init() {}
+    private var locationManager: CLLocationManager
+    
+    public override init() {
+        locationManager = CLLocationManager()
+        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        
+        super.init()
+        
+        locationManager.delegate = self
+    }
+    
+    deinit {
+        locationManager.stopUpdatingLocation() // 위치 업데이트 중단
+        locationManager.delegate = nil // delegate 해제
+    }
     
     func getCities(_ province: Province) -> [String] {
         switch province {
@@ -75,5 +91,89 @@ final public class LocationViewModel: ObservableObject {
         case .jeju:
             return ["서귀포시", "제주시"]
         }
+    }
+    
+    func shortRegionName(from area: String) -> String {
+        switch area {
+        case "충청북도": return "충북"
+        case "충청남도": return "충남"
+        case "전라북도": return "전북"
+        case "전라남도": return "전남"
+        case "경상북도": return "경북"
+        case "경상남도": return "경남"
+        default: return area.prefix(2).description
+        }
+    }
+}
+
+extension LocationViewModel: CLLocationManagerDelegate {
+    func checkAuthorizationStatus() throws {
+        guard locationManager.authorizationStatus == .authorizedWhenInUse else {
+            locationManager.requestWhenInUseAuthorization()
+            return
+        }
+    }
+    
+    func getLocation() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            isLoading = true 
+            locationManager.requestLocation()
+        default:
+            print("위치 권한 오류")
+            isLoading = false
+        }
+    }
+    
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = locationManager.authorizationStatus
+        
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
+            isLoading = true
+            locationManager.requestLocation()
+        } else if status == .denied || status == .restricted {
+            isLoading = false // 권한이 거부되면 로딩 상태 해제
+        }
+    }
+    
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            let geoCoder: CLGeocoder = CLGeocoder()
+            
+            geoCoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+                guard let self = self else { return }
+                
+                DispatchQueue.main.async {
+                    if let error = error {
+                        print("geoCoder error: \(error.localizedDescription)")
+                        self.isLoading = false
+                        return
+                    }
+                    
+                    if let placemark = placemarks?.first,
+                       let country = placemark.country {
+                        let address: [String] = placemark.description.components(separatedBy: country)[1].components(separatedBy: " ")
+                        
+                        if address.count > 2 {
+                            let province: String = self.shortRegionName(from: address[1])
+                            let city: String = address[2]
+                            
+                            self.location = "\(province) \(city)"
+                        } else {
+                            print("Address Parsing Error: Out of Index...")
+                        }
+                        
+                        self.isLoading = false
+                    }
+                }
+            }
+        }
+    }
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        isLoading = false
+        print("위치 가져오기 실패: \(error.localizedDescription)")
     }
 }
