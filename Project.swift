@@ -49,7 +49,6 @@ let sisoApp: Target = .target(
             "UIBackgroundModes": [
                 "remote-notification"
             ]
-
         ]
     ),
     sources: ["siso-ios/Sources/**",],

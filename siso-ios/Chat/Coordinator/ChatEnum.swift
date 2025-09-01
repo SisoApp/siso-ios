@@ -5,10 +5,29 @@
 //  Created by 김용해 on 8/20/25.
 //
 
-public enum ChatPage: String, Identifiable, Hashable {
-    case main, detail, notificationChat
+public enum ChatPage: Identifiable, Hashable {
+    case main
+    case detail(chat: RecentChat)
+    case notificationChat
     
-    public var id: String { self.rawValue }
+    public var id: String {
+        switch self {
+        case .main:
+            return "main"
+        case .detail(let chat):
+            return "detail-\(chat.id)"
+        case .notificationChat:
+            return "notificationChat"
+        }
+    }
+    
+    public static func == (lhs: ChatPage, rhs: ChatPage) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 public enum ChatSheet: String, Identifiable, Hashable {

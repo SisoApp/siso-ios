@@ -141,7 +141,9 @@ public class Coordinator: ObservableObject {
                     )) {
                         MatchingMainView(viewModel: matchingViewModel, delegate: self)
                             .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
+                            .navigationDestination(for: IntegrationPage.self) { page in
+                                self.build(page)
+                            }
                     }
                     .tabItem { Label("둘러보기", systemImage: "house") }.tag(0)
                     
@@ -151,7 +153,9 @@ public class Coordinator: ObservableObject {
                     ))  {
                         ChatMainView(delegate: self)
                             .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
+                            .navigationDestination(for: IntegrationPage.self) { page in
+                                self.build(page)
+                            }
                     }
                     .tabItem { Label("대화", systemImage: "ellipsis.message") }.tag(1)
                     
@@ -162,7 +166,7 @@ public class Coordinator: ObservableObject {
                         MyPageView(delegate: self)
                             .navigationBarBackButtonHidden(true)
                             .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
-                            
+         
                     }
                     .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
                     .sheet(item: Binding(
@@ -212,8 +216,8 @@ public class Coordinator: ObservableObject {
             // Chat
         case .main:
             AnyView(ChatMainView(delegate: self))
-        case .detail:
-            AnyView(ChatMainView.ChatDetailView(chat: .init(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true)))
+        case .detail(let chat):
+            AnyView(ChatMainView.ChatDetailView(chat: chat))
         case .notificationChat:
             AnyView(
                 NotificationChatView()
