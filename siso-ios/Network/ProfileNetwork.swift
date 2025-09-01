@@ -22,7 +22,7 @@ public final actor ProfileNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
-    public func getProfiles() async throws {
+    public func getProfiles(completion: @escaping ([UserProfileDTO]) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -40,40 +40,35 @@ public final actor ProfileNetworkManager: Sendable {
                    method: .get,
                    headers: headers)
         .validate(statusCode: 200..<300)
-        .response { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
-            }
-            
+        .responseDecodable(of: [UserProfileDTO].self) { response in
             switch response.result {
-            case .success:
+            case .success(let profiles):
                 print("전체 프로필 조회 성공!")
-                break
+                completion(profiles)
             case .failure(let error):
                 print("전체 프로필 조회 실패!")
-                print(error)
-                break
+                print(error.localizedDescription)
             }
         }
     }
     
-    public func getUserProfile(for id: Int) async throws {
+    public func getUserProfile(for id: Int, completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles/\(id)"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try await fetchProfile(url: url)
+        try await fetchProfile(url: url, completion)
     }
     
-    public func getCurrentUserProfile() async throws {
+    public func getCurrentUserProfile(completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try await fetchProfile(url: url)
+        try await fetchProfile(url: url, completion)
     }
     
-    private func fetchProfile(url: URL) async throws {
+    private func fetchProfile(url: URL,_ completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
@@ -82,22 +77,17 @@ public final actor ProfileNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        print("-------------accessToken: \(accessToken)")
-        
         AF.request(url,
                    method: .get,
                    headers: headers)
         .validate(statusCode: 200..<300)
-        .responseDecodable(of: UserProfileRequestDto.self) { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
-            }
-            
+        .responseDecodable(of: UserProfileDTO.self) { response in
             switch response.result {
             case .success(let profile):
                 print("프로필 조회 성공!: \(profile)")
+                completion(profile)
             case .failure(let error):
-                print("프로필 조회 실패: \(error)")
+                print("프로필 조회 실패: \(error.localizedDescription)")
             }
         }
     }
@@ -112,8 +102,12 @@ public final actor ProfileNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)"
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json"
         ]
+        
+        print("-------------accessToken: \(accessToken)")
+        print(parameters)
         
         AF.request(url,
                    method: .post,
@@ -135,7 +129,7 @@ public final actor ProfileNetworkManager: Sendable {
         }
     }
     
-    public func updateProfile(_ profile: UserProfileRequestDto) async throws {
+    public func updateProfile(_ profile: UserProfileDTO) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }

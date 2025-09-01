@@ -135,7 +135,7 @@ public struct BasicProfileView: View {
                 "nickname": userProfile.nickname,
                 "age": userProfile.age,
                 "sex": userProfile.sex,
-                "preference_sex": userProfile.targetSex
+                "preferenceSex": userProfile.targetSex
             ]
             
             Task {

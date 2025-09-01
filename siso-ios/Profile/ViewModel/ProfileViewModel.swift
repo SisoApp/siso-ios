@@ -29,11 +29,5 @@ public extension ProfileView {
             
             try? await ProfileNetworkManager.shared.registerProfile(parameters)
         }
-        
-        func updateProfile(_ userProfile: UserProfile) async {
-            let parameters: [String: Any] = UserProfile.convertToDict(userProfile)
-            let request: UserProfileRequestDto = UserProfileRequestDto(from: parameters)
-            try? await ProfileNetworkManager.shared.updateProfile(request)
-        }
     }
 }

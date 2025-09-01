@@ -8,7 +8,7 @@
 import Foundation
 
 /// 서버에 사용자 프로필 생성을 요청할 때 사용하는 데이터 모델
-public struct UserProfileRequestDto: Codable, Sendable {
+public struct UserProfileDTO: Codable, Sendable {
     public let drinkingCapacity: DrinkingCapacity?
     public let religion: Religion?
     public let smoke: Bool?

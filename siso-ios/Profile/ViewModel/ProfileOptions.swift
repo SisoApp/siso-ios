@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import network
+import model
 
 struct ProfileOptions {
     static func getSexOptions() -> [(String, String)] {

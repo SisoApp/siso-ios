@@ -22,6 +22,7 @@ public struct ProfileView: View {
     @State private var isPlaying: Bool = false
     @State private var religion: String = ""
     @State private var meetings: [String] = []
+    @State private var showAlert: Bool = false
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
@@ -79,7 +80,9 @@ public struct ProfileView: View {
             }
         }
         .task {
-            try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            try? await ProfileNetworkManager.shared.getCurrentUserProfile(completion: { profile in
+                print(profile)
+            })
             //try? await ProfileNetworkManager.shared.getProfiles()
             try? await VoiceNetworkManager.shared.getVoice()
             try? await ImageNetworkManager.shared.getImages()
@@ -180,13 +183,10 @@ public struct ProfileView: View {
     }
     
     private func textView() -> some View {
-        let isActive: Bool = introduce.count >= 5
-        
         return ZStack {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.Siso.Gray._20)
                 .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
-                .stroke(!isActive ? .red : .clear)
                 .frame(height: 195)
             
             TextEditor(text: $introduce)
@@ -237,13 +237,13 @@ public struct ProfileView: View {
                     .fill(Color.Siso.Gray._60)
             )
             
-            Image("pencil")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .onTapGesture {
-                    delegate?.pushProfile(.voice)
-                }
+            Button {
+                delegate?.pushProfile(.voice)
+            } label: {
+                Text("수정")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.Siso.Gray._60)
+            }
         }
         .padding(.top, 8)
     }
@@ -451,10 +451,11 @@ public struct ProfileView: View {
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = true
-        //let isActive: Bool = introduce.count >= 5
-        
-        return PrimaryButton(title: "완료하기", isActive: isActive) {
+        return PrimaryButton(title: "완료하기") {
+            guard introduce.count >= 5 else {
+                showAlert = true
+                return
+            }
             // guard let sex = sex, let targetSex = targetSex else { return }
             
 //            userProfile.age = Int(age) ?? 0
@@ -468,22 +469,27 @@ public struct ProfileView: View {
 //                await viewModel.registerProfile(userProfile)
 //            }
             
-            let parameters: [String: Any] = [
-                "nickname": "안녕",
-                "age": "50",
-                "sex": "MALE",
-                "preference_sex": "FEMALE"
-            ]
-            
-            Task {
-                print("click!")
-                try? await ProfileNetworkManager.shared.registerProfile(parameters)
-            }
+//            let parameters: [String: Any] = [
+//                "nickname": "안녕",
+//                "age": "50",
+//                "sex": "MALE",
+//                "preference_sex": "FEMALE"
+//            ]
+//            
+//            Task {
+//                print("click!")
+//                try? await ProfileNetworkManager.shared.registerProfile(parameters)
+//            }
             
             delegate?.pop()
         }
         .padding(.horizontal)
         .padding(.bottom, 8)
+        .alert("오류", isPresented: $showAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text("자기소개를 5자 이상 작성해주세요")
+        }
     }
     
     private func hideKeyboard() {
