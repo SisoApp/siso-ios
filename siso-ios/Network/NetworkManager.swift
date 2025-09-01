@@ -35,7 +35,7 @@ public final class NetworkManager {
             encoding: encoding,
             headers: headers
         )
-        .cURLDescription { print($0) }
+        // .cURLDescription { print($0) }
         .validate(statusCode: 200..<300)
         .serializingDecodable(SisoResponse<T>.self)
         

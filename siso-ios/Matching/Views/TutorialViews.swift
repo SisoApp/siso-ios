@@ -36,7 +36,7 @@ public struct TutorialViews: View {
                     Button {
                         if selectedTabIndex == 2 {
                             appSettings.tutorialHasBeenWatched = true
-                          //  delegate.pushMatching(.home)
+                            delegate.pushMatching(.home)
                             
                             
                         } else {
@@ -58,7 +58,7 @@ public struct TutorialViews: View {
                     
                     Button {
                         appSettings.tutorialHasBeenWatched = true
-                       // delegate.pushMatching(.home)
+                        delegate.pushMatching(.home)
                    
                        
                     } label: {

@@ -15,6 +15,21 @@ import chat
 
 @MainActor
 public class Coordinator: ObservableObject {
+    // ✨ 1. 현재 활성화된 탭의 Path를 가리키는 계산 프로퍼티
+    private var currentPath: Binding<NavigationPath> {
+        switch selectedTab {
+        case 0:
+            return .init(get: { self.matchingPath }, set: { self.matchingPath = $0 })
+        case 1:
+            return .init(get: { self.chatPath }, set: { self.chatPath = $0 })
+        case 2:
+            return .init(get: { self.myPagePath }, set: { self.myPagePath = $0 })
+        default:
+            // 비상용 또는 인증 플로우용
+            return .init(get: { self.path }, set: { self.path = $0 })
+        }
+    }
+
     @Published public var stackID: UUID = UUID()
     
     // MARK: - Navigation Paths
@@ -64,28 +79,21 @@ public class Coordinator: ObservableObject {
     
     // MARK: - Delegate Method Implementations (여기에 모든 구현을 모읍니다)
     
-    // ✨ 2. Delegate가 요구하는 모든 메서드를 여기에 깔끔하게 구현합니다.
+    // ✨ 2. push, pop 메서드가 매우 간결해집니다.
     public func push(page: IntegrationPage) {
         print("Pushing page: \(page) on tab \(selectedTab)")
-        switch selectedTab {
-        case 0: matchingPath.append(page)
-        case 1: chatPath.append(page)
-        case 2: myPagePath.append(page)
-        default: path.append(page)
-        }
+        currentPath.wrappedValue.append(page)
     }
-    
+
     public func pop() {
-        switch selectedTab {
-        case 0: if !matchingPath.isEmpty { matchingPath.removeLast() }
-        case 1: if !chatPath.isEmpty { chatPath.removeLast() }
-        case 2: if !myPagePath.isEmpty { myPagePath.removeLast() }
-        default: if !path.isEmpty { path.removeLast() }
+        if !currentPath.wrappedValue.isEmpty {
+            currentPath.wrappedValue.removeLast()
         }
     }
-    
+
+    // popToRoot도 현재 탭에 맞게 수정 가능
     public func popToRoot() {
-        path = NavigationPath()
+        currentPath.wrappedValue = NavigationPath()
     }
     
     public func present(sheet: MatchingSheet) {

@@ -15,7 +15,7 @@ public struct InitialView: View {
     public init() {}
     
     public var body: some View {
-        let _ = print("✅ [InitialView] Body re-evaluated. tutorialHasBeenWatched is: \(appSettings.tutorialHasBeenWatched)")
+        // let _ = print("✅ [InitialView] Body re-evaluated. tutorialHasBeenWatched is: \(appSettings.tutorialHasBeenWatched)")
         
         Group {
             // authVM의 userState 값에 따라 뷰를 분기합니다.

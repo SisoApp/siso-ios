@@ -4,7 +4,7 @@ import UserNotifications // 푸시 알림을 위한 프레임워크
 import FirebaseCore
 import FirebaseMessaging
 import model
-
+import network
 // SwiftUI 앱에 연결되기 위해 NSObject와 UIApplicationDelegate를 상속받습니다.
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
@@ -35,7 +35,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         // Device Token은 Data 형태로 전달됩니다. 서버로 보내기 위해 16진수 문자열로 변환합니다.
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        print("✅ APNs Device Token: \(tokenString)")
+         // print("✅ APNs Device Token: \(tokenString)")
         Messaging.messaging().apnsToken = deviceToken
         // 🚨 중요: 이 tokenString을 사용자의 ID와 함께 백엔드 서버로 전송해야 합니다.
         // 예: ApiClient.shared.sendDeviceToken(token: tokenString)
@@ -148,7 +148,7 @@ extension AppDelegate: MessagingDelegate {
             print("🔴 FCM token is nil.")
             return
         }
-        
+        KeyChainManager.shared.save(token: token, for: "fcmToken")
         print("🔥 FCM Registration Token: \(token)")
         
         // 🚨 중요: 이 새로운/갱신된 FCM 토큰을 백엔드 서버로 전송하여
