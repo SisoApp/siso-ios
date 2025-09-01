@@ -49,8 +49,9 @@ public final actor LoginNetworkManager: Sendable {
                 switch response.result {
                 case .success(var token):
                     // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
+                    self?.keychain.save(token: token.refreshToken, for: "accessToken")
                     self?.keychain.save(token: token.refreshToken, for: "refreshToken")
-                    if token.hasProfile  {
+                    if !token.hasProfile  {
                         token.registrationStatus = "REGISTER" // 동의 항목 이동
                     }
                     completionHandler(token.registrationStatus, nil)
@@ -89,13 +90,18 @@ public final actor LoginNetworkManager: Sendable {
         
         let headers: HTTPHeaders = ["Authorization": "Bearer \(refreshToken)"]
         
-        let response = try await AF.request(url, method: .post, headers: headers)
+        var response = try await AF.request(url, method: .post, headers: headers)
             .validate(statusCode: 200..<300)
             .serializingDecodable(AutoLoginResponse.self)
             .value
         
         // 새로 받은 토큰을 다시 저장
+        keychain.save(token: response.token.refreshToken, for: "accessToken")
         keychain.save(token: response.token.refreshToken, for: "refreshToken")
+        
+        if !response.token.hasProfile {
+            response.token.registrationStatus = "REGISTER"
+        }
         
         return RefreshResult(user: response.user, registrationStatus: response.token.registrationStatus)
     }
