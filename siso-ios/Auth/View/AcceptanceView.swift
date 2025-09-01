@@ -48,12 +48,14 @@ public struct AcceptanceView: View {
         .navigationBarBackButtonHidden()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Image(systemName: "chevron.backward")
-                    .foregroundStyle(Color.Siso.Gray._90)
-                    .onTapGesture {
-                        dismiss()
-                    }
+            if !(delegate?.initAuthback() ?? false) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Image(systemName: "chevron.backward")
+                        .foregroundStyle(Color.Siso.Gray._90)
+                        .onTapGesture {
+                            delegate?.pop()
+                        }
+                }
             }
         }
     }

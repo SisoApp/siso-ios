@@ -20,7 +20,7 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
    
     public func pushMatching(_ page: MatchingPage) {
         print("Push Matching \(page)")
-        matchingPath.append(toIntegrationPage(.home))
+        matchingPath.append(toIntegrationPage(page))
     }
     
     // 변소
@@ -31,7 +31,7 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
 
     public func changeMatchingToProfile() {
         print("goto profile")
-        path.append(IntegrationPage.profile)
+        matchingPath.append(IntegrationPage.profile)
     }
     
     public func changeMatchingToCall(opponentProfile: MatchingProfile) {
