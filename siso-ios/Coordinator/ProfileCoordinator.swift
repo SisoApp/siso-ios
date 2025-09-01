@@ -40,9 +40,8 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
     }
     
     public func changeProfileToMatching() {
-        //popToRoot()
-        selectedTab = 0
-        pushMatching(.home)
+        authViewModel.userState = .login
+        popToRoot()
     }
     
     public func presentProfile(sheet: ProfileSheet) {

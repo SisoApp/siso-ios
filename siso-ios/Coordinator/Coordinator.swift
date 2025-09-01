@@ -117,16 +117,14 @@ public class Coordinator: ObservableObject {
     
     @ViewBuilder
     public func build(_ page: IntegrationPage) -> some View {
-        // ✨ [해결책] switch 문의 각 case가 반환하는 뷰를 AnyView로 감싸서
-        // 모든 분기가 'AnyView'라는 동일한 타입을 반환하도록 만듭니다.
         switch page {
             // Auth
         case .login:
-            AnyView(SocialView(delegate: self))
+            SocialView(delegate: self)
         case .accept:
-            AnyView(AcceptanceView(delegate: self))
+            AcceptanceView(delegate: self)
         case .welcome:
-            AnyView(WelcomeView(delegate: self))
+            WelcomeView(delegate: self)
             
             // Matching
         case .home:
@@ -180,7 +178,7 @@ public class Coordinator: ObservableObject {
             )
             
         case .tutorial:
-            AnyView(TutorialViews(selectedTabIndex: 0, delegate: self).navigationBarBackButtonHidden(true))
+            TutorialViews(delegate: self)
             
             // Profile
         case .complete: AnyView(CompleteProfileView(delegate: self))
@@ -197,32 +195,29 @@ public class Coordinator: ObservableObject {
         case .image: AnyView(ImageProfileView(delegate: self, currentPage: .constant(.basic), userProfile: userProfile, mode: .edit))
             
             // MyPage
-        case .my: AnyView(MyPageView(delegate: self))
-        case .setting: AnyView(SettingView(delegate: self))
-        case .notification: AnyView(NotificationView(delegate: self))
+        case .my: MyPageView(delegate: self)
+        case .setting: SettingView(delegate: self)
+        case .notification: NotificationView(delegate: self)
             
             // Call (Enum 수정이 필요합니다)
         case .manner(let opponentProfile):
-            AnyView(CallMannerView(opponentProfile: opponentProfile, delegate: self))
+            CallMannerView(opponentProfile: opponentProfile, delegate: self)
                 .navigationBarBackButtonHidden(true)
             
         case .activeCall:
-            AnyView(ActiveCallView(delegate: self))
+            ActiveCallView(delegate: self)
                 .navigationBarBackButtonHidden(true)
             
         case .reportFeedbackPopup:
-            AnyView(ReportFeedBackView(delegate: self))
+            ReportFeedBackView(delegate: self)
             
             // Chat
         case .main:
-            AnyView(ChatMainView(delegate: self))
+            ChatMainView(delegate: self)
         case .detail(let chat):
-            AnyView(ChatMainView.ChatDetailView(chat: chat))
+            ChatMainView.ChatDetailView(chat: chat)
         case .notificationChat:
-            AnyView(
-                NotificationChatView()
-                    .navigationBarBackButtonHidden()
-            )
+            NotificationChatView()
         }
     }
 }

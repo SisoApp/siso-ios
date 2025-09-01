@@ -13,4 +13,5 @@ public protocol AuthCoordinatorDelegate {
     func popToRoot()
     func changeAuthToProfile()
     func changeAuthToMatching()
+    func initAuthback() -> Bool
 }

@@ -44,21 +44,16 @@ public final actor LoginNetworkManager: Sendable {
                    parameters: parameters,
                    encoding: JSONEncoding.default,
                    headers: headers
-            )
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: Token.self) { [weak self] response in
-                switch response.result {
-                case .success(var token):
-                    // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
-                    self?.keychain.save(token: token.refreshToken, for: "accessToken")
-                    self?.keychain.save(token: token.refreshToken, for: "refreshToken")
-                    if !token.hasProfile  {
-                        token.registrationStatus = "REGISTER" // 동의 항목 이동
-                    }
-                    completionHandler(token.registrationStatus, nil)
-                case .failure(let error):
-                    completionHandler("", error)
-                    return
+        )
+        .validate(statusCode: 200..<300)
+        .responseDecodable(of: Token.self) { [weak self] response in
+            switch response.result {
+            case .success(var token):
+                // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
+                self?.keychain.save(token: token.refreshToken, for: "accessToken")
+                self?.keychain.save(token: token.refreshToken, for: "refreshToken")
+                if !token.hasProfile  {
+                    token.registrationStatus = "REGISTER" // 동의 항목 이동
                 }
                 completionHandler(token.registrationStatus, nil)
             case .failure(let error):
@@ -104,7 +99,7 @@ public final actor LoginNetworkManager: Sendable {
         // 새로 받은 토큰을 다시 저장
         keychain.save(token: response.token.refreshToken, for: "accessToken")
         keychain.save(token: response.token.refreshToken, for: "refreshToken")
-        
+        print("refreshToken : \(response.token.refreshToken)")
         if !response.token.hasProfile {
             response.token.registrationStatus = "REGISTER"
         }

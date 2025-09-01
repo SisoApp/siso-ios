@@ -8,6 +8,10 @@ import network
 
 extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
     
+    // MARK: 첫 빌드 시 동의 항목 가면 뒤로가기 없애기
+    public func initAuthback() -> Bool {
+        path.count <= 1
+    }
     
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: AuthPage) -> IntegrationPage {
@@ -31,13 +35,5 @@ extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
         pushMatching(.home)
     }
     
-    // MARK: App Start func
-    @ViewBuilder
-    public func start() -> some View {
-        // 이제 start() 함수는 InitialView를 반환하여 비동기 처리를 위임합니다.
-        InitialView()
-            .environmentObject(self) // self(Coordinator)를 주입
-            .environmentObject(self.authViewModel) // authViewModel을 주입
-            .environmentObject(self.appSettings)
-    }
+    
 }

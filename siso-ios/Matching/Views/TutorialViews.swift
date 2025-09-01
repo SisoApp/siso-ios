@@ -37,6 +37,7 @@ public struct TutorialViews: View {
                         if selectedTabIndex == 2 {
                             appSettings.tutorialHasBeenWatched = true
                             delegate.pushMatching(.home)
+                            delegate.pushMatching(.home)
                             
                             
                         } else {
@@ -58,9 +59,6 @@ public struct TutorialViews: View {
                     
                     Button {
                         appSettings.tutorialHasBeenWatched = true
-                        delegate.pushMatching(.home)
-                   
-                       
                     } label: {
                         Text("건너뛰기")
                             .font(.system(size: 18, weight: .semibold))

@@ -47,7 +47,13 @@ struct SisoIosApp: App {
     
     var body: some Scene {
         WindowGroup {
-            coordinator.start()
+            AppView()
+                .environmentObject(coordinator)
+                .environmentObject(userProfile)
+                .environmentObject(appSettings)
+                .environmentObject(matchingViewModel)
+                .environmentObject(authVM)
+                .environmentObject(locationViewModel)
         }
     }
 }
