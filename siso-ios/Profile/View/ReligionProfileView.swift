@@ -7,21 +7,11 @@
 
 import SwiftUI
 
-enum Religion: String, Identifiable, CaseIterable {
-    case christianity = "기독교"
-    case catholic = "천주교"
-    case buddhism = "불교"
-    case wonBuddhism = "원불교"
-    case none = "무교"
-    case other = "기타/(직접입력)"
-    
-    var id: String { rawValue }
-}
-
 public struct ReligionProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var religion: String
     
+    private var viewModel: ReligionProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -60,33 +50,19 @@ public struct ReligionProfileView: View {
     }
     
     private func religionButtonGroup() -> some View {
-        let first = Religion.allCases.prefix(Religion.allCases.count / 2)
-        let second = Religion.allCases.suffix(Religion.allCases.count / 2)
-        
-        return VStack {
-            HStack(spacing: 12) {
-                ForEach(first) { religion in
-                    religionButton(religion.rawValue)
-                }
-                Spacer()
-            }
-            .padding(.top, 24)
-            .padding(.bottom, 4)
-            
-            HStack(spacing: 12) {
-                ForEach(second) { religion in
-                    religionButton(religion.rawValue)
-                }
-                Spacer()
+        return TagGroup {
+            ForEach(ProfileOptions.getReligionOptions(), id: \.0) { (value, title) in
+                religionButton(title: title, value: value)
             }
         }
     }
     
-    private func religionButton(_ title: String) -> some View {
-        let isContain: Bool = religion == title
+    private func religionButton(title: String, value: String) -> some View {
+        let isContain: Bool = religion == value
         
         return Button {
-            religion = isContain ? "" : title
+            religion = isContain ? "" : value
+            print(religion)
         } label: {
             Text(title)
                 .font(.system(size: 18))
@@ -105,20 +81,10 @@ public struct ReligionProfileView: View {
     private func completeButton() -> some View {
         let isActive: Bool = !religion.isEmpty
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             userProfile.religion = religion
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
         .frame(height: 54)
         .padding(.bottom, 38)
     }

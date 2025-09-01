@@ -38,9 +38,16 @@ public struct SignUpProfileView: View {
     
     
     private func progressView() -> some View {
-        return ProgressView(value: Double(currentPage.rawValue), total: Double(SignUpProfilePage.allCases.count))
-            .tint(Color.Siso.Primary._50)
-            .frame(height: 5)
+        return HStack(spacing: 12) {
+            circleView(page: 1)
+            lineView(page: 2)
+            circleView(page: 2)
+            lineView(page: 3)
+            circleView(page: 3)
+            lineView(page: 4)
+            circleView(page: 4)
+        }
+        .padding(.horizontal)
     }
     
     private func circleView(page: Int) -> some View {
@@ -66,7 +73,7 @@ public struct SignUpProfileView: View {
             case .basic:
                 BasicProfileView(currentPage: $currentPage, userProfile: userProfile)
             case .image:
-                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile)
+                ImageProfileView(delegate: delegate, currentPage: $currentPage, userProfile: userProfile, mode: .signUp)
             case .introduce:
                 IntroduceProfileView(currentPage: $currentPage, userProfile: userProfile)
             case .voice:

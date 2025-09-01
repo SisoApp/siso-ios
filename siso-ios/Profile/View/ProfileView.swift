@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import network
 
 public enum ProfileMode {
     case signUp, edit
@@ -16,40 +17,44 @@ public struct ProfileView: View {
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
-    @State private var height: String = ""
-    @State private var weight: String = ""
-    @State private var sex: String = ""
-    @State private var target: String = ""
+    @State private var sex: String? = nil
+    @State private var targetSex: String? = nil
     @State private var isPlaying: Bool = false
     @State private var religion: String = ""
     @State private var meetings: [String] = []
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
-    @FocusState private var heightFocus: Bool
-    @FocusState private var weightFocus: Bool
     
+    private let viewModel: ProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
+        self._nickname = State(wrappedValue: userProfile.nickname)
+        self._age = State(wrappedValue: userProfile.age.description)
+        self._introduce = State(wrappedValue: userProfile.introduce)
+        self._sex = State(wrappedValue: userProfile.sex)
+        self._targetSex = State(wrappedValue: userProfile.targetSex)
     }
     
     public var body: some View {
         VStack {
             ScrollView {
                 VStack {
-                    profileImage()
+                    profileImageView()
                     nicknameView()
                     ageView()
                     introduceView()
                     basicInfoSection()
                     additionalInfoSection()
                     tagSection()
-                    Spacer()
                 }
                 .padding()
+                .onTapGesture {
+                    hideKeyboard()
+                }
                 
             }
             completeButton()
@@ -65,17 +70,46 @@ public struct ProfileView: View {
                         delegate?.pop()
                     }
             }
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("완료") {
+                    hideKeyboard()
+                }
+                .foregroundStyle(Color.Siso.Gray._90)
+            }
+        }
+        .task {
+            try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            //try? await ProfileNetworkManager.shared.getProfiles()
+            try? await VoiceNetworkManager.shared.getVoice()
+            try? await ImageNetworkManager.shared.getImages()
         }
     }
     
-    private func profileImage() -> some View {
-        return Image("testimg")
-            .resizable()
-            .scaledToFill()
-            .frame(width: 120, height: 120)
-            .clipped()
-            .clipShape(.rect(cornerRadius: 60))
-            .padding(.top, 10)
+    private func profileImageView() -> some View {
+        return ZStack(alignment: .bottomTrailing) {
+            Image("testimg")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 120, height: 120)
+                .clipped()
+                .clipShape(.rect(cornerRadius: 60))
+                .padding(.top, 10)
+                .onTapGesture {
+                    delegate?.pushProfile(.image)
+                }
+            
+            Image("pencil")
+                .resizable()
+                .scaledToFit()
+                .padding(4)
+                .frame(width: 28, height: 28)
+                .background(
+                    Circle()
+                        .fill(Color.Siso.Gray._20)
+                        .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                )
+        }
     }
     
     private func sectionHeader(title: String, point: String) -> some View {
@@ -116,6 +150,16 @@ public struct ProfileView: View {
         return VStack {
             HStack {
                 textFieldView(title: "나이", unit: "세", binding: $age, isFocused: $ageFocus)
+                    .keyboardType(.numbersAndPunctuation)
+                    .submitLabel(.done)
+                    .onChange(of: age) { _, newValue in
+                        let filtered: String = newValue.filter { "0123456790".contains($0) }
+                        age = String(filtered.prefix(2))
+                    }
+                    .onSubmit {
+                        hideKeyboard()
+                    }
+                    
                 Spacer()
             }
         }
@@ -131,33 +175,42 @@ public struct ProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
   
             recordView()
-            
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.Siso.Gray._20)
-                    .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
-                    .frame(height: 195)
-                
-                TextEditor(text: $introduce)
-                    .focused($introduceFocus)
-                    .background(.clear)
-                    .scrollContentBackground(.hidden)
-                    .font(.system(size: 20, weight: .semibold))
-                    .padding()
-                
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Text("\(introduce.count)/50")
-                            .font(.system(size: 18))
-                            .foregroundStyle(Color.Siso.Gray._50)
-                    }
-                }
-                .padding()
-            }
-            .padding(.top)
+            textView()
         }
+    }
+    
+    private func textView() -> some View {
+        let isActive: Bool = introduce.count >= 5
+        
+        return ZStack {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.Siso.Gray._20)
+                .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
+                .stroke(!isActive ? .red : .clear)
+                .frame(height: 195)
+            
+            TextEditor(text: $introduce)
+                .focused($introduceFocus)
+                .background(.clear)
+                .scrollContentBackground(.hidden)
+                .font(.system(size: 20, weight: .semibold))
+                .padding()
+                .onChange(of: introduce) { _, newValue in
+                    introduce = newValue.prefix(50).description
+                }
+            
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("\(introduce.count)/50")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Color.Siso.Gray._50)
+                }
+            }
+            .padding()
+        }
+        .padding(.top)
     }
     
     private func recordView() -> some View {
@@ -231,14 +284,11 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
             
-            textFieldView(title: "키", unit: "cm", binding: $height, isFocused: $heightFocus)
-                .padding(.top, 16)
-            textFieldView(title: "몸무게", unit: "kg", binding: $weight, isFocused: $weightFocus)
-                .padding(.top, 8)
-            RadioButtonView(title: "내 성별", options: ["여성", "남성"], binding: $sex)
-                .padding(.top, 16)
-            RadioButtonView(title: "매칭 성별", options: ["이성", "동성", "상관없음"], binding: $target)
-                .padding(.top, 16)
+            RadioButtonGroup(title: "내 성별", options: ProfileOptions.getSexOptions(), selection: $sex)
+                .padding(.top)
+            
+            RadioButtonGroup(title: "매칭 성별", options: ProfileOptions.getPreferenceSexOptions(), selection: $targetSex)
+                .padding(.top)
             
             inputView(title: "지역", item: userProfile.location)
                 .onTapGesture {
@@ -256,12 +306,12 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.religion)
                 }
             
-            inputView(title: "흡연", item: userProfile.smoking)
+            inputView(title: "흡연", item: userProfile.smoking ? "흡연자" : "비흡연자")
                 .onTapGesture {
                     delegate?.pushProfile(.smoke)
                 }
             
-            inputView(title: "음주", item: userProfile.drinking)
+            inputView(title: "음주", item: ProfileOptions.getDrinkingCapacityDescription(rawValue: userProfile.drinking) ?? "")
                 .onTapGesture {
                     delegate?.pushProfile(.drink)
                 }
@@ -328,16 +378,12 @@ public struct ProfileView: View {
     }
     
     private func tagListView(_ items: [String]) -> some View {
-        return VStack {
-            ForEach(chunked(into: 2, items: items), id: \.self) { chunk in
-                HStack {
-                    ForEach(chunk, id: \.self) { item in
-                        tagButton(item)
-                    }
-                    Spacer()
-                }
+        return TagGroup {
+            ForEach(items, id: \.self) { item in
+                tagButton(item)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func tagButton(_ title: String) -> some View {
@@ -376,42 +422,6 @@ public struct ProfileView: View {
         }
     }
     
-    private func RadioButtonView(title: String, options: [String], binding: Binding<String>) -> some View {
-        return VStack {
-            Text(title)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack() {
-                ForEach(options, id: \.self) { option in
-                    let isSelect: Bool = binding.wrappedValue == option
-                    
-                    HStack(spacing: 2) {
-                        Text(option)
-                            .padding(.trailing, 2)
-                            .font(.system(size: 20))
-                            .fontWeight(.semibold)
-                        
-                        Image(systemName: isSelect ? "circle.inset.filled" : "circle")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .bold()
-                            .foregroundStyle(isSelect ? .black : .gray)
-                            .padding(.trailing, 24)
-                    }
-                    .onTapGesture {
-                        binding.wrappedValue = option
-                    }
-                }
-                .padding(.top, 4)
-                
-                Spacer()
-            }
-        }
-    }
-    
     private func inputView(title: String, item: String) -> some View {
         return VStack {
             Text(title)
@@ -441,27 +451,47 @@ public struct ProfileView: View {
     }
     
     private func completeButton() -> some View {
-        return Button {
+        let isActive: Bool = true
+        //let isActive: Bool = introduce.count >= 5
+        
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
+            // guard let sex = sex, let targetSex = targetSex else { return }
+            
+//            userProfile.age = Int(age) ?? 0
+//            userProfile.introduce = introduce
+//            userProfile.sex = sex.text
+//            userProfile.targetSex = targetSex.text
+            
+            
+            
+//            Task {
+//                await viewModel.registerProfile(userProfile)
+//            }
+            
+            let parameters: [String: Any] = [
+                "nickname": "안녕",
+                "age": "50",
+                "sex": "MALE",
+                "preference_sex": "FEMALE"
+            ]
+            
+            Task {
+                print("click!")
+                try? await ProfileNetworkManager.shared.registerProfile(parameters)
+            }
+            
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
-                .clipShape(.rect(cornerRadius: 27))
         }
-        .frame(height: 54)
         .padding(.horizontal)
+        .padding(.bottom, 8)
     }
     
-    private func chunked(into size: Int, items: [String]) -> [[String]] {
-        return stride(from: 0, to: items.count, by: size).map {
-            Array(items[$0..<min($0 + size, items.count)])
-        }
+    private func hideKeyboard() {
+        ageFocus = false
+        introduceFocus = false
     }
 }
+
 
 #Preview {
     NavigationStack {

@@ -21,10 +21,11 @@ struct SisoIosApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     init() {
-        let userProfile = UserProfile(
-            nickname: "", age: "", sex: "", targetSex: "", profileImageUrl: [],
-            interests: [], introduce: "", religion: "", smoking: "", drinking: "",
+        let userProfile: UserProfile = .init(
+            nickname: "", age: 0, sex: "", targetSex: "", profileImageUrl: [],
+            interests: [], introduce: "", religion: "", smoking: false, drinking: "",
             meeting: [], mbti: "", location: "")
+        
         let matchingViewModel = MatchingViewModel(cards: [])
         let authViewModel = SocialLoginView.LoginViewModel()
         let locationViewModel: LocationViewModel = .init()
@@ -33,7 +34,6 @@ struct SisoIosApp: App {
         self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         self._authVM = StateObject(wrappedValue: authViewModel)
         self._locationViewModel = StateObject(wrappedValue: locationViewModel)
-        self._matchingViewModel = StateObject(wrappedValue: matchingViewModel)
         
         self._coordinator = StateObject(
             wrappedValue: Coordinator(
@@ -47,7 +47,13 @@ struct SisoIosApp: App {
     
     var body: some Scene {
         WindowGroup {
-            coordinator.start()
+            AppView()
+                .environmentObject(coordinator)
+                .environmentObject(userProfile)
+                .environmentObject(appSettings)
+                .environmentObject(matchingViewModel)
+                .environmentObject(authVM)
+                .environmentObject(locationViewModel)
         }
     }
 }

@@ -155,23 +155,11 @@ public struct PersonalityProfileView: View {
     private func completeButton() -> some View {
         let isActive: Bool = !energy.isEmpty && !information.isEmpty && !decision.isEmpty && !lifeStyle.isEmpty
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             let mbti: String = energy + information + decision + lifeStyle
             userProfile.mbti = mbti
             delegate?.pop()
-            print(mbti)
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
 }
 

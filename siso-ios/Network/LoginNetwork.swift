@@ -8,6 +8,7 @@
 import Foundation
 import Alamofire
 import CryptoKit
+import model
 
 // MARK: - Network Manager
 
@@ -43,23 +44,23 @@ public final actor LoginNetworkManager: Sendable {
                    parameters: parameters,
                    encoding: JSONEncoding.default,
                    headers: headers
-            )
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: Token.self) { [weak self] response in
-                switch response.result {
-                case .success(var token):
-                    // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
-                    self?.keychain.save(token: token.refreshToken, for: "accessToken")
-                    self?.keychain.save(token: token.refreshToken, for: "refreshToken")
-                    if !token.hasProfile  {
-                        token.registrationStatus = "REGISTER" // 동의 항목 이동
-                    }
-                    completionHandler(token.registrationStatus, nil)
-                case .failure(let error):
-                    completionHandler("", error)
-                    return
+        )
+        .validate(statusCode: 200..<300)
+        .responseDecodable(of: Token.self) { [weak self] response in
+            switch response.result {
+            case .success(var token):
+                // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
+                self?.keychain.save(token: token.refreshToken, for: "accessToken")
+                self?.keychain.save(token: token.refreshToken, for: "refreshToken")
+                if !token.hasProfile  {
+                    token.registrationStatus = "REGISTER" // 동의 항목 이동
                 }
+                completionHandler(token.registrationStatus, nil)
+            case .failure(let error):
+                completionHandler("", error)
+                return
             }
+        }
     }
     
     /// ** MARK: 저장된 리프레시 토큰을 사용하여 자동으로 로그인합니다.
@@ -67,7 +68,7 @@ public final actor LoginNetworkManager: Sendable {
         guard let refreshToken = keychain.get(for: "refreshToken") else {
             return .failure(.invalidURL(url: "refreshToken -> nil"))
         }
-
+        
         do {
             /// refreshToken을 가지고 서버에 보내서 비교
             /// 만료되었다면 다시 로그인 시키고 아직 만료까지 남아있다면 토근 재발급 해서 갱신하기
@@ -98,7 +99,7 @@ public final actor LoginNetworkManager: Sendable {
         // 새로 받은 토큰을 다시 저장
         keychain.save(token: response.token.refreshToken, for: "accessToken")
         keychain.save(token: response.token.refreshToken, for: "refreshToken")
-        
+        print("refreshToken : \(response.token.refreshToken)")
         if !response.token.hasProfile {
             response.token.registrationStatus = "REGISTER"
         }

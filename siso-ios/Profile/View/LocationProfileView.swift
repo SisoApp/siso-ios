@@ -20,23 +20,33 @@ public struct LocationProfileView: View {
     }
     
     public var body: some View {
-        VStack {
-            locationView()
-                .padding()
-                .navigationTitle("내 정보 수정")
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden()
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Image(systemName: "chevron.backward")
-                            .foregroundStyle(Color.Siso.Gray._50)
-                            .onTapGesture {
-                                delegate?.pop()
-                            }
-                    }
-                }
+        ZStack {
+            indicatorView()
             
-            completeButton()
+            VStack {
+                locationView()
+                completeButton()
+            }
+            .navigationTitle("내 정보 수정")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Image(systemName: "chevron.backward")
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .onTapGesture {
+                            delegate?.pop()
+                        }
+                }
+            }
+        }
+    }
+    
+    private func indicatorView() -> some View {
+        return Group {
+            if viewModel.isLoading {
+                SimpleSpinner()
+            }
         }
     }
     
@@ -73,6 +83,9 @@ public struct LocationProfileView: View {
                 Text("현재 위치로 설정하기")
                     .font(.system(size: 18))
                     .foregroundStyle(Color.Siso.Gray._50)
+                    .onTapGesture {
+                        viewModel.getLocation()
+                    }
                 
                 Spacer()
             }
@@ -80,28 +93,36 @@ public struct LocationProfileView: View {
             
             Spacer()
         }
+        .padding()
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = !viewModel.location.isEmpty
+        let isActive: Bool = !viewModel.location.isEmpty && !viewModel.isLoading
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             userProfile.location = viewModel.location
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
         .frame(height: 54)
         .padding(.bottom, 38)
         .padding(.horizontal)
+    }
+}
+
+struct SimpleSpinner: View {
+    @State private var isRotating = 0.0
+    
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.7)
+            .stroke(Color.Siso.Gray._50, lineWidth: 3)
+            .frame(width: 30, height: 30)
+            .rotationEffect(Angle(degrees: isRotating))
+            .onAppear {
+                withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                    isRotating = 360
+                }
+            }
     }
 }
 

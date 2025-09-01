@@ -20,12 +20,19 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
         case .signUp: return .signUp
         case .interest: return .interest
         case .voice: return .voice
+        case .image: return .image 
         }
     }
 
     // Profile Page
     public func pushProfile(_ page: ProfilePage) {
-        path.append(toIntegrationPage(page))
+        if selectedTab == 2 {
+            // 마이페이지에서 프로필 화면을 보여줄 때
+            myPagePath.append(toIntegrationPage(page))
+        } else {
+            // 최초 로그인 시점에 프로필을 등록할 때
+            path.append(toIntegrationPage(page))
+        }
     }
     
     public func pushFullScreenProfileImageView() {
@@ -33,7 +40,8 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
     }
     
     public func changeProfileToMatching() {
-        path.append(IntegrationPage.home)
+        authViewModel.userState = .login
+        popToRoot()
     }
     
     public func presentProfile(sheet: ProfileSheet) {
@@ -53,6 +61,8 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
             ImagePicker(userProfile: userProfile)
         case .location:
             LocationProfileSheet(delegate: self, viewModel: locationViewModel)
+        case .religion:
+            ReligionProfileSheet(delegate: self, userProfile: userProfile)
         }
     }
 }

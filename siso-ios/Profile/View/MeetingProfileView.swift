@@ -11,7 +11,6 @@ public struct MeetingProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @State private var meetings: [String] = []
     
-    private var viewModel: MeetingProfileViewModel = MeetingProfileViewModel()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -48,7 +47,7 @@ public struct MeetingProfileView: View {
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
+            Text("최소 3개 이상, 7개 이하로 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
                 .font(.system(size: 18))
                 .foregroundStyle(Color.Siso.Gray._60)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -56,11 +55,18 @@ public struct MeetingProfileView: View {
         }
     }
     
-    private func meetingButton(_ title: String) -> some View {
-        let isActive: Bool = meetings.contains(title)
+    private func meetingButton(title: String, value: String) -> some View {
+        let isActive: Bool = meetings.contains(value)
         
         return Button {
-            meetings.append(title)
+            if isActive {
+                guard let index = meetings.firstIndex(of: value) else { return }
+                meetings.remove(at: index)
+            } else {
+                if meetings.count < 7 {
+                    meetings.append(value)
+                }
+            }
         } label: {
             Text(title)
                 .padding(EdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 18))
@@ -74,36 +80,22 @@ public struct MeetingProfileView: View {
     
     private func meetingButtonScrollView() -> some View {
         return ScrollView {
-            ForEach(viewModel.chucked(into: 2), id: \.self) { chunk in
-                HStack {
-                    ForEach(chunk, id: \.self) { meeting in
-                        meetingButton(meeting)
-                    }
-                    Spacer()
+            TagGroup {
+                ForEach(ProfileOptions.getMeetingOptions(), id: \.0) { (value, title) in
+                    meetingButton(title: title, value: value)
                 }
             }
         }
-        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = true
+        let isActive: Bool = meetings.count > 2
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
             userProfile.meeting = meetings
             delegate?.pop()
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
 }
 

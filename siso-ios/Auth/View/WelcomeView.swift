@@ -37,7 +37,7 @@ public struct WelcomeView: View {
                 .padding()
         }
         .frame(maxWidth: .infinity)
-        .navigationTitle("내 정보 입력")
+        .navigationTitle("약관 동의")
         .navigationBarBackButtonHidden()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

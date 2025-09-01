@@ -7,7 +7,7 @@
 import SwiftUI
 
 public enum ProfilePage: String, Identifiable, Hashable {
-    case complete, location, religion, smoke, drink, personality, meeting, profile, signUp, interest, voice
+    case complete, location, religion, smoke, drink, personality, meeting, profile, signUp, interest, voice, image
     
     public var id: String { self.rawValue }
 }
@@ -16,6 +16,7 @@ public enum ProfileSheet: Identifiable, Hashable {
     case imageHelper(([UIImage]) -> Void)
     case cameraSheet
     case location
+    case religion
     
     public var id: String {
         switch self {
@@ -25,6 +26,8 @@ public enum ProfileSheet: Identifiable, Hashable {
             return "cameraSheet"
         case .location:
             return "location"
+        case .religion:
+            return "religion"
         }
     }
     

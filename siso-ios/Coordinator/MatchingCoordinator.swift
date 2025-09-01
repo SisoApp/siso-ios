@@ -11,8 +11,8 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
     // MARK: Page Conversion
     private func toIntegrationPage(_ page: MatchingPage) -> IntegrationPage {
         switch page {
-        case .tutorial: return .home
-        case .home: return .tutorial
+        case .tutorial: return .tutorial
+        case .home: return .home
         }
     }
     
@@ -20,7 +20,7 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
    
     public func pushMatching(_ page: MatchingPage) {
         print("Push Matching \(page)")
-        path.append(toIntegrationPage(page))
+        matchingPath.append(toIntegrationPage(page))
     }
     
     // 변소
@@ -31,7 +31,7 @@ extension Coordinator: @preconcurrency MatchingCoordinatorDelegate {
 
     public func changeMatchingToProfile() {
         print("goto profile")
-        path.append(IntegrationPage.profile)
+        matchingPath.append(IntegrationPage.profile)
     }
     
     public func changeMatchingToCall(opponentProfile: MatchingProfile) {

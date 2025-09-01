@@ -14,7 +14,7 @@ public struct RecordProfileView: View {
     @StateObject private var viewModel: RecordProfileViewModel
     @Binding var currentPage: SignUpProfilePage
     
-    let mode: ProfileMode
+    private let mode: ProfileMode
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, currentPage: Binding<SignUpProfilePage>, userProfile: UserProfile, mode: ProfileMode) {
@@ -35,7 +35,7 @@ public struct RecordProfileView: View {
         }
         .padding(.top, 60)
         .padding(.horizontal)
-        .navigationTitle("내 정보 수정")
+        .navigationTitle(mode == .signUp ? "내 정보 등록" : "내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
         .toolbar {
@@ -123,20 +123,9 @@ public struct RecordProfileView: View {
     private func recordButton() -> some View {
         let isActive: Bool = viewModel.recordButtonIsActive
         
-        return Button {
+        return PrimaryButton(title: "녹음시작", isActive: isActive) {
             viewModel.startRecoding()
-        } label: {
-            Text("녹음시작")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
     
     private func skipButton() -> some View {
@@ -161,43 +150,26 @@ public struct RecordProfileView: View {
     private func nextButton() -> some View {
         let isActive: Bool = viewModel.nextButtonIsActive
         
-        return Button {
+        return PrimaryButton(title: "완료하기", isActive: isActive) {
+            Task {
+                await viewModel.uploadVoice()
+            }
+            
             switch mode {
             case .signUp:
                 delegate?.pushProfile(.complete)
             case .edit:
                 delegate?.pop()
             }
-        } label: {
-            Text("완료하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18)) 
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
     
     private func restartButton() -> some View {
         let isActive: Bool = viewModel.restartButtonIsActive
         
-        return Button {
+        return PrimaryButton(title: "다시 녹음하기", isActive: isActive) {
             viewModel.startRecoding()
-        } label: {
-            Text("다시 녹음하기")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
         }
-        .disabled(!isActive)
-        .frame(height: 54)
     }
 }
 

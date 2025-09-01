@@ -24,6 +24,7 @@ public enum IntegrationPage: Hashable, Identifiable {
     case signUp
     case interest
     case voice
+    case image
     
     // MyPage
     case my
@@ -65,6 +66,7 @@ public enum IntegrationPage: Hashable, Identifiable {
         case .signUp: return "signUp"
         case .interest: return "interest"
         case .voice: return "voice"
+        case .image: return "image"
         case .my: return "my"
         case .setting: return "setting"
         case .notification: return "notification"

@@ -12,7 +12,6 @@ public struct InterestProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var interests: [String] = []
     
-    private let viewModel: InterestProfileViewModel = InterestProfileViewModel()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -27,7 +26,7 @@ public struct InterestProfileView: View {
             nextButton()
         }
         .background(.white)
-        .padding(.horizontal)
+        .padding()
         .navigationTitle("내 정보 수정")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -49,7 +48,7 @@ public struct InterestProfileView: View {
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("최소 3개 이상 선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
+            Text("최소 3개 이상, 7개 이하로  선택해주세요\n많이 고를수록 매칭 확률이 높아져요")
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundStyle(Color.Siso.Gray._60)
                 .lineSpacing(9)
@@ -57,15 +56,17 @@ public struct InterestProfileView: View {
         }
     }
     
-    private func interestButton(_ title: String) -> some View {
-        let isActive: Bool = interests.contains(title)
+    private func interestButton(title: String, value: String) -> some View {
+        let isActive: Bool = interests.contains(value)
         
         return Button {
             if isActive {
-                guard let index: Int = interests.firstIndex(of: title) else { return }
+                guard let index: Int = interests.firstIndex(of: value) else { return }
                 interests.remove(at: index)
             } else {
-                interests.append(title)
+                if interests.count < 7 {
+                    interests.append(value)
+                }
             }
         } label: {
             Text(title)
@@ -81,46 +82,32 @@ public struct InterestProfileView: View {
     private func interestButtonScrollView() -> some View {
         return ScrollView {
             VStack(spacing: 12) {
-                ForEach(InterestType.allCases, id: \.self) { type in
-                    Text(type.id)
+                ForEach(ProfileOptions.getInterestOptions(), id: \.0) { category, options in
+                    Text(ProfileOptions.getInterestCategoryDescription(rawValue: category.rawValue) ?? "")
                         .font(.system(size: 18))
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundStyle(Color.Siso.Gray._50)
                         .padding(.top, 12)
                     
-                    ForEach(viewModel.chucked(type, into: 2), id: \.self) { chunk in
-                        HStack {
-                            ForEach(chunk, id: \.self) { item in
-                                interestButton(item)
-                            }
-                            Spacer()
+                    TagGroup {
+                        ForEach(options, id: \.0) { (value, title) in
+                            interestButton(title: title, value: value)
                         }
                     }
                 }
             }
-            .padding(.vertical, 12)
         }
+        .padding(.vertical, 8)
     }
     
     private func nextButton() -> some View {
         let isActive: Bool = interests.count > 2
         
-        return Button {
+        return PrimaryButton(title: "계속하기", isActive: isActive) {
             userProfile.interests = interests
             delegate?.pop()
-        } label: {
-            Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(isActive ? .black : Color.Siso.Gray._50)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._30)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
-        .padding(.bottom, 8)
-        .disabled(!isActive)
     }
 }
 

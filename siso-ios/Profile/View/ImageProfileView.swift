@@ -7,6 +7,7 @@
 
 import SwiftUI
 import designSystem
+import network
 
 public struct ImageProfileView: View {
     @ObservedObject private var userProfile: UserProfile
@@ -14,15 +15,18 @@ public struct ImageProfileView: View {
     private var images: [UIImage] = [] // 이미지 등록을 건너뛸 때 초기 값으로 복구하기 위한 초기값 저장 변수
     
     weak var delegate: ProfileCoordinatorDelegate?
+    private let mode: ProfileMode
     private let limit: Int = 5
     
     public init(delegate: ProfileCoordinatorDelegate?,
                 currentPage: Binding<SignUpProfilePage>,
-                userProfile: UserProfile) {
+                userProfile: UserProfile,
+                mode: ProfileMode) {
         self.delegate = delegate
         self._currentPage = currentPage
         self.userProfile = userProfile
-        self.images = userProfile.profileImageUrl
+        self.images = userProfile.profileImages
+        self.mode = mode 
     }
     
     public var body: some View {
@@ -36,12 +40,20 @@ public struct ImageProfileView: View {
         }
         .padding(.top, 60)
         .padding(.horizontal)
+        .navigationTitle(mode == .signUp ? "내 정보 등록" : "내 정보 수정")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
                     .foregroundStyle(Color.Siso.Gray._90)
                     .onTapGesture {
-                        currentPage = .introduce
+                        switch mode {
+                        case .signUp:
+                            currentPage = .basic
+                        case .edit:
+                            delegate?.pop()
+                        }
                     }
             }
         }
@@ -64,12 +76,12 @@ public struct ImageProfileView: View {
     
     private func mainImageView() -> some View {
         let index: Int = 0
-        let isExist: Bool = userProfile.profileImageUrl.count > index
+        let isExist: Bool = userProfile.profileImages.count > index
         
         return ZStack(alignment: .topTrailing) {
             Group {
                 if isExist {
-                    Image(uiImage: userProfile.profileImageUrl[index])
+                    Image(uiImage: userProfile.profileImages[index])
                         .resizable()
                         .scaledToFill()
                         .frame(height: 206)
@@ -77,7 +89,7 @@ public struct ImageProfileView: View {
                         .clipped()
                         .clipShape(.rect(cornerRadius: 12))
                     Button {
-                        userProfile.profileImageUrl.remove(at: index)
+                        userProfile.profileImages.remove(at: index)
                     } label: {
                         Image(systemName: "xmark")
                             .fontWeight(.bold)
@@ -115,12 +127,12 @@ public struct ImageProfileView: View {
         return HStack(spacing: 8) {
             ForEach(1...4, id: \.self) { index in
                 let isExist: Bool =
-                userProfile.profileImageUrl.count > index
+                userProfile.profileImages.count > index
                 
                 ZStack(alignment: .topTrailing) {
                     Group {
                         if isExist {
-                            Image(uiImage: userProfile.profileImageUrl[index])
+                            Image(uiImage: userProfile.profileImages[index])
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: size, height: size)
@@ -129,7 +141,7 @@ public struct ImageProfileView: View {
                                 .clipShape(.rect(cornerRadius: 12))
                             
                             Button {
-                                userProfile.profileImageUrl.remove(at: index)
+                                userProfile.profileImages.remove(at: index)
                             } label: {
                                 Image(systemName: "xmark")
                                     .fontWeight(.bold)
@@ -159,30 +171,20 @@ public struct ImageProfileView: View {
     }
     
     private func addButton() -> some View {
-        let isActive: Bool = userProfile.profileImageUrl.count >= 0 && userProfile.profileImageUrl.count < 5
+        let isActive: Bool = userProfile.profileImages.count >= 0 && userProfile.profileImages.count < 5
         
-        return Button {
+        return PrimaryButton(title: "사진 추가하기 (\(userProfile.profileImages.count)/\(limit))", isActive: isActive) {
             delegate?.presentProfile(sheet: .imageHelper({ images in
                 delegate?.dismissProfileSheet()
-                userProfile.profileImageUrl.append(contentsOf: images)
+                userProfile.profileImages.append(contentsOf: images)
             }))
-        } label: {
-            Text("사진 추가하기 (\(userProfile.profileImageUrl.count)/\(limit))")
-                .frame(maxWidth: .infinity, maxHeight: 54)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(isActive ? Color.Siso.Primary.main : Color.Siso.Gray._20)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
         }
         .padding(.vertical, 8)
-        .disabled(!isActive)
     }
     
     private func bottomButton() -> some View {
         return Group {
-            if userProfile.profileImageUrl.count > 0 {
+            if userProfile.profileImages.count > 0 {
                 nextButton()
             } else {
                 skipButton()
@@ -191,40 +193,45 @@ public struct ImageProfileView: View {
     }
     
     private func nextButton() -> some View {
-        let isActive: Bool = userProfile.profileImageUrl.count > 0
+        let isActive: Bool = userProfile.profileImages.count > 0
         
-        return Button {
-            currentPage = .introduce
-        } label: {
-            Text("계속하기")
-                .frame(maxWidth: .infinity, maxHeight: 54)
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(.black)
-                .background(Color.Siso.Primary.main)
-                .clipShape(.rect(cornerRadius: 27))
-                .animation(.smooth, value: isActive)
+        return PrimaryButton(title: "계속하기", isActive: isActive) {
+            Task {
+                try await ImageNetworkManager.shared.uploadImages(userProfile.profileImages)
+            }
+        
+            switch mode {
+            case .signUp:
+                currentPage = .introduce
+            case .edit:
+                delegate?.pop()
+            }
         }
-        .disabled(!isActive)
     }
     
     private func skipButton() -> some View {
-        return Button {
-            userProfile.profileImageUrl = images // 정보 갱신 x, 초기 값으로 복구
-            currentPage = .introduce
-        } label: {
-            Text("건너뛰기")
-                .font(.system(size: 18))
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.Siso.Gray._50)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        let isActive: Bool = mode == .signUp
+        
+        return Group {
+            if isActive {
+                Button {
+                    userProfile.profileImages = images // 정보 갱신 x, 초기 값으로 복구
+                    currentPage = .introduce
+                } label: {
+                    Text("건너뛰기")
+                        .font(.system(size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(height: 54)
+            }
         }
-        .frame(height: 54)
     }
 }
 
 #Preview {
     NavigationStack {
-        ImageProfileView(delegate: nil, currentPage: .constant(.image) , userProfile: .empty)
+        ImageProfileView(delegate: nil, currentPage: .constant(.image) , userProfile: .empty, mode: .signUp)
     }
 }

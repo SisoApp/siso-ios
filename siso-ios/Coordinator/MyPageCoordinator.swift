@@ -16,11 +16,11 @@ extension Coordinator: @preconcurrency MyPageCoordinatorDelegate {
         }
     }
     
-    public func pushMyPage(_ page: mypage.MyPage) {
-        path.append(toIntegrationPage(page))
+    public func pushMyPage(_ page: MyPage) {
+        myPagePath.append(toIntegrationPage(page))
     }
     
     public func pushMyPageToProfile() {
-        path.append(IntegrationPage.profile)
+        myPagePath.append(IntegrationPage.profile)
     }
 }
