@@ -8,6 +8,8 @@
 import SwiftUI
 import designSystem
 import model
+import network
+
 
 // 발신자의 첫 화면
 public struct CallMannerView: View {

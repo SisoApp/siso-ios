@@ -7,6 +7,8 @@
 
 import Foundation
 import model
+import network
+
 public enum CallPage: Identifiable, Hashable, Equatable {
     case manner(opponentProfile: MatchingProfile)
 //    case connecting(opponentProfile: UserProfileServer)

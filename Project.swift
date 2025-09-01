@@ -55,15 +55,15 @@ let sisoApp: Target = .target(
     resources: ["siso-ios/Resources/**"],
     entitlements: .file(path: "siso-ios/SupportingFiles/siso-ios.entitlements"),
     dependencies: [
-        .target(name: "auth"),
-        .target(name: "network"),
-        .target(name: "matching"),
-        .target(name: "profile"),
-        .target(name: "mypage"),
+//        .target(name: "auth"),
+       // .target(name: "network"),
+//        .target(name: "matching"),
+//        .target(name: "profile"),
+//        .target(name: "mypage"),
         .target(name: "coordinator"),
-        .target(name: "designSystem"),
-        .target(name: "call"),
-        .target(name: "chat"),
+     //   .target(name: "designSystem"),
+//       .target(name: "call"),
+//        .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
     ],
@@ -136,6 +136,7 @@ let matching: Target = .target(
     dependencies: [
         .target(name: "model"),
         .target(name: "network"),
+        .target(name: "designSystem"),
     ]
 )
 
