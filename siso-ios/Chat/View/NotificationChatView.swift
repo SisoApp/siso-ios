@@ -29,6 +29,7 @@ public struct NotificationChatView: View {
             }
             Spacer()
         }
+        .toolbar(.hidden, for: .tabBar)
         .padding()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

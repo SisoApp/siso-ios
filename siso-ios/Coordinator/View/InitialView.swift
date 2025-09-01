@@ -30,6 +30,9 @@ public struct InitialView: View {
                 case .register:
                     NavigationStack(path: $coordinator.path) {
                         coordinator.build(.accept)
+                            .navigationDestination(for: IntegrationPage.self) { page in
+                                coordinator.build(page)
+                            }
                     }
                 case .logout, .undefined:
                     if authVM.userState == .undefined {
