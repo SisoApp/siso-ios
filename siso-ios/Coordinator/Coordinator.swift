@@ -26,7 +26,7 @@ public class Coordinator: ObservableObject {
             return .init(get: { self.path }, set: { self.path = $0 })
         }
     }
-
+    
     @Published public var stackID: UUID = UUID()
     
     // MARK: - Navigation Paths
@@ -81,13 +81,13 @@ public class Coordinator: ObservableObject {
         print("Pushing page: \(page) on tab \(selectedTab)")
         currentPath.wrappedValue.append(page)
     }
-
+    
     public func pop() {
         if !currentPath.wrappedValue.isEmpty {
             currentPath.wrappedValue.removeLast()
         }
     }
-
+    
     // popToRoot도 현재 탭에 맞게 수정 가능
     public func popToRoot() {
         path = NavigationPath()
@@ -136,54 +136,7 @@ public class Coordinator: ObservableObject {
             
             // Matching
         case .home:
-            AnyView(
-                TabView(selection: Binding(
-                    get: { self.selectedTab },
-                    set: { self.selectedTab = $0 }
-                )) {
-                    NavigationStack(path: Binding(
-                        get: { self.matchingPath },
-                        set: { self.matchingPath = $0 }
-                    )) {
-                        MatchingMainView(viewModel: matchingViewModel, delegate: self)
-                            .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in
-                                self.build(page)
-                            }
-                    }
-                    .tabItem { Label("둘러보기", systemImage: "house") }.tag(0)
-                    
-                    NavigationStack(path: Binding(
-                        get: { self.chatPath },
-                        set: { self.chatPath = $0 }
-                    ))  {
-                        ChatMainView(delegate: self)
-                            .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in
-                                self.build(page)
-                            }
-                    }
-                    .tabItem { Label("대화", systemImage: "ellipsis.message") }.tag(1)
-                    
-                    NavigationStack(path: Binding(
-                        get: { self.myPagePath },
-                        set: { self.myPagePath = $0 }
-                    ))  {
-                        MyPageView(delegate: self)
-                            .navigationBarBackButtonHidden(true)
-                            .navigationDestination(for: IntegrationPage.self) { page in self.build(page) }
-         
-                    }
-                    .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
-                    .sheet(item: Binding(
-                        get: { self.profileSheet },
-                        set: { self.profileSheet = $0 }
-                    )) { sheet in
-                        self.build(sheet: sheet)
-                    }
-                }
-                .tint(Color.Siso.Primary._100)
-            )
+            MatchingMainView(viewModel: matchingViewModel, delegate: self)
             
         case .tutorial:
             TutorialViews(delegate: self)

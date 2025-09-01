@@ -9,6 +9,8 @@ import SwiftUI
 import matching
 import model // UserProfileServer 모델을 사용하기 위해 import
 import designSystem // Color.Siso 등을 사용하기 위해 import
+import network
+
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
 ///  기본적으로는 발신자 전용임

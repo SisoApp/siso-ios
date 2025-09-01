@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import model
+import network
 
 public protocol HomeCardDelegate: AnyObject {
     func cardViewModelDidRequestCall(on viewModel: CardViewModel)

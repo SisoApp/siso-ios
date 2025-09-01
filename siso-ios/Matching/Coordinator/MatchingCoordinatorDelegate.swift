@@ -7,6 +7,8 @@
 
 import SwiftUI
 import model
+import network
+
 
 public protocol MatchingCoordinatorDelegate: AnyObject {
     
