@@ -129,7 +129,7 @@ public final actor ProfileNetworkManager: Sendable {
         }
     }
     
-    public func updateProfile(_ profile: UserProfileDTO) async throws {
+    public func updateProfile(_ parameters: UserProfileDTO) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -139,13 +139,13 @@ public final actor ProfileNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-Type": "application/json"
+            "Authorization": "Bearer \(accessToken)"
         ]
         
         AF.request(url,
                    method: .patch,
-                   parameters: profile,
+                   parameters: parameters,
+                   encoder: JSONParameterEncoder.default,
                    headers: headers)
         .validate(statusCode: 200..<300)
         .response { response in
