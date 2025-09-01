@@ -15,6 +15,7 @@ public enum ProfileMode {
 public struct ProfileView: View {
     @EnvironmentObject private var appSettings: AppSettings
     @ObservedObject var userProfile: UserProfile
+    
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
@@ -31,7 +32,7 @@ public struct ProfileView: View {
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
     
-    private let viewModel: ProfileViewModel = .init()
+    private var viewModel: ProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -495,9 +496,21 @@ public struct ProfileView: View {
         introduce = viewModel.introduce
         sex = viewModel.sex
         targetSex = viewModel.preferenceSex
+        
         religion = viewModel.religion
+        userProfile.religion = viewModel.religion
+        
+        userProfile.smoking = viewModel.smoke
+        userProfile.mbti = viewModel.mbti
+        userProfile.drinking = viewModel.drinkingCapacity
+        
+        userProfile.location = viewModel.location
+        
         meetings = viewModel.meetings
+        userProfile.meeting = viewModel.meetings
+        
         interests = viewModel.interests
+        userProfile.interests = viewModel.interests
     }
 }
 

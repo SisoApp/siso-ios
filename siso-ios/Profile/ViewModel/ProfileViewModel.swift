@@ -29,8 +29,8 @@ public extension ProfileView {
             return profile?.location ?? ""
         }
         
-        var smoke: Bool? {
-            return profile?.smoke
+        var smoke: Bool {
+            return profile?.smoke ?? false
         }
         
         var sex: String? {
@@ -39,6 +39,10 @@ public extension ProfileView {
         
         var preferenceSex: String? {
             return profile?.preferenceSex?.rawValue
+        }
+        
+        var drinkingCapacity: String {
+            return profile?.drinkingCapacity?.rawValue ?? ""
         }
         
         var religion: String {
