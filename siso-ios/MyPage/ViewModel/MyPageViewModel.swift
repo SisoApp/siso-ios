@@ -6,7 +6,29 @@
 //
 
 import Foundation
+import model
 
-class MyPageViewModel {
-    
+public extension MyPageView {
+    @MainActor
+    class MyPageViewModel: ObservableObject {
+        @Published private var profile: UserProfileDTO?
+        
+        var nickname: String {
+            return profile?.nickname ?? ""
+        }
+        
+        var age: String {
+            return (profile?.age.description ?? "")  + "세"
+        }
+        
+        var location: String {
+            return profile?.location ?? ""
+        }
+        
+        func setProfile(_ profile: UserProfileDTO?) {
+            self.profile = profile
+        }
+    }
 }
+
+
