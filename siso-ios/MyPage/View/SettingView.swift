@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import auth
 
 enum Settings: String, Identifiable, CaseIterable {
     case account = "계정"
@@ -14,12 +15,15 @@ enum Settings: String, Identifiable, CaseIterable {
     case payment = "결제 내역 조회"
     case policy = "개인정보 처리방침"
     case legal = "법적고지"
+    case logout = "로그아웃"
     case withdraw = "회원탈퇴"
     
     var id: String { self.rawValue }
 }
 
 public struct SettingView: View {
+    @EnvironmentObject private var authVM: SocialLoginView.LoginViewModel
+    private let viewModel: SettingViewModel = .init()
     weak var delegate: MyPageCoordinatorDelegate?
 
     public init(delegate: MyPageCoordinatorDelegate?) {
@@ -54,7 +58,13 @@ public struct SettingView: View {
                 .onTapGesture {
                     switch item {
                     case .notification:
-                        break 
+                        delegate?.pushMyPage(.notification)
+                    case .logout:
+                        Task {
+                            await viewModel.logout {
+                                authVM.userState = .logout
+                            }
+                        }
                     default:
                         break
                     }

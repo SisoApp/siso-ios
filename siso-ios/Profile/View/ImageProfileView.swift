@@ -57,6 +57,7 @@ public struct ImageProfileView: View {
                     }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func informationText() -> some View {

@@ -41,6 +41,7 @@ public struct PersonalityProfileView: View {
                     }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             setMBTI()
         }

@@ -39,6 +39,7 @@ public struct LocationProfileView: View {
                         }
                 }
             }
+            .toolbar(.hidden, for: .tabBar)
         }
     }
     

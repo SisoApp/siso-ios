@@ -12,11 +12,13 @@ public struct InterestProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @State private var interests: [String] = []
     
+    private var viewModel: InterestProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
+        self._interests = State(wrappedValue: userProfile.interests)
     }
     
     public var body: some View {
@@ -39,6 +41,7 @@ public struct InterestProfileView: View {
                     }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func informationText() -> some View {
@@ -82,8 +85,8 @@ public struct InterestProfileView: View {
     private func interestButtonScrollView() -> some View {
         return ScrollView {
             VStack(spacing: 12) {
-                ForEach(ProfileOptions.getInterestOptions(), id: \.0) { category, options in
-                    Text(ProfileOptions.getInterestCategoryDescription(rawValue: category.rawValue) ?? "")
+                ForEach(viewModel.interestOptions, id: \.0) { category, options in
+                    Text(category)
                         .font(.system(size: 18))
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity, alignment: .leading)

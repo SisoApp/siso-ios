@@ -8,7 +8,7 @@
 import Foundation
 
 /// 서버에 사용자 프로필 생성을 요청할 때 사용하는 데이터 모델
-public struct UserProfileRequestDto: Codable, Sendable {
+public struct UserProfileDTO: Codable, Sendable {
     public let drinkingCapacity: DrinkingCapacity?
     public let religion: Religion?
     public let smoke: Bool?
@@ -21,50 +21,35 @@ public struct UserProfileRequestDto: Codable, Sendable {
     public let mbti: Mbti?
     public let meetings: [Meeting]?
     
-    public init(from parameters: [String: Any]) {
-        self.age = parameters["age"] as? Int ?? 0
-        self.nickname = parameters["nickname"] as? String ?? ""
-        
-        if let sexString = parameters["sex"] as? String {
-            self.sex = Sex(rawValue: sexString)
-        } else {
-            self.sex = nil
-        }
-        
-        if let preferenceSexString = parameters["preferenceSex"] as? String {
-            self.preferenceSex = PreferenceSex(rawValue: preferenceSexString)
-        } else {
-            self.preferenceSex = nil
-        }
-        
-        if let drinkingString = parameters["drinkingCapacity"] as? String {
-            self.drinkingCapacity = DrinkingCapacity(rawValue: drinkingString)
-        } else {
-            self.drinkingCapacity = nil
-        }
-        
-        if let religionString = parameters["religion"] as? String {
-            self.religion = Religion(rawValue: religionString)
-        } else {
-            self.religion = nil
-        }
-        
-        if let mbtiString = parameters["mbti"] as? String {
-            self.mbti = Mbti(rawValue: mbtiString)
-        } else {
-            self.mbti = nil
-        }
-        
-        self.smoke = parameters["smoke"] as? Bool
-        self.introduce = parameters["introduce"] as? String
-        self.location = parameters["location"] as? String
-        
-        if let meetingStrings = parameters["meetings"] as? [String] {
-            self.meetings = meetingStrings.compactMap { Meeting(rawValue: $0) }
-        } else {
-            self.meetings = nil
-        }
+    public init(drinkingCapacity: DrinkingCapacity?, religion: Religion?, smoke: Bool?,
+                age: Int, nickname: String, introduce: String?, location: String?, sex: Sex?,
+                preferenceSex: PreferenceSex?, mbti: Mbti?, meetings: [Meeting]?) {
+        self.drinkingCapacity = drinkingCapacity
+        self.religion = religion
+        self.smoke = smoke
+        self.age = age
+        self.nickname = nickname
+        self.introduce = introduce
+        self.location = location
+        self.sex = sex
+        self.preferenceSex = preferenceSex
+        self.mbti = mbti
+        self.meetings = meetings
     }
+}
+
+public struct InterestRequestDTO: Codable, Sendable {
+    public let interest: Interest
+    
+    public init(interest: Interest) {
+        self.interest = interest
+    }
+}
+
+public struct InterestResponseDTO: Codable, Sendable {
+    public let status: Int
+    public let errorMessage: String?
+    public let data: [Interest]
 }
 
 public struct UserProfileResponse: Codable, Sendable {
@@ -184,8 +169,21 @@ public struct MainProfileImage: Codable, Sendable {
 
 public enum Mbti: String, Codable, CaseIterable, Sendable {
     case infp = "INFP"
+    case enfp = "ENFP"
+    case intp = "INTP"
+    case entp = "ENTP"
+    case isfj = "ISFJ"
+    case esfj = "ESFJ"
+    case istj = "ISTJ"
+    case estj = "ESTJ"
+    case isfp = "ISFP"
+    case esfp = "ESFP"
+    case istp = "ISTP"
+    case estp = "ESTP"
+    case infj = "INFJ"
+    case enfj = "ENFJ"
+    case intj = "INTJ"
     case entj = "ENTJ"
-    // ... 다른 케이스들
 }
 
 public enum Meeting: String, Codable, CaseIterable, Sendable {

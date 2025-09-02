@@ -7,6 +7,7 @@
 
 import SwiftUI
 import designSystem
+import model
 
 enum MyPageInfo: String, CaseIterable, Identifiable {
     case blacklist = "차단 / 신고한 인연"
@@ -16,6 +17,9 @@ enum MyPageInfo: String, CaseIterable, Identifiable {
 }
 
 public struct MyPageView: View {
+    @EnvironmentObject private var appSettings: AppSettings
+    @ObservedObject private var viewModel: MyPageViewModel = .init()
+    
     weak var delegate: MyPageCoordinatorDelegate?
     
     public init(delegate: MyPageCoordinatorDelegate?) {
@@ -38,6 +42,9 @@ public struct MyPageView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 settingButton()
             }
+        }
+        .onAppear {
+            viewModel.setProfile(appSettings.userProfile)
         }
     }
     
@@ -64,19 +71,29 @@ public struct MyPageView: View {
             }
             
             VStack(spacing: 4) {
-                Text("삼성전자회장이나")
+                Text(viewModel.nickname)
                     .font(.system(size: 24))
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("28세")
+                Text(viewModel.age)
                     .font(.system(size: 22))
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.Siso.Gray._50)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
+                locationView()
+            }
+            .padding(.leading)
+        }
+        .padding(.horizontal, 8)
+    }
+    
+    private func locationView() -> some View {
+        return Group {
+            if !viewModel.location.isEmpty {
                 Label {
-                    Text("서울 중구")
+                    Text(viewModel.location)
                         .font(.system(size: 18))
                 } icon: {
                     Image("location")
@@ -86,9 +103,7 @@ public struct MyPageView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.leading)
         }
-        .padding(.horizontal, 8)
     }
     
     private func profileProgressView() -> some View {

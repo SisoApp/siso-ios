@@ -1,8 +1,8 @@
 //
 //  ImageDTO.swift
-//  profile
+//  model
 //
-//  Created by 멘태 on 8/31/25.
+//  Created by 멘태 on 9/2/25.
 //
 
 import Foundation

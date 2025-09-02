@@ -22,7 +22,7 @@ public final actor ProfileNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
-    public func getProfiles() async throws {
+    public func getProfiles(completion: @escaping ([UserProfileDTO]) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -39,41 +39,36 @@ public final actor ProfileNetworkManager: Sendable {
         AF.request(url,
                    method: .get,
                    headers: headers)
-        .validate(statusCode: 200..<300)
-        .response { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: [UserProfileDTO].self) { response in
+                switch response.result {
+                case .success(let profiles):
+                    print("전체 프로필 조회 성공!")
+                    completion(profiles)
+                case .failure(let error):
+                    print("전체 프로필 조회 실패!")
+                    print(error.localizedDescription)
+                }
             }
-            
-            switch response.result {
-            case .success:
-                print("전체 프로필 조회 성공!")
-                break
-            case .failure(let error):
-                print("전체 프로필 조회 실패!")
-                print(error)
-                break
-            }
-        }
     }
     
-    public func getUserProfile(for id: Int) async throws {
+    public func getUserProfile(for id: Int, completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles/\(id)"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try await fetchProfile(url: url)
+        try await fetchProfile(url: url, completion)
     }
     
-    public func getCurrentUserProfile() async throws {
+    public func getCurrentUserProfile(completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try await fetchProfile(url: url)
+        try await fetchProfile(url: url, completion)
     }
     
-    private func fetchProfile(url: URL) async throws {
+    private func fetchProfile(url: URL,_ completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
@@ -82,24 +77,22 @@ public final actor ProfileNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        print("-------------accessToken: \(accessToken)")
+        print("---------accessToken----------")
+        print(accessToken)
         
         AF.request(url,
                    method: .get,
                    headers: headers)
-        .validate(statusCode: 200..<300)
-        .responseDecodable(of: UserProfileRequestDto.self) { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: UserProfileDTO.self) { response in
+                switch response.result {
+                case .success(let profile):
+                    print("프로필 조회 성공!: \(profile)")
+                    completion(profile)
+                case .failure(let error):
+                    print("프로필 조회 실패: \(error.localizedDescription)")
+                }
             }
-            
-            switch response.result {
-            case .success(let profile):
-                print("프로필 조회 성공!: \(profile)")
-            case .failure(let error):
-                print("프로필 조회 실패: \(error)")
-            }
-        }
     }
     
     public func registerProfile(_ parameters: [String: Any]) async throws {
@@ -112,7 +105,8 @@ public final actor ProfileNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)"
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json"
         ]
         
         AF.request(url,
@@ -120,22 +114,22 @@ public final actor ProfileNetworkManager: Sendable {
                    parameters: parameters,
                    encoding: JSONEncoding.default,
                    headers: headers)
-        .validate(statusCode: 200..<300)
-        .response { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
+            .validate(statusCode: 200..<300)
+            .response { response in
+                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
+                    print("body: \(body)")
+                }
+                
+                switch response.result {
+                case .success:
+                    print("프로필 등록 성공!")
+                case .failure(let error):
+                    print("프로필 등록 실패: ", error.localizedDescription)
+                }
             }
-            
-            switch response.result {
-            case .success:
-                print("프로필 등록 성공!")
-            case .failure(let error):
-                print("프로필 등록 실패: ", error.localizedDescription)
-            }
-        }
     }
     
-    public func updateProfile(_ profile: UserProfileRequestDto) async throws {
+    public func updateProfile(_ parameters: UserProfileDTO, completion: @escaping (UserProfileDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/profiles"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -145,26 +139,84 @@ public final actor ProfileNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-Type": "application/json"
+            "Authorization": "Bearer \(accessToken)"
         ]
         
         AF.request(url,
                    method: .patch,
-                   parameters: profile,
+                   parameters: parameters,
+                   encoder: JSONParameterEncoder.default,
                    headers: headers)
-        .validate(statusCode: 200..<300)
-        .response { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: UserProfileDTO.self) { response in
+                switch response.result {
+                case .success(let profile):
+                    print("프로필 등록 성공!")
+                    completion(profile)
+                case .failure(let error):
+                    print("프로필 수정 실패: \(error.localizedDescription)")
+                }
             }
-            
-            switch response.result {
-            case .success:
-                print("프로필 수정 성공!")
-            case .failure(let error):
-                print("프로필 수정 실패: ", error.localizedDescription)
-            }
+    }
+    
+    public func getInterests(completion: @escaping ([Interest]) -> Void) async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/interests/list"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
         }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        AF.request(url,
+                   method: .get,
+                   headers: headers)
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: InterestResponseDTO.self) { response in
+                switch response.result {
+                case .success(let interestDTO):
+                    print("관심사 조회 성공!")
+                    completion(interestDTO.data)
+                case .failure(let error):
+                    print("관심사 조회 실패: \(error.localizedDescription)")
+                }
+            }
+    }
+    
+    public func registerInterests(_ parameters: [InterestRequestDTO]) async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/interests/select"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        let data = try! JSONEncoder().encode(parameters)
+        let body = String(data: data, encoding: .utf8)
+        print(body)
+        
+        AF.request(url,
+                   method: .post,
+                   parameters: parameters,
+                   encoder: JSONParameterEncoder.default,
+                   headers: headers)
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    print("관심사 등록 성공!")
+                case .failure(let error):
+                    print("관심사 등록 실패: \(error.localizedDescription)")
+                }
+            }
     }
 }
