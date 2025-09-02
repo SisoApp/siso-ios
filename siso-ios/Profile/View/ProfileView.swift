@@ -79,6 +79,7 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._90)
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             if !didInit {
                 viewModel.setProfile(appSettings.userProfile)

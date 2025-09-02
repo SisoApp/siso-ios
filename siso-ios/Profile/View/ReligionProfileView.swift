@@ -40,6 +40,7 @@ public struct ReligionProfileView: View {
                     }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func informationText() -> some View {

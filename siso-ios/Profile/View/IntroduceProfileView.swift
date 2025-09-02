@@ -58,6 +58,7 @@ public struct IntroduceProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._90)
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .padding(.horizontal)
     }
     

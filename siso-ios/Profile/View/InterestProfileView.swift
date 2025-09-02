@@ -41,6 +41,7 @@ public struct InterestProfileView: View {
                     }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func informationText() -> some View {
