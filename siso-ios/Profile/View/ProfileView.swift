@@ -6,37 +6,38 @@
 //
 
 import SwiftUI
-import network
+import model
 
 public enum ProfileMode {
     case signUp, edit
 }
 
 public struct ProfileView: View {
+    @EnvironmentObject private var appSettings: AppSettings
     @ObservedObject var userProfile: UserProfile
+    
     @State private var nickname: String = ""
     @State private var age: String = ""
     @State private var introduce: String = ""
     @State private var sex: String? = nil
     @State private var targetSex: String? = nil
-    @State private var isPlaying: Bool = false
     @State private var religion: String = ""
     @State private var meetings: [String] = []
+    @State private var interests: [String] = []
+    
+    @State private var showAlert: Bool = false
+    @State private var isPlaying: Bool = false
+    @State private var didInit: Bool = false
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
     
-    private let viewModel: ProfileViewModel = .init()
+    private var viewModel: ProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
         self.delegate = delegate
         self.userProfile = userProfile
-        self._nickname = State(wrappedValue: userProfile.nickname)
-        self._age = State(wrappedValue: userProfile.age.description)
-        self._introduce = State(wrappedValue: userProfile.introduce)
-        self._sex = State(wrappedValue: userProfile.sex)
-        self._targetSex = State(wrappedValue: userProfile.targetSex)
     }
     
     public var body: some View {
@@ -78,11 +79,13 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._90)
             }
         }
-        .task {
-            try? await ProfileNetworkManager.shared.getCurrentUserProfile()
-            //try? await ProfileNetworkManager.shared.getProfiles()
-            try? await VoiceNetworkManager.shared.getVoice()
-            try? await ImageNetworkManager.shared.getImages()
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            if !didInit {
+                viewModel.setProfile(appSettings.userProfile)
+                bindViewValue()
+                didInit = true
+            }
         }
     }
     
@@ -133,7 +136,7 @@ public struct ProfileView: View {
                 .foregroundStyle(Color.Siso.Gray._50)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("닉네임입니다")
+            Text(nickname)
                 .font(.system(size: 24, weight: .bold))
                 .padding()
                 .frame(height: 54)
@@ -180,13 +183,10 @@ public struct ProfileView: View {
     }
     
     private func textView() -> some View {
-        let isActive: Bool = introduce.count >= 5
-        
         return ZStack {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.Siso.Gray._20)
                 .stroke(introduceFocus ? Color.Siso.Primary._60 : .clear)
-                .stroke(!isActive ? .red : .clear)
                 .frame(height: 195)
             
             TextEditor(text: $introduce)
@@ -197,6 +197,7 @@ public struct ProfileView: View {
                 .padding()
                 .onChange(of: introduce) { _, newValue in
                     introduce = newValue.prefix(50).description
+                    print(introduce.count)
                 }
             
             VStack {
@@ -237,13 +238,13 @@ public struct ProfileView: View {
                     .fill(Color.Siso.Gray._60)
             )
             
-            Image("pencil")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .onTapGesture {
-                    delegate?.pushProfile(.voice)
-                }
+            Button {
+                delegate?.pushProfile(.voice)
+            } label: {
+                Text("수정")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.Siso.Gray._60)
+            }
         }
         .padding(.top, 8)
     }
@@ -284,10 +285,10 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "기본 정보", point: "+ 30%")
             
-            RadioButtonGroup(title: "내 성별", options: ProfileOptions.getSexOptions(), selection: $sex)
+            RadioButtonGroup(title: "내 성별", options: viewModel.sexOptions, selection: $sex)
                 .padding(.top)
             
-            RadioButtonGroup(title: "매칭 성별", options: ProfileOptions.getPreferenceSexOptions(), selection: $targetSex)
+            RadioButtonGroup(title: "매칭 성별", options: viewModel.preferenceSexOptions, selection: $targetSex)
                 .padding(.top)
             
             inputView(title: "지역", item: userProfile.location)
@@ -301,7 +302,7 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "추가 정보", point: "+ 30%")
             
-            inputView(title: "종교", item: userProfile.religion)
+            inputView(title: "종교", item: viewModel.getReligionDescription(for: userProfile.religion))
                 .onTapGesture {
                     delegate?.pushProfile(.religion)
                 }
@@ -311,7 +312,7 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.smoke)
                 }
             
-            inputView(title: "음주", item: ProfileOptions.getDrinkingCapacityDescription(rawValue: userProfile.drinking) ?? "")
+            inputView(title: "음주", item: viewModel.getDrinkingCapacityDescription(for: userProfile.drinking))
                 .onTapGesture {
                     delegate?.pushProfile(.drink)
                 }
@@ -327,12 +328,16 @@ public struct ProfileView: View {
         return VStack {
             sectionHeader(title: "관심사 / 취향 태그", point: "+ 30%")
             
-            tagView(title: "나의 관심사", placeholder: "나의 관심사를 골라주세요", items: userProfile.interests)
+            tagView(title: "나의 관심사",
+                    placeholder: "나의 관심사를 골라주세요",
+                    items: viewModel.getInterestDescriptions(for: userProfile.interests))
                 .onTapGesture {
                     delegate?.pushProfile(.interest)
                 }
             
-            tagView(title: "매칭 상대와의 관계", placeholder: "어떤 관계를 원하시나요?", items: userProfile.meeting)
+            tagView(title: "매칭 상대와의 관계",
+                    placeholder: "어떤 관계를 원하시나요?",
+                    items: viewModel.getMettingDescriptions(for: userProfile.meeting))
                 .onTapGesture {
                     delegate?.pushProfile(.meeting)
                 }
@@ -451,44 +456,63 @@ public struct ProfileView: View {
     }
     
     private func completeButton() -> some View {
-        let isActive: Bool = true
-        //let isActive: Bool = introduce.count >= 5
-        
-        return PrimaryButton(title: "완료하기", isActive: isActive) {
-            // guard let sex = sex, let targetSex = targetSex else { return }
-            
-//            userProfile.age = Int(age) ?? 0
-//            userProfile.introduce = introduce
-//            userProfile.sex = sex.text
-//            userProfile.targetSex = targetSex.text
-            
-            
-            
-//            Task {
-//                await viewModel.registerProfile(userProfile)
-//            }
-            
-            let parameters: [String: Any] = [
-                "nickname": "안녕",
-                "age": "50",
-                "sex": "MALE",
-                "preference_sex": "FEMALE"
-            ]
-            
-            Task {
-                print("click!")
-                try? await ProfileNetworkManager.shared.registerProfile(parameters)
+        return PrimaryButton(title: "완료하기") {
+            guard let sex = sex, let targetSex = targetSex else { return }
+            guard introduce.count >= 5 else {
+                showAlert = true
+                return
             }
             
-            delegate?.pop()
+            userProfile.nickname = nickname
+            userProfile.age = Int(age) ?? 0
+            userProfile.introduce = introduce
+            userProfile.sex = sex
+            userProfile.targetSex = targetSex
+            
+            Task {
+                await viewModel.updateInterests(userProfile)
+                
+                await viewModel.updateProfile(userProfile) { profile in
+                    appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
+                    delegate?.pop()
+                }
+            }
         }
         .padding(.horizontal)
         .padding(.bottom, 8)
+        .alert("오류", isPresented: $showAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text("자기소개를 5자 이상 작성해주세요")
+        }
     }
     
     private func hideKeyboard() {
         ageFocus = false
         introduceFocus = false
+    }
+    
+    private func bindViewValue() {
+        nickname = viewModel.nickname
+        age = viewModel.age
+        introduce = viewModel.introduce
+        sex = viewModel.sex
+        targetSex = viewModel.preferenceSex
+        
+        religion = viewModel.religion
+        userProfile.religion = viewModel.religion
+        
+        userProfile.smoking = viewModel.smoke
+        userProfile.mbti = viewModel.mbti
+        userProfile.drinking = viewModel.drinkingCapacity
+        
+        userProfile.location = viewModel.location
+        
+        meetings = viewModel.meetings
+        userProfile.meeting = viewModel.meetings
+        
+        interests = viewModel.interests
+        userProfile.interests = viewModel.interests
     }
 }
 

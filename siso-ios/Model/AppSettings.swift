@@ -16,5 +16,24 @@ public class AppSettings: ObservableObject {
     // 값이 변경되면 @Published 덕분에 SwiftUI 뷰가 자동으로 업데이트됩니다.
     @AppStorage("tutorialHasBeenWatched") public var tutorialHasBeenWatched: Bool = false
     
+    // 앱에 로그인한 사용자의 프로필 정보를 UserDefaults에 저장합니다.
+    @AppStorage("userProfile") private var userProfileData: Data?
+    public var userProfile: UserProfileDTO? {
+        get {
+            guard let data = userProfileData,
+                  let profile = try? JSONDecoder().decode(UserProfileDTO.self, from: data) else { return nil }
+            return profile
+        }
+        set {
+            if let profile = newValue,
+               let data = try? JSONEncoder().encode(profile) {
+                print("내 프로필 UserDefaults 저장 성공: \(profile)")
+                userProfileData = data
+            } else {
+                userProfileData = nil
+            }
+        }
+    }
+    
     public init(){}
 }

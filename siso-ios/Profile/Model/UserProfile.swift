@@ -59,22 +59,4 @@ public class UserProfile: ObservableObject {
         self.mbti = mbti
         self.location = location
     }
-    
-    public static func convertToDict(_ userProfile: UserProfile) -> [String: Any] {
-        var dict: [String: Any] = [:]
-        
-        dict["age"] = userProfile.age
-        dict["nickname"] = userProfile.nickname
-        dict["sex"] = userProfile.sex
-        dict["preferenceSex"] = userProfile.targetSex
-        dict["drinkingCapacity"] = userProfile.drinking
-        dict["religion"] = userProfile.religion
-        dict["introduce"] = userProfile.introduce
-        dict["location"] = userProfile.location
-        dict["mbti"] = userProfile.mbti
-        dict["smoke"] = userProfile.smoking
-        if !userProfile.meeting.isEmpty { dict["meetings"] = userProfile.meeting }
-        
-        return dict 
-    }
 }

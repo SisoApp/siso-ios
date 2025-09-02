@@ -25,6 +25,21 @@ public struct AppView: View {
                 AuthNavigator()
             }
         }
+        .sheet(item: $coordinator.afterCallSheetProfile) { profile in
+            AfterCallAssessmentView(opponentProfile: profile, matchingDelegate: coordinator)
+        }
+        .sheet(item: $coordinator.matchingSheet) { sheet in
+            coordinator.build(sheet: sheet)
+        }
+        .sheet(item: $coordinator.profileSheet) { sheet in
+            coordinator.build(sheet: sheet)
+        }
+        .sheet(item: $coordinator.callSheet) { sheet in
+            coordinator.build(sheet: sheet)
+        }
+        .sheet(item: $coordinator.authSheet) { sheet in
+            coordinator.build(sheet: sheet)
+        }
         .animation(.easeInOut, value: authVM.userState)
         .task {
             if authVM.userState == .undefined {
@@ -75,15 +90,7 @@ struct MainTabView: View {
             .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
         }
         .tint(Color.Siso.Primary._100)
-        .sheet(item: $coordinator.matchingSheet) { sheet in
-            coordinator.build(sheet: sheet)
-        }
-        .sheet(item: $coordinator.profileSheet) { sheet in
-            coordinator.build(sheet: sheet)
-        }
-        .sheet(item: $coordinator.callSheet) { sheet in
-            coordinator.build(sheet: sheet)
-        }
+        
     }
 }
 

@@ -7,6 +7,7 @@
 
 import UIKit
 import Alamofire
+import model
 
 public final actor ImageNetworkManager: Sendable {
     public static let shared: ImageNetworkManager = .init()

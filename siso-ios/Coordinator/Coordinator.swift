@@ -37,6 +37,7 @@ public class Coordinator: ObservableObject {
     @Published public var selectedTab: Int = 0
     
     // MARK: - Sheet & Call Properties
+    @Published public var authSheet: AuthSheet?
     @Published public var profileSheet: ProfileSheet?
     @Published public var matchingSheet: MatchingSheet?
     @Published public var callPage: CallPage?

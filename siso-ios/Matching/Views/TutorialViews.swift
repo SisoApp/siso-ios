@@ -36,10 +36,6 @@ public struct TutorialViews: View {
                     Button {
                         if selectedTabIndex == 2 {
                             appSettings.tutorialHasBeenWatched = true
-                            delegate.pushMatching(.home)
-                            delegate.pushMatching(.home)
-                            
-                            
                         } else {
                             selectedTabIndex += 1
                         }
@@ -73,6 +69,8 @@ public struct TutorialViews: View {
                 
             }
         }
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarBackButtonHidden()
     }
 }
 

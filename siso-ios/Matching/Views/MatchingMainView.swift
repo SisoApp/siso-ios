@@ -1,8 +1,9 @@
 import SwiftUI
+import model
 
 public struct MatchingMainView: View {
     // MARK: - Properties
-    
+    @EnvironmentObject var appSettings: AppSettings
     @ObservedObject private var viewModel: MatchingViewModel
     @StateObject private var audioPlayer = AudioPlayerManager()
     public var delegate: MatchingCoordinatorDelegate?
@@ -95,6 +96,9 @@ public struct MatchingMainView: View {
         }
         .task {
             await viewModel.fetchCards()
+            await viewModel.fetchMyProfile { profile in
+                appSettings.userProfile = profile
+            }
         }
     }
     

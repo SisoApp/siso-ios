@@ -66,4 +66,18 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
             self.errorMessage = "프로필을 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요."
         }
     }
+    
+    func fetchMyProfile(completion: @escaping (UserProfileDTO) -> Void) async {
+        do {
+            try? await ProfileNetworkManager.shared.getCurrentUserProfile { profile in
+                completion(profile)
+            }
+        }
+    }
+    
+    func fetchMyInterests() async {
+        try? await ProfileNetworkManager.shared.getInterests { interests in
+            print(interests)
+        }
+    }
 }
