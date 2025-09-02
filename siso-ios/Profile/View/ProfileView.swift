@@ -82,7 +82,11 @@ public struct ProfileView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             if !didInit {
-                viewModel.setProfile(appSettings.userProfile)
+                viewModel.setViewModel(
+                    profile: appSettings.userProfile,
+                    images: appSettings.profileImages,
+                    voice: appSettings.voice
+                )
                 bindViewValue()
                 didInit = true
             }
@@ -227,7 +231,7 @@ public struct ProfileView: View {
                 
                 waveFormView(count: 30, height: 44)
                 
-                Text("00:15")
+                Text("00:\(String(format: "%02d", viewModel.voiceDuration))")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
             }
@@ -511,8 +515,8 @@ public struct ProfileView: View {
         meetings = viewModel.meetings
         userProfile.meeting = viewModel.meetings
         
-        interests = viewModel.interests
-        userProfile.interests = viewModel.interests
+        interests = viewModel.interestArray
+        userProfile.interests = viewModel.interestArray
     }
 }
 

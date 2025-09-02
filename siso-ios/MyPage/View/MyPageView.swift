@@ -44,7 +44,11 @@ public struct MyPageView: View {
             }
         }
         .onAppear {
-            viewModel.setProfile(appSettings.userProfile)
+            viewModel.setViewModel(
+                profile: appSettings.userProfile,
+                images: appSettings.profileImages,
+                voice: appSettings.voice,
+                interests: nil)
         }
     }
     
@@ -59,7 +63,7 @@ public struct MyPageView: View {
                     .overlay {
                         Circle()
                             .rotation(.degrees(270))
-                            .trim(from: 0, to: 0.36)
+                            .trim(from: 0, to: Double(viewModel.progress))
                             .stroke(
                                 Color.Siso.Primary.main,
                                 style: StrokeStyle(
@@ -108,7 +112,7 @@ public struct MyPageView: View {
     
     private func profileProgressView() -> some View {
         return HStack(spacing: 12) {
-            Text("36% 완성")
+            Text("\(viewModel.progress)% 완성")
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .padding(.horizontal, 16)

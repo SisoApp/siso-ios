@@ -12,6 +12,9 @@ import model
 public extension ProfileView {
     class ProfileViewModel {
         private var profile: UserProfileDTO?
+        private var images: [ImageDTO]?
+        private var voice: VoiceDTO?
+        private var interests: [Interest]?
         
         var nickname: String {
             return profile?.nickname ?? ""
@@ -57,8 +60,20 @@ public extension ProfileView {
             return profile?.meetings?.map { $0.rawValue } ?? []
         }
         
-        var interests: [String] {
-            return []
+        var interestArray: [String] {
+            return interests?.map { $0.rawValue } ?? []
+        }
+        
+        var voiceId: Int? {
+            return voice?.id
+        }
+        
+        var voiceDuration: Int {
+            return voice?.duration ?? 0
+        }
+        
+        var voiceUrl: String {
+            return voice?.url ?? ""
         }
         
         var sexOptions: [(String, String)] {
@@ -97,8 +112,10 @@ public extension ProfileView {
             return descriptions
         }
         
-        func setProfile(_ profile: UserProfileDTO?) {
+        func setViewModel(profile: UserProfileDTO?, images: [ImageDTO]?, voice: VoiceDTO?) {
             self.profile = profile
+            self.images = images
+            self.voice = voice
         }
         
         func fetchProfile() async {

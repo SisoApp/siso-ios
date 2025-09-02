@@ -17,11 +17,23 @@ public final actor VoiceNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
-    public func getMyVoice() async throws {
+    public func getMyVoice(completion: @escaping (VoiceDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/voice-samples/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
+       try? await fetchVoice(url, completion: completion)
+    }
+    
+    public func getUserVoice(for userId: Int, completion: @escaping (VoiceDTO) -> Void) async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/voice-samples/user"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+       try? await fetchVoice(url, completion: completion)
+    }
+    
+    private func fetchVoice(_ url: URL, completion: @escaping (VoiceDTO) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
@@ -38,13 +50,14 @@ public final actor VoiceNetworkManager: Sendable {
                 switch response.result {
                 case .success(let voices):
                     debugPrint("녹음파일 조회 성공: \(voices)")
+                    if !voices.isEmpty { completion(voices[0]) }
                 case .failure(let error):
                     debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
                 }
             }
     }
     
-    public func uploadVoice() async throws {
+    public func uploadVoice(completion: @escaping (VoiceDTO) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/voice-samples/upload"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -57,8 +70,7 @@ public final actor VoiceNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        AF.upload(
-            multipartFormData: { multipartFormData in
+        AF.upload(multipartFormData: { multipartFormData in
                 let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
                 let fileURL = paths[0].appendingPathComponent("voice.m4a")
                 
@@ -66,20 +78,19 @@ public final actor VoiceNetworkManager: Sendable {
                                          withName: "file",
                                          fileName: fileURL.lastPathComponent,
                                          mimeType: "audio/m4a")
-            },
-            to: url,
-            method: .post,
-            headers: headers
-        )
-        .validate(statusCode: 200..<300)
-        .responseDecodable(of: VoiceDTO.self) { response in
-            switch response.result {
-            case .success(let voice):
-                debugPrint("녹음파일 업로드 성공!")
-                debugPrint(voice)
-            case .failure(let error):
-                debugPrint("녹음파일 업로드 실패: ", error.localizedDescription)
+                },
+                to: url,
+                method: .post,
+                headers: headers)
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: VoiceDTO.self) { response in
+                switch response.result {
+                case .success(let voice):
+                    debugPrint("녹음파일 업로드 성공!: \(voice)")
+                    completion(voice)
+                case .failure(let error):
+                    debugPrint("녹음파일 업로드 실패: ", error.localizedDescription)
+                }
             }
-        }
     }
 }

@@ -66,7 +66,7 @@ public class AppSettings: ObservableObject {
                 profileImagesData = data
                 debugPrint("프로필 이미지 UserDefaults 저장 성공: \(profileImages)")
             } else {
-                profileImagesData = nil 
+                profileImagesData = nil
             }
         }
     }

@@ -77,15 +77,19 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
     
     func fetchMyInterests() async {
         try? await ProfileNetworkManager.shared.getInterests { interests in
-            print(interests)
+            debugPrint(interests)
         }
     }
     
-    func fetchMyImages() async {
-        try? await ImageNetworkManager.shared.getMyImages()
+    func fetchMyImages(completion: @escaping ([ImageDTO]) -> Void) async {
+        try? await ImageNetworkManager.shared.getMyImages(completion: { images in
+            completion(images)
+        })
     }
     
-    func fetchMyVoice() async {
-        try? await VoiceNetworkManager.shared.getMyVoice()
+    func fetchMyVoice(completion: @escaping (VoiceDTO) -> Void) async {
+        try? await VoiceNetworkManager.shared.getMyVoice(completion: { voice in
+            completion(voice)
+        })
     }
 }

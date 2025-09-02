@@ -17,23 +17,23 @@ public final actor ImageNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
-    public func getMyImages() async throws {
+    public func getMyImages(completion: @escaping ([ImageDTO]) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/images/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try? await fetchImages(url)
+        try? await fetchImages(url, completion: completion)
     }
     
-    public func getUserImages(for userId: Int) async throws {
+    public func getUserImages(for userId: Int, completion: @escaping ([ImageDTO]) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/user/\(userId)"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try? await fetchImages(url)
+        try? await fetchImages(url, completion: completion)
     }
     
-    private func fetchImages(_ url: URL) async throws {
+    private func fetchImages(_ url: URL, completion: @escaping ([ImageDTO]) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
@@ -50,6 +50,7 @@ public final actor ImageNetworkManager: Sendable {
             switch response.result {
             case .success(let images):
                 debugPrint("이미지 목록 조회 성공: \(images)")
+                completion(images)
                 break
             case .failure(let error):
                 debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
@@ -103,6 +104,12 @@ public final actor ImageNetworkManager: Sendable {
                 debugPrint("이미지 업로드 실패: ", error.localizedDescription)
             }
         }
+    }
+    
+    public func openImageUrl() async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/images/upload"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
     }
     
     public func removeImage(_ id: Int) async throws {
