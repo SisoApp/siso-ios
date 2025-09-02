@@ -4,6 +4,7 @@ import SwiftUI
 import Combine
 import model
 import Foundation
+import network
 
 @MainActor // UI와 직접 상호작용하므로 클래스 전체를 MainActor로 지정합니다.
 public class CallViewModel: ObservableObject, Identifiable {
@@ -23,7 +24,7 @@ public class CallViewModel: ObservableObject, Identifiable {
     
     // MARK: - Properties
     
-    public let opponentCallInfo: CallInfoDto
+    public let opponentProfile: CallProfileDto
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
     
@@ -32,8 +33,26 @@ public class CallViewModel: ObservableObject, Identifiable {
 
     // MARK: - Initializer
     
-    public init(opponentCallInfo: CallInfoDto) {
-        self.opponentCallInfo = opponentCallInfo
+    public init(opponentProfile: CallProfileDto) {
+        self.opponentProfile = opponentProfile
+        self.remainingSeconds = initialCallDuration
+        self.remainTime = timeString(from: initialCallDuration)
+        
+        bindAgoraManager()
+        
+        // remainingSeconds의 변화를 감지하여 remainTime을 업데이트하는
+        // '영구적인' 파이프라인을 init에서 '단 한 번만' 설정합니다.
+        $remainingSeconds
+            .map { [weak self] seconds in
+                // 약한 참조로 순환 참조를 방지하는 것이 더 안전합니다.
+                self?.timeString(from: seconds) ?? "00:00"
+            }
+            .assign(to: \.remainTime, on: self)
+            .store(in: &cancellables) // 구독을 cancellables에 저장하여 생명주기를 관리합니다.
+    }
+    
+    public init (opponentProfile: MatchingProfile) {
+        self.opponentProfile = CallProfileDto.init(from: opponentProfile)
         self.remainingSeconds = initialCallDuration
         self.remainTime = timeString(from: initialCallDuration)
         

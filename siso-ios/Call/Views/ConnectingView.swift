@@ -13,13 +13,14 @@ import network
 
 
 /// 상대방과 전화 연결을 시도하는 중임을 보여주는 뷰입니다.
-///  기본적으로는 발신자 전용임
+///  기본적으로는 발신자 전용임 -> 매칭 프로필을 받을 수 있음
 public struct ConnectingView: View {
-    var receiverCallInfo: CallInfoDto
+    var receiverProfile: MatchingProfile
     var delegate: CallCoordinatorDelegate?
     
-    public init(receiverCallInfo: CallInfoDto, delegate: CallCoordinatorDelegate? = nil) {
-        self.receiverCallInfo = receiverCallInfo
+    public init(receiverProfile: MatchingProfile,
+                delegate: CallCoordinatorDelegate? = nil) {
+        self.receiverProfile = receiverProfile
         self.delegate = delegate
     }
     
@@ -29,7 +30,7 @@ public struct ConnectingView: View {
         VStack(spacing: 30) {
             Spacer()
             // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
-            Text("\(receiverCallInfo.nickname) 님과\n연결중이에요")
+            Text("\(receiverProfile.nickname) 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)

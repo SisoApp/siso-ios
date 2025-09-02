@@ -30,14 +30,14 @@ public struct CallingView: View {
         VStack {
             
             HStack {
-                profileImageView(profile: callViewModel.opponentCallInfo)
+                profileImageView(profile: callViewModel.opponentProfile)
                 VStack(alignment: .leading, spacing: 0){
-                    Text("\(callViewModel.opponentCallInfo.nickname)")
+                    Text("\(callViewModel.opponentProfile.nickname)")
                         .font(.system(size: 24, weight: .bold))
                     HStack {
-                        Text("\(callViewModel.opponentCallInfo.age)세")
+                        Text("\(callViewModel.opponentProfile.age)세")
                             .font(.system(size: 22, weight: .medium))
-                        locationInfoSection(profile: callViewModel.opponentCallInfo)
+                        locationInfoSection(profile: callViewModel.opponentProfile)
                     }
                     
                 }
@@ -84,7 +84,7 @@ public struct CallingView: View {
             }
             
             Spacer()
-            commonInterestView(profile: callViewModel.opponentCallInfo)
+            commonInterestView(profile: callViewModel.opponentProfile)
             
             actionButtonsSection()
         }
@@ -93,7 +93,7 @@ public struct CallingView: View {
     
     // MARK: - View Components (Functions)
     @ViewBuilder
-    private func profileImageView(profile: CallInfoDto) -> some View {
+    private func profileImageView(profile: CallProfileDto) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
         if profile.profileImageUrl == nil {
             placeholderImage
@@ -130,7 +130,7 @@ public struct CallingView: View {
     }
     
     /// 사용자 이름과 나이를 표시하는 뷰
-    private func userInfoSection(profile: CallInfoDto) -> some View {
+    private func userInfoSection(profile: CallProfileDto) -> some View {
         HStack {
             Text("\(profile.nickname),")
                 .font(.system(size: 24, weight: .bold))
@@ -145,7 +145,7 @@ public struct CallingView: View {
     }
     
     /// 위치 정보를 표시하는 뷰
-    private func locationInfoSection(profile: CallInfoDto) -> some View {
+    private func locationInfoSection(profile: CallProfileDto) -> some View {
         HStack {
             Image("locationicon_inverse") // 에셋 이름 확인 필요
             Text(profile.location ?? "비공개") // UserProfileServer에 location이 옵셔널로 있다고 가정
@@ -166,7 +166,7 @@ public struct CallingView: View {
 //            .padding(.horizontal)
 //    }
     
-    private func commonInterestView(profile: CallInfoDto) -> some View {
+    private func commonInterestView(profile: CallProfileDto) -> some View {
         HStack {
             Text("공통 관심사")
                 .font(.system(size: 18, weight: .medium))

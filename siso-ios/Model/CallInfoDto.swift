@@ -12,12 +12,7 @@ public struct CallInfoDto: Codable, Equatable, Identifiable {
     public let token: String
     public let callerId: Int      // Long -> Int
     public let receiverId: Int    // Long -> Int
-    public let firstCall: Bool    // ✅ 누락되었던 firstCall 필드 추가
-    public let profileImageUrl: String?
-    public let nickname: String
-    public let location: String?
-    public let age: Int
-    public let interests: [String]
+   
     
     // 3. 서버 JSON 키와 Swift 프로퍼티 이름이 다른 경우 매핑
     // Java는 보통 camelCase를 사용하므로 Swift와 이름이 일치합니다.
@@ -27,12 +22,6 @@ public struct CallInfoDto: Codable, Equatable, Identifiable {
         case token
         case callerId
         case receiverId
-        case firstCall   // ✅ 누락되었던 firstCall 키 추가
-        case profileImageUrl
-        case nickname
-        case location
-        case age
-        case interests
     }
     
    
