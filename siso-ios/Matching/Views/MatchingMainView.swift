@@ -99,6 +99,8 @@ public struct MatchingMainView: View {
             await viewModel.fetchMyProfile { profile in
                 appSettings.userProfile = profile
             }
+            await viewModel.fetchMyImages()
+            await viewModel.fetchMyVoice()
         }
     }
     

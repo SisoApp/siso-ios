@@ -43,11 +43,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: [UserProfileDTO].self) { response in
                 switch response.result {
                 case .success(let profiles):
-                    print("전체 프로필 조회 성공!")
+                    debugPrint("전체 프로필 조회 성공!: \(profiles)")
                     completion(profiles)
                 case .failure(let error):
-                    print("전체 프로필 조회 실패!")
-                    print(error.localizedDescription)
+                    debugPrint("전체 프로필 조회 실패!: \(error.localizedDescription)")
                 }
             }
     }
@@ -77,8 +76,7 @@ public final actor ProfileNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        print("---------accessToken----------")
-        print(accessToken)
+        debugPrint("accessToken: \(accessToken)")
         
         AF.request(url,
                    method: .get,
@@ -87,10 +85,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: UserProfileDTO.self) { response in
                 switch response.result {
                 case .success(let profile):
-                    print("프로필 조회 성공!: \(profile)")
+                    debugPrint("프로필 조회 성공!: \(profile)")
                     completion(profile)
                 case .failure(let error):
-                    print("프로필 조회 실패: \(error.localizedDescription)")
+                    debugPrint("프로필 조회 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -116,15 +114,11 @@ public final actor ProfileNetworkManager: Sendable {
                    headers: headers)
             .validate(statusCode: 200..<300)
             .response { response in
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
-                
                 switch response.result {
                 case .success:
-                    print("프로필 등록 성공!")
+                    debugPrint("프로필 등록 성공!")
                 case .failure(let error):
-                    print("프로필 등록 실패: ", error.localizedDescription)
+                    debugPrint("프로필 등록 실패: ", error.localizedDescription)
                 }
             }
     }
@@ -151,10 +145,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: UserProfileDTO.self) { response in
                 switch response.result {
                 case .success(let profile):
-                    print("프로필 등록 성공!")
+                    debugPrint("프로필 등록 성공!")
                     completion(profile)
                 case .failure(let error):
-                    print("프로필 수정 실패: \(error.localizedDescription)")
+                    debugPrint("프로필 수정 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -179,10 +173,9 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: InterestResponseDTO.self) { response in
                 switch response.result {
                 case .success(let interestDTO):
-                    print("관심사 조회 성공!")
-                    completion(interestDTO.data)
+                    debugPrint("관심사 조회 성공!: \(interestDTO.data)")
                 case .failure(let error):
-                    print("관심사 조회 실패: \(error.localizedDescription)")
+                    debugPrint("관심사 조회 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -209,9 +202,9 @@ public final actor ProfileNetworkManager: Sendable {
             .response { response in
                 switch response.result {
                 case .success:
-                    print("관심사 등록 성공!")
+                    debugPrint("관심사 등록 성공!")
                 case .failure(let error):
-                    print("관심사 등록 실패: \(error.localizedDescription)")
+                    debugPrint("관심사 등록 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -238,9 +231,9 @@ public final actor ProfileNetworkManager: Sendable {
             .response { response in
                 switch response.result {
                 case .success:
-                    print("관심사 수정 성공!")
+                    debugPrint("관심사 수정 성공!")
                 case .failure(let error):
-                    print("관심사 수정 실패: \(error.localizedDescription)")
+                    debugPrint("관심사 수정 실패: \(error.localizedDescription)")
                 }
             }
     }

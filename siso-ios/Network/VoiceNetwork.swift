@@ -17,7 +17,7 @@ public final actor VoiceNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
-    public func getVoice() async throws {
+    public func getMyVoice() async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/voice-samples/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -37,10 +37,9 @@ public final actor VoiceNetworkManager: Sendable {
             .responseDecodable(of: [VoiceDTO].self) { response in
                 switch response.result {
                 case .success(let voices):
-                    print("녹음파일 조회 성공")
-                    print(voices[0])
+                    debugPrint("녹음파일 조회 성공: \(voices)")
                 case .failure(let error):
-                    print("녹음파일 조회 실패: \(error.localizedDescription)")
+                    debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -76,14 +75,10 @@ public final actor VoiceNetworkManager: Sendable {
         .responseDecodable(of: VoiceDTO.self) { response in
             switch response.result {
             case .success(let voice):
-                print("녹음파일 업로드 성공!")
-                print(voice)
+                debugPrint("녹음파일 업로드 성공!")
+                debugPrint(voice)
             case .failure(let error):
-                print("녹음파일 업로드 실패: ", error.localizedDescription)
-                
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
+                debugPrint("녹음파일 업로드 실패: ", error.localizedDescription)
             }
         }
     }

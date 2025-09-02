@@ -27,10 +27,46 @@ public class AppSettings: ObservableObject {
         set {
             if let profile = newValue,
                let data = try? JSONEncoder().encode(profile) {
-                print("내 프로필 UserDefaults 저장 성공: \(profile)")
                 userProfileData = data
+                print("내 프로필 UserDefaults 저장 성공: \(profile)")
             } else {
                 userProfileData = nil
+            }
+        }
+    }
+    
+    @AppStorage("voice") private var voiceData: Data?
+    public var voice: VoiceDTO? {
+        get {
+            guard let data = voiceData,
+                  let voice = try? JSONDecoder().decode(VoiceDTO.self, from: data) else { return nil }
+            return voice
+        }
+        set {
+            if let voice = newValue,
+               let data = try? JSONEncoder().encode(voice) {
+                voiceData = data
+                debugPrint("녹음파일 UserDefaults 저장 성공!: \(voice)")
+            } else {
+                voiceData = nil
+            }
+        }
+    }
+    
+    @AppStorage("profileImages") private var profileImagesData: Data?
+    public var profileImages: [ImageDTO]? {
+        get {
+            guard let data = profileImagesData,
+                  let profileImages = try? JSONDecoder().decode([ImageDTO].self, from: data) else { return nil }
+            return profileImages
+        }
+        set {
+            if let profileImages = newValue,
+               let data = try? JSONEncoder().encode(profileImages) {
+                profileImagesData = data
+                debugPrint("프로필 이미지 UserDefaults 저장 성공: \(profileImages)")
+            } else {
+                profileImagesData = nil 
             }
         }
     }

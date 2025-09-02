@@ -80,4 +80,12 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
             print(interests)
         }
     }
+    
+    func fetchMyImages() async {
+        try? await ImageNetworkManager.shared.getMyImages()
+    }
+    
+    func fetchMyVoice() async {
+        try? await VoiceNetworkManager.shared.getMyVoice()
+    }
 }
