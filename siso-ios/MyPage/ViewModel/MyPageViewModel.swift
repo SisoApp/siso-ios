@@ -35,7 +35,7 @@ public extension MyPageView {
                 result += 10
             }
             
-            if let _ = profile?.location {
+            if let location = profile?.location, !location.isEmpty {
                 result += 30
             }
             

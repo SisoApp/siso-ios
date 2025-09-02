@@ -119,16 +119,13 @@ public extension ProfileView {
             self.interests = interests
         }
         
-        func fetchProfile() async {
-            
-        }
-        
         func updateProfile(_ userProfile: UserProfile, completion: @escaping (UserProfileDTO) -> Void) async {
             let drinkingCapacity = DrinkingCapacity(rawValue: userProfile.drinking)
             let religion = Religion(rawValue: userProfile.religion)
             let sex = Sex(rawValue: userProfile.sex)
             let preferenceSex = PreferenceSex(rawValue: userProfile.targetSex)
             let mbti = Mbti(rawValue: userProfile.mbti)
+            let location = !userProfile.location.isEmpty ? userProfile.location : nil
             
             let meetings: [Meeting]? = userProfile.meeting.isEmpty
                 ? nil
@@ -141,14 +138,12 @@ public extension ProfileView {
                 age: userProfile.age,
                 nickname: userProfile.nickname,
                 introduce: userProfile.introduce,
-                location: userProfile.location,
+                location: location,
                 sex: sex,
                 preferenceSex: preferenceSex,
                 mbti: mbti,
                 meetings: meetings
             )
-            
-            //관심사도 해야함
             
             try? await ProfileNetworkManager.shared.updateProfile(request) { profile in
                 completion(profile)
