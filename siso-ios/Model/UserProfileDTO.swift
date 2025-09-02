@@ -38,6 +38,20 @@ public struct UserProfileDTO: Codable, Sendable {
     }
 }
 
+public struct InterestRequestDTO: Codable, Sendable {
+    public let interest: Interest
+    
+    public init(interest: Interest) {
+        self.interest = interest
+    }
+}
+
+public struct InterestResponseDTO: Codable, Sendable {
+    public let status: Int
+    public let errorMessage: String?
+    public let data: [Interest]
+}
+
 public struct UserProfileResponse: Codable, Sendable {
     let success: Bool
     let code: String

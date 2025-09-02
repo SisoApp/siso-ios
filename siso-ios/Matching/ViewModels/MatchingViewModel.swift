@@ -74,4 +74,10 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
             }
         }
     }
+    
+    func fetchMyInterests() async {
+        try? await ProfileNetworkManager.shared.getInterests { interests in
+            print(interests)
+        }
+    }
 }

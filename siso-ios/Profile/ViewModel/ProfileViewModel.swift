@@ -112,7 +112,9 @@ public extension ProfileView {
                   let preferenceSex = PreferenceSex(rawValue: userProfile.targetSex),
                   let mbti = Mbti(rawValue: userProfile.mbti) else { return }
             
-            let meetings: [Meeting] = userProfile.meeting.compactMap { Meeting(rawValue: $0) }
+            let meetings: [Meeting]? = userProfile.meeting.isEmpty
+                ? nil
+                : userProfile.meeting.compactMap { Meeting(rawValue: $0) }
             
             let request: UserProfileDTO = UserProfileDTO(
                 drinkingCapacity: drinkingCapacity,
@@ -133,6 +135,18 @@ public extension ProfileView {
             try? await ProfileNetworkManager.shared.updateProfile(request) { profile in
                 completion(profile)
             }
+        }
+        
+        func updateInterests(_ userProfile: UserProfile) async {
+            var request: [InterestRequestDTO] = []
+            
+            for interest in userProfile.interests {
+                if let interestDTO = Interest(rawValue: interest) {
+                    request.append(InterestRequestDTO(interest: interestDTO))
+                }
+            }
+            
+            try? await ProfileNetworkManager.shared.registerInterests(request)
         }
     }
 }
