@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import model
 
 public final actor VoiceNetworkManager: Sendable {
     public static let shared: VoiceNetworkManager = .init()
@@ -32,35 +33,21 @@ public final actor VoiceNetworkManager: Sendable {
         AF.request(url,
                    method: .get,
                    headers: headers)
-        .validate(statusCode: 200..<300)
-        .response(completionHandler: { response in
-            if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                print("body: \(body)")
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: [VoiceDTO].self) { response in
+                switch response.result {
+                case .success(let voices):
+                    print("녹음파일 조회 성공")
+                    print(voices[0])
+                case .failure(let error):
+                    print("녹음파일 조회 실패: \(error.localizedDescription)")
+                }
             }
-            
-            switch response.result {
-            case .success:
-                print("녹음파일 조회 성공")
-                break
-            case .failure(let error):
-                print("녹음파일 조회 실패: \(error.localizedDescription)")
-            }
-        })
-//        .responseDecodable(of: VoiceResponseDTO.self) { response in
-//            switch response.result {
-//            case .success(let voice):
-//                print("녹음파일 조회 성공")
-//                print(voice.url)
-//                break
-//            case .failure(let error):
-//                print("녹음파일 조회 실패: \(error.localizedDescription)")
-//            }
-//        }
     }
     
     public func uploadVoice() async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
-        let urlString: String = baseUrl + "/api/voice-samples/user"
+        let urlString: String = baseUrl + "/api/voice-samples/upload"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
@@ -86,10 +73,11 @@ public final actor VoiceNetworkManager: Sendable {
             headers: headers
         )
         .validate(statusCode: 200..<300)
-        .response { response in
+        .responseDecodable(of: VoiceDTO.self) { response in
             switch response.result {
-            case .success:
+            case .success(let voice):
                 print("녹음파일 업로드 성공!")
+                print(voice)
             case .failure(let error):
                 print("녹음파일 업로드 실패: ", error.localizedDescription)
                 

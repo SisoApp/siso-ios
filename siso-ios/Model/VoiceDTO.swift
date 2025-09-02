@@ -8,9 +8,8 @@
 import Foundation
 
 public struct VoiceDTO: Codable, Sendable {
-    let id: Int
-    let userId: Int
-    let url: String
-    let duration: String
-    let updatedAt: String
+    public let id: Int
+    public let userId: Int
+    public let url: String
+    public let duration: String
 }
