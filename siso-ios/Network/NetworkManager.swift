@@ -158,20 +158,31 @@ public final class NetworkManager {
     /// - Parameter callInfo: 수신한 통화 정보 객체 (`IncommingCall` 또는 `CallInfoDto`)
     /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
     /// - Throws: NetworkError
-    public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
-        
-        // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
-        let parameters = try callInfo.toDictionary()
-        
-        // 2. 제네릭 request 함수를 호출합니다.
-        // ✨ 핵심: 이번에는 응답 'data'가 단일 객체이므로,
-        // responseType을 `CallResponseDto.self`로 지정합니다.
-        return try await request(
-            target: .acceptCall,
-            parameters: parameters,
-            responseType: CallResponseDto.self
-        )
-    }
+    /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
+       public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+           
+           // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
+           let parameters = try callInfo.toDictionary()
+           
+           // ✅ 2. 제네릭 request 함수를 호출합니다.
+           //    API 명세에 따라, 응답의 'data'는 배열이므로,
+           //    responseType을 `[CallResponseDto].self`로 지정합니다.
+           let responseArray = try await request(
+               target: .acceptCall,
+               parameters: parameters,
+               responseType: [CallResponseDto].self // 👈 여기가 핵심 수정 사항!
+           )
+           
+           // ✅ 3. 디코딩된 배열에서 첫 번째 요소를 안전하게 추출합니다.
+           guard let response = responseArray.first else {
+               // 서버가 data 배열을 비워서 보내는 예외적인 경우에 대한 방어 코드
+               throw NetworkError.serverError(message: "서버로부터 유효한 통화 수락 정보를 받지 못했습니다.")
+           }
+           
+           // ✅ 4. 추출한 단일 CallResponseDto 객체를 반환합니다.
+           return response
+       }
+       
     
     /// [POST] /api/calls/deny - 수신자가 통화를 거절합니다.
     public func denyCall(callInfo: CallInfoDto) async throws -> CallResponseDto {

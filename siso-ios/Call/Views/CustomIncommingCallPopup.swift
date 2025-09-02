@@ -9,6 +9,8 @@ import SwiftUI
 import model
 import designSystem
 
+/// 기본적으로 수신자 전용임
+/// 따라서 반환받는 데이터가 한정적임
 public struct CustomIncommingCallPopup: View {
     let incommingCall: CallInfoDto
     
@@ -17,7 +19,7 @@ public struct CustomIncommingCallPopup: View {
             HStack {
                 profileImageView
                 
-                Text("\(incommingCall.nickname)님으로부터\n전화가 걸려왔어요")
+                Text("\(incommingCall)님으로부터\n전화가 걸려왔어요")
                     .font(.system(size: 23, weight: .semibold))
                     .foregroundStyle(.black)
             }
@@ -27,7 +29,7 @@ public struct CustomIncommingCallPopup: View {
     }
     private var profileImageView: some View {
         ZStack {
-            AsyncImage(url: URL(string: incommingCall.profileImageUrl ?? "https://imgur.com/a/24214AF")){ image in
+            AsyncImage(url: URL(string: "https://imgur.com/a/24214AF")){ image in
                 
                 image
                     .resizable() // 1. 크기 조절 가능하게 설정 (필수!)

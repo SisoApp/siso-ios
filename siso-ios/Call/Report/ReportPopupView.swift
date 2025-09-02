@@ -32,15 +32,15 @@ public struct ReportPopupView: View {
     @State private var selectedType: ReportReasonType? = nil
     
     
-    var opponentProfile: CallInfoDto
+    var opponentProfile: CallProfileDto
     
-    public init(opponentProfile: CallInfoDto) {
+    public init(opponentProfile: CallProfileDto) {
         self.opponentProfile = opponentProfile
     }
     
    public var body: some View {
         headerView
-        profileImageView(profile: opponentProfile)
+       profileImageView(profile: opponentProfile)
         
         radioButtons
         if selectedType == .other {
@@ -79,7 +79,7 @@ public struct ReportPopupView: View {
     }
     
     @ViewBuilder
-    private func profileImageView(profile: CallInfoDto) -> some View {
+    private func profileImageView(profile: CallProfileDto) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
         if profile.profileImageUrl == nil {
             placeholderImage

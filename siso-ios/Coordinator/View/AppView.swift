@@ -25,9 +25,6 @@ public struct AppView: View {
                 AuthNavigator()
             }
         }
-        .sheet(item: $coordinator.afterCallSheetProfile) { profile in
-            AfterCallAssessmentView(opponentProfile: profile, matchingDelegate: coordinator)
-        }
         .sheet(item: $coordinator.matchingSheet) { sheet in
             coordinator.build(sheet: sheet)
         }

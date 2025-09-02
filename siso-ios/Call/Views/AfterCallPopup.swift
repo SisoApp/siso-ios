@@ -9,9 +9,9 @@ import SwiftUI
 import model
 
 public struct AfterCallPopup: View {
-    var opponentProfile: CallInfoDto
+    var opponentProfile: CallProfileDto
     
-    public init(opponentProfile: CallInfoDto){
+    public init(opponentProfile: CallProfileDto){
         self.opponentProfile = opponentProfile
     }
     

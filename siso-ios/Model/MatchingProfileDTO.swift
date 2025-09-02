@@ -1,4 +1,3 @@
-import model
 
 public struct MatchingProfile: Codable, Equatable, Identifiable {
     public init(from dto: UserProfileDto, userId: Int) {
@@ -30,7 +29,7 @@ public struct MatchingProfile: Codable, Equatable, Identifiable {
     public let nickname: String
     public let age: Int
     public let location: String?
-    public let interests: [String]
+    public let interests: [Interest]
     public let introduce: String?
     public let imageUrls: [String]
     public let voiceSampleUrl: String?
