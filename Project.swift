@@ -57,6 +57,7 @@ let sisoApp: Target = .target(
     entitlements: .file(path: "siso-ios/SupportingFiles/siso-ios.entitlements"),
     dependencies: [
         .target(name: "coordinator"),
+        .target(name: "auth"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
     ],
@@ -200,7 +201,8 @@ let myPage: Target = .target(
     sources: ["siso-ios/MyPage/**"],
     dependencies: [
         .target(name: "designSystem"),
-        .target(name: "profile")
+        .target(name: "profile"),
+        .target(name: "auth") // 이 부분을 추가해주세요.
     ]
 )
 

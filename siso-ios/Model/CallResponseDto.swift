@@ -21,6 +21,6 @@ public struct UserProfileDto: Codable, Equatable {
     public let nickname: String
     public let age: Int
     public let location: String?
-    public let interests: [String]
+    public let interests: [Interest]
     public let profileImageUrl: String?
 }

@@ -8,7 +8,7 @@ public struct CallProfileDto: Codable, Equatable {
     public let nickname: String
     public let age: Int
     public let location: String?
-    public let interests: [String]
+    public let interests: [Interest]
     public let profileImageUrl: String?
     
     // ✅ 여기에 변환을 위한 초기화 메서드를 추가합니다.
