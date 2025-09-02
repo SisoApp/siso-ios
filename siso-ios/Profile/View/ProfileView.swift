@@ -202,7 +202,6 @@ public struct ProfileView: View {
                 .padding()
                 .onChange(of: introduce) { _, newValue in
                     introduce = newValue.prefix(50).description
-                    print(introduce.count)
                 }
             
             VStack {
