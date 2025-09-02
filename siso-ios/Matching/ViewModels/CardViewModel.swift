@@ -33,7 +33,7 @@ public class CardViewModel: ObservableObject, Identifiable {
     public var nickname: String { profile.nickname }
     public var age: Int { profile.age }
     public var location: String { profile.location ?? "비공개" }
-    public var interestTags: [String] { profile.interests }
+    public var interestTags: [Interest] { profile.interests }
     public var introduction: String { profile.introduce ?? "" }
     
     public var profileImageURLs: [URL] {

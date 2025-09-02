@@ -41,11 +41,20 @@ public final class CallManager: ObservableObject {
     public func startCall(to receiver: MatchingProfile) async {
           do {
               let callInfo = try await NetworkManager.shared.requestCall(receiverId: receiver.userId)
+              print("📞 서버로부터 받은 통화 정보(callInfo): \(callInfo)")
+                    if callInfo.token.isEmpty {
+                        print("🚨🚨🚨 Agora 토큰이 비어있습니다! 🚨🚨🚨")
+                    }
               await MainActor.run {
                   // ✅ 'profile'과 'info'를 모두 담아서 .connecting 상태로 변경!
                   self.callState = .connecting(profile: receiver, info: callInfo)
               }
-              agoraManager.initalizeAndJoinChannel(channelName: callInfo.channelName, token: callInfo.token)
+              
+              // 임시값으로 처리합니다 추후 변경 필요
+              let tempChannelName = "testChannel"
+              let tempToken = "21232f297a57a5a743894a0e4a801fc3"
+//              agoraManager.initalizeAndJoinChannel(channelName: callInfo.channelName, token: callInfo.token)
+              agoraManager.initalizeAndJoinChannel(channelName: tempChannelName, token: tempToken)
           } catch {
               await MainActor.run { self.callState = .idle }
           }

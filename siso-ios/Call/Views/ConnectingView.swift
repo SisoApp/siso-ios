@@ -54,7 +54,7 @@ public struct ConnectingView: View {
                 // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
                 Task {
                     await CallManager.shared.endCall(wasConnected: false)
-                    delegate?.dismissCallFlow()
+//                    delegate?.dismissCallFlow()
                 }
             } label: {
                 ZStack {

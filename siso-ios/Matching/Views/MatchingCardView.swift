@@ -173,8 +173,8 @@ public struct MatchingCardView: View {
     private var interestTagsSection: some View {
         HStack(spacing: 8) {
             // 🔥 변경: viewModel의 계산 프로퍼티 사용
-            ForEach(cardViewModel.interestTags.prefix(3), id: \.self) { interest in
-                Text("#\(interest)")
+            ForEach(cardViewModel.interestTags, id: \.self) { interest in
+                Text(interest.description)
                     .font(.system(size: 16))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
