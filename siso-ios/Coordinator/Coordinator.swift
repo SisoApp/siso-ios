@@ -62,19 +62,20 @@ public class Coordinator: ObservableObject {
         self.authViewModel = authViewModel
         self.locationViewModel = locationViewModel
         self.matchingViewModel.delegate = self
-        subscribeToCallManagerEvents()
+        // ✅ 4. 수신 전화 Publisher는 계속 사용
+        subscribeToIncomingCalls()
     }
-    
-    private func subscribeToCallManagerEvents() {
-        callManager.showAfterCallPopupPublisher
+    private func subscribeToIncomingCalls() {
+        // 이 Publisher는 앱이 실행 중일 때 오는 전화를 처리하기 위해 필요
+        callManager.incomingCallPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] opponentProfile in
-                print("📞 Coordinator received event to show assessment sheet.")
-                self?.afterCallSheetProfile = opponentProfile
+            .sink { [weak self] callInfo in
+                print("📞 Coordinator received incoming call. Changing state to .receiving.")
+                // CallManager의 상태를 직접 변경하거나, CallManager의 메서드를 호출
+                self?.callManager.receiveCall(info: callInfo)
             }
             .store(in: &cancellables)
     }
-    
     // MARK: - Delegate Method Implementations (여기에 모든 구현을 모읍니다)
     
     // ✨ 2. push, pop 메서드가 매우 간결해집니다.
@@ -121,7 +122,7 @@ public class Coordinator: ObservableObject {
         // stackID를 변경하여 NavigationStack 자체를 새로 그리게 합니다.
         stackID = UUID()
     }
-    
+   
     // MARK: - View Builder
     
     @ViewBuilder

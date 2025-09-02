@@ -28,7 +28,6 @@ public struct ConnectingView: View {
     public var body: some View {
         VStack(spacing: 30) {
             Spacer()
-            
             // 1. opponentProfile이 nil일 경우를 대비해 기본값("상대방")을 제공합니다.
             Text("\(receiverCallInfo.nickname) 님과\n연결중이에요")
                 .multilineTextAlignment(.center)
@@ -52,8 +51,10 @@ public struct ConnectingView: View {
             // 취소 버튼 추가 (사용자 경험을 위해 중요)
             Button {
                 // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
-                CallManager.shared.endCall(reason: .cancelled)
-                delegate?.popToRoot()
+                Task {
+                    await CallManager.shared.endCall(wasConnected: false)
+                    delegate?.dismissCallFlow()
+                }
             } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 24)

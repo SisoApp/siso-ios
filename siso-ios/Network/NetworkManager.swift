@@ -10,7 +10,7 @@ public final class NetworkManager {
     // MARK: - Core Request Method
     
     /// 모든 API 요청을 처리하는 제네릭 private 메서드
-    private func request<T: Decodable>(
+    public func request<T: Decodable>(
         target: EndPoint,
         parameters: Parameters? = nil,
         responseType: T.Type
@@ -35,9 +35,9 @@ public final class NetworkManager {
             encoding: encoding,
             headers: headers
         )
-        .cURLDescription { print($0) }
-        .validate(statusCode: 200..<300)
-        .serializingDecodable(SisoResponse<T>.self)
+            .cURLDescription { print($0) }
+            .validate(statusCode: 200..<300)
+            .serializingDecodable(SisoResponse<T>.self)
         
         let response = await dataTask.response
         
@@ -62,49 +62,185 @@ public final class NetworkManager {
     /// [GET] /api/filter/matching - 매칭 프로필 목록 조회
     public func getMatchingProfiles(count: Int = 5) async throws -> [MatchingProfile] {
         let parameters: [String: Any] = ["count": count]
-        return try await request(target: .getMatchingProfiles, parameters: parameters, responseType: [MatchingProfile].self)
+        
+        // 이 엔드포인트는 SisoResponse 래퍼 없이 직접 배열을 반환하는 것으로 보입니다.
+        // 따라서 `request` 제네릭 메서드를 사용하는 대신, 별도로 처리해야 합니다.
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let target = EndPoint.getMatchingProfiles
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: URLEncoding.default, // GET 요청
+            headers: headers
+        )
+            .cURLDescription { print($0) }
+            .validate(statusCode: 200..<300)
+            .serializingDecodable([MatchingProfile].self) // ✨ SisoResponse<[MatchingProfile]>.self 대신 [MatchingProfile].self 직접 디코딩
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let profiles):
+            print(profiles)
+            return profiles // 직접 디코딩된 프로필 배열을 반환
+        case .failure(let afError):
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (getMatchingProfiles) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
     }
     
     /// [POST] /api/calls/request - 통화 요청
     public func requestCall(receiverId: Int) async throws -> CallInfoDto {
         let parameters: [String: Any] = ["receiverId": receiverId]
         
-        // ✅ 수정된 코드: responseType을 배열 [CallInfoDto].self로 변경
-        let callInfoArray = try await request(
-            target: .requestCall,
-            parameters: parameters,
-            responseType: [CallInfoDto].self // ✨ 핵심: 배열 타입으로 디코딩
-        )
-        
-        // 디코딩된 배열에서 첫 번째 요소를 안전하게 추출
-        guard let callInfo = callInfoArray.first else {
-            // NetworkError에 .unexpectedEmptyData 케이스를 추가하면 더 좋습니다.
-            throw NetworkError.serverError(message: "서버로부터 유효한 통화 정보를 받지 못했습니다.")
+        // 이 API는 응답 구조가 표준 SisoResponse와 다르므로 직접 처리합니다.
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
         }
         
-        return callInfo
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let target = EndPoint.requestCall
+        
+        // ✅ 1. 서버의 실제 응답 JSON 구조와 '정확하게' 일치하는 임시 구조체를 정의합니다.
+        struct TempCallRequestResponse: Decodable {
+            let status: Int
+            let data: CallInfoDto // 'data' 필드의 값은 CallInfoDto 객체입니다.
+            let errorMessage: String?
+        }
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: JSONEncoding.default,
+            headers: headers
+        )
+            .cURLDescription { print($0) }
+            .validate(statusCode: 200..<300)
+        // ✅ 2. Alamofire에게 위에서 정의한 TempCallRequestResponse 형태로 디코딩하라고 지시합니다.
+            .serializingDecodable(TempCallRequestResponse.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let tempResponse):
+            // ✅ 3. 디코딩이 성공하면, 래퍼 객체(tempResponse)에서 'data' 프로퍼티만 꺼내서 반환합니다.
+            //    이렇게 하면 이 함수의 최종 반환 타입은 'CallInfoDto'가 됩니다.
+            return tempResponse.data
+        case .failure(let afError):
+            // 디코딩 실패 시 이쪽으로 빠집니다. (현재 상황)
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (requestCall) 🔴 ---\n\(body)\n------------------------------")
+            }
+            // 디코딩 에러의 구체적인 원인을 확인하려면 afError를 출력해보는 것이 좋습니다.
+            print("🔴 Decoding Error: \(afError)")
+            throw NetworkError.afError(afError)
+        }
     }
     /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
-        /// - Parameter callInfo: 수신한 통화 정보 객체 (`IncommingCall` 또는 `CallInfoDto`)
-        /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
-        /// - Throws: NetworkError
-        public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
-            
-            // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
-            let parameters = try callInfo.toDictionary()
-            
-            // 2. 제네릭 request 함수를 호출합니다.
-            // ✨ 핵심: 이번에는 응답 'data'가 단일 객체이므로,
-            // responseType을 `CallResponseDto.self`로 지정합니다.
-            return try await request(
-                target: .acceptCall,
-                parameters: parameters,
-                responseType: CallResponseDto.self
-            )
+    /// - Parameter callInfo: 수신한 통화 정보 객체 (`IncommingCall` 또는 `CallInfoDto`)
+    /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
+    /// - Throws: NetworkError
+    public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+        
+        // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
+        let parameters = try callInfo.toDictionary()
+        
+        // 2. 제네릭 request 함수를 호출합니다.
+        // ✨ 핵심: 이번에는 응답 'data'가 단일 객체이므로,
+        // responseType을 `CallResponseDto.self`로 지정합니다.
+        return try await request(
+            target: .acceptCall,
+            parameters: parameters,
+            responseType: CallResponseDto.self
+        )
+    }
+    
+    /// [POST] /api/calls/deny - 수신자가 통화를 거절합니다.
+    public func denyCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+        let parameters = try callInfo.toDictionary()
+        
+        let responseArray = try await request(
+            target: .denyCall, // 👈 EndPoint에 .denyCall 추가 필요
+            parameters: parameters,
+            responseType: [CallResponseDto].self
+        )
+        
+        guard let response = responseArray.first else {
+            throw NetworkError.serverError(message: "서버로부터 통화 거절 정보를 받지 못했습니다.")
         }
-  
+        return response
+    }
+    
+    /// [POST] /api/calls/end - 통화를 종료합니다.
+    public func endCall(callInfo: CallInfoDto, continueRelationship: Bool) async throws -> CallResponseDto {
+        // Body 파라미터와 Query 파라미터를 함께 보내야 합니다.
+        // Alamofire는 이를 직접 지원하지 않으므로 URL에 직접 쿼리를 추가해야 합니다.
+        var target = EndPoint.endCall // 👈 EndPoint에 .endCall 추가 필요
+        
+        // 1. URL에 Query Parameter 추가
+        var urlComponents = URLComponents(string: target.baseURL + target.path)!
+        urlComponents.queryItems = [URLQueryItem(name: "continueRelationship", value: String(continueRelationship))]
+        let urlWithQuery = try urlComponents.asURL()
+        
+        // 2. Body Parameter 준비
+        let bodyParameters = try callInfo.toDictionary()
+        
+        // 3. 직접 AF.request 호출 (범용 request 메서드는 이 경우에 부적합)
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
+        
+        let dataTask = AF.request(
+            urlWithQuery,
+            method: .post,
+            parameters: bodyParameters,
+            encoding: JSONEncoding.default,
+            headers: headers
+        )
+            .cURLDescription { print($0) }
+            .validate(statusCode: 200..<300)
+            .serializingDecodable(SisoResponse<[CallResponseDto]>.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let sisoResponse):
+            if sisoResponse.success, let data = sisoResponse.data, let callResponse = data.first {
+                return callResponse
+            } else {
+                throw NetworkError.serverError(message: sisoResponse.errorMessage ?? "통화 종료 정보 처리 중 오류 발생")
+            }
+        case .failure(let afError):
+            throw NetworkError.afError(afError)
+        }
+    }
 }
-fileprivate extension Encodable {
+
+public extension Encodable {
     /// Encodable 객체를 Alamofire의 Parameters 타입인 `[String: Any]`로 변환합니다.
     func toDictionary() throws -> [String: Any]? {
         let data = try JSONEncoder().encode(self)

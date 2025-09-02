@@ -56,23 +56,15 @@ let sisoApp: Target = .target(
     resources: ["siso-ios/Resources/**"],
     entitlements: .file(path: "siso-ios/SupportingFiles/siso-ios.entitlements"),
     dependencies: [
-//        .target(name: "auth"),
-       // .target(name: "network"),
-//        .target(name: "matching"),
-//        .target(name: "profile"),
-//        .target(name: "mypage"),
         .target(name: "coordinator"),
-     //   .target(name: "designSystem"),
-//       .target(name: "call"),
-//        .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
     ],
-    settings: .settings(
-           base: [
-               "OTHER_LDFLAGS": "-ObjC"
-           ]
-       )
+//    settings: .settings(
+//           base: [
+//               "OTHER_LDFLAGS": "-ObjC"
+//           ]
+//       )
 )
 
 let sisoAppTest: Target = .target(

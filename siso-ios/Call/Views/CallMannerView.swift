@@ -52,11 +52,21 @@ public struct CallMannerView: View {
             Button {
                 print("확인했어요 전화 시작")
                 // 전화 시작
-                Task{
+                Task {
+                    // ✅ 1. startCall이 끝날 때까지 여기서 기다립니다.
                     await CallManager.shared.startCall(to: opponentProfile)
+                    
+                    // ✅ 2. startCall이 성공해서 상태가 .connecting으로 바뀌었는지 확인합니다.
+                    if case .connecting = CallManager.shared.callState {
+                        // ✅ 3. 상태가 바뀐 것을 확인한 후에야 화면을 전환합니다.
+                        delegate?.pushCall(.activeCall)
+                    } else {
+                        print("🔴 통화 시작에 실패하여 화면을 전환하지 않습니다.")
+                        // (선택) 여기에 사용자에게 보여줄 에러 알림창 로직 추가
+                    }
                 }
                 
-                delegate?.pushCall(.activeCall)
+               
             } label: {
                 Text("확인했어요")
                     .font(.system(size: 18))

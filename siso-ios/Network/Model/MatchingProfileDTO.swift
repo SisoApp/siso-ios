@@ -1,4 +1,25 @@
+import model
+
 public struct MatchingProfile: Codable, Equatable, Identifiable {
+    public init(from dto: UserProfileDto, userId: Int) {
+            self.userId = userId
+            self.nickname = dto.nickname
+            self.age = dto.age
+            self.location = dto.location
+            self.interests = dto.interests
+            
+            // UserProfileDto에 없는 정보들은 기본값 또는 nil로 처리합니다.
+            self.introduce = nil // 소개글 정보가 없으므로 nil
+            self.imageUrls = [dto.profileImageUrl].compactMap { $0 } // profileImageUrl이 nil이 아니면 배열에 추가
+            self.voiceSampleUrl = nil // 음성 샘플 정보가 없으므로 nil
+            
+            // presenceStatus는 알 수 없으므로, 기본값(예: .online)으로 설정하거나
+            // 또는 API 응답에 이 정보가 추가되어야 합니다.
+            // 여기서는 임의로 .online으로 설정하겠습니다.
+            self.presenceStatus = .online
+        }
+
+    
     // Identifiable 프로토콜을 위한 id 프로퍼티. userId 값을 사용합니다.
     public var id: Int {
         return self.userId
@@ -27,24 +48,8 @@ public struct MatchingProfile: Codable, Equatable, Identifiable {
         case introduce
         case imageUrls
         case voiceSampleUrl
-        
-        // ▼▼▼▼▼ 바로 이 부분이 핵심 수정 사항입니다! ▼▼▼▼▼
-        // Swift 프로퍼티 이름(presenceStatus)과 서버 JSON 키 이름("presenseStatus")을 연결합니다.
         case presenceStatus = "presenseStatus" // "ce"를 가진 프로퍼티가 "se"를 가진 JSON 키에서 온다고 명시
     }
-
-    // 샘플 데이터는 수정할 필요 없이 잘 동작합니다.
-    public static let sampleMessi: MatchingProfile = .init(
-        userId: 10,
-        nickname: "리오넬 메시",
-        age: 37,
-        location: "아르헨티나 부에노스아이레스",
-        interests: ["구토댄스", "메슬렁대기", "발롱도르 받기"],
-        introduce: "안녕하세요!...",
-        imageUrls: ["https://picsum.photos/seed/messi/400/600"],
-        voiceSampleUrl: nil,
-        presenceStatus: .online
-    )
 }
 
 // PresenceStatus Enum은 그대로 사용하시면 됩니다.

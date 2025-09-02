@@ -16,10 +16,10 @@ protocol TargetType {
 }
 
 // AFTER (수정된 코드) ✅
-struct SisoResponse<T: Decodable>: Decodable {
-    let success: Bool
-    let data: T?
-    let errorMessage: String?
+public struct SisoResponse<T: Decodable>: Decodable {
+   public let success: Bool
+   public let data: T?
+   public let errorMessage: String?
 }
 /// 네트워크 레이어에서 발생하는 커스텀 에러 정의
 public enum NetworkError: Error, LocalizedError {

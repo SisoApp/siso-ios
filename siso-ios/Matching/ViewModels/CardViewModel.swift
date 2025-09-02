@@ -17,6 +17,7 @@ public protocol HomeCardDelegate: AnyObject {
 
 
 public class CardViewModel: ObservableObject, Identifiable {
+    private let sampleImgUrl: URL = URL(string: "https://imgur.com/a/24214AF")!
     
     // 1. Model을 let으로 소유 (Source of Truth)
     public let profile: MatchingProfile
@@ -36,7 +37,11 @@ public class CardViewModel: ObservableObject, Identifiable {
     public var introduction: String { profile.introduce ?? "" }
     
     public var profileImageURLs: [URL] {
-        profile.imageUrls.compactMap { URL(string: $0) }
+       let urls =  profile.imageUrls.compactMap { URL(string: $0) }
+        if urls.isEmpty {
+            return [sampleImgUrl]
+        }
+        return urls
     }
     
     public var voiceSampleURL: URL? {
@@ -45,7 +50,9 @@ public class CardViewModel: ObservableObject, Identifiable {
     }
     
     // ViewModel이 직접 관리하는 상태
-    @Published public var isOnline: Bool = true
+    public var presenceStatus: PresenceStatus {
+        profile.presenceStatus
+    }
 
     // --- Initializer ---
     public init(profile: MatchingProfile, delegate: MatchingCoordinatorDelegate? = nil) {
