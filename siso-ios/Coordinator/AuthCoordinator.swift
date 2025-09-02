@@ -7,6 +7,13 @@ import network
 
 
 extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
+    public func openSheet(_ sheet: auth.AuthSheet) {
+        self.authSheet = sheet
+    }
+    
+    public func dismissSheet() {
+        self.authSheet = nil
+    }
     
     // MARK: 첫 빌드 시 동의 항목 가면 뒤로가기 없애기
     public func initAuthback() -> Bool {
@@ -35,5 +42,11 @@ extension Coordinator: @preconcurrency AuthCoordinatorDelegate {
         pushMatching(.home)
     }
     
-    
+    @ViewBuilder
+    public func build(sheet: AuthSheet) -> some View {
+        switch sheet {
+            case .consent(let title ,let content):
+                AcceptSheet(title: title ,content: content, delegate: self)
+        }
+    }
 }

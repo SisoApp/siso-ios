@@ -31,6 +31,9 @@ public struct NotificationChatView: View {
         }
         .toolbar(.hidden, for: .tabBar)
         .padding()
+        .navigationTitle("알림")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Image(systemName: "chevron.backward")
@@ -39,8 +42,6 @@ public struct NotificationChatView: View {
                     }
             }
         }
-        .navigationTitle("알림")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

@@ -10,3 +10,22 @@ public enum AuthPage: String, Identifiable, Hashable {
     
     public var id: String { self.rawValue }
 }
+
+public enum AuthSheet: Identifiable, Hashable {
+    case consent(title: String ,content: String)
+    
+    public var id: String {
+        switch self {
+        case .consent(let title ,let content):
+            return content
+        }
+    }
+    
+    public static func == (lhs: AuthSheet, rhs: AuthSheet) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

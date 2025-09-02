@@ -9,6 +9,8 @@ import SwiftUI
 
 public protocol AuthCoordinatorDelegate {
     func pushAuth(_ page: AuthPage)
+    func openSheet(_ sheet: AuthSheet)
+    func dismissSheet()
     func pop()
     func popToRoot()
     func changeAuthToProfile()
