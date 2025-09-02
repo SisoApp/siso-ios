@@ -63,7 +63,7 @@ public struct MyPageView: View {
                     .overlay {
                         Circle()
                             .rotation(.degrees(270))
-                            .trim(from: 0, to: Double(viewModel.progress))
+                            .trim(from: 0, to: (Double(viewModel.progress) / 100))
                             .stroke(
                                 Color.Siso.Primary.main,
                                 style: StrokeStyle(
