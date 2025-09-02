@@ -463,7 +463,7 @@ public struct ProfileView: View {
     private func completeButton() -> some View {
         return PrimaryButton(title: "완료하기") {
             guard let sex = sex, let targetSex = targetSex else { return }
-            guard introduce.count >= 5 else {
+            guard introduce.count >= 5 || introduce.count == 0 else {
                 showAlert = true
                 return
             }
@@ -478,6 +478,8 @@ public struct ProfileView: View {
                 await viewModel.updateInterests(userProfile)
                 
                 await viewModel.updateProfile(userProfile) { profile in
+                    
+                    
                     appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
                     delegate?.pop()
                 }
