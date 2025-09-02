@@ -112,10 +112,11 @@ public extension ProfileView {
             return descriptions
         }
         
-        func setViewModel(profile: UserProfileDTO?, images: [ImageDTO]?, voice: VoiceDTO?) {
+        func setViewModel(profile: UserProfileDTO?, images: [ImageDTO]?, voice: VoiceDTO?, interests: [Interest]?) {
             self.profile = profile
             self.images = images
             self.voice = voice
+            self.interests = interests
         }
         
         func fetchProfile() async {

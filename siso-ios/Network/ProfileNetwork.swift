@@ -174,6 +174,7 @@ public final actor ProfileNetworkManager: Sendable {
                 switch response.result {
                 case .success(let interestDTO):
                     debugPrint("관심사 조회 성공!: \(interestDTO.data)")
+                    completion(interestDTO.data.map { $0.interest })
                 case .failure(let error):
                     debugPrint("관심사 조회 실패: \(error.localizedDescription)")
                 }

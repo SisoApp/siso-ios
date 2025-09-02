@@ -75,9 +75,9 @@ public class MatchingViewModel: ObservableObject, HomeCardDelegate {
         }
     }
     
-    func fetchMyInterests() async {
+    func fetchMyInterests(completion: @escaping ([Interest]) -> Void) async {
         try? await ProfileNetworkManager.shared.getInterests { interests in
-            debugPrint(interests)
+            completion(interests)
         }
     }
     

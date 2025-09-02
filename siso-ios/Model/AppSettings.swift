@@ -35,6 +35,24 @@ public class AppSettings: ObservableObject {
         }
     }
     
+    @AppStorage("interests") private var interestsData: Data?
+    public var interests: [Interest]? {
+        get {
+            guard let data = interestsData,
+                  let interests = try? JSONDecoder().decode([Interest].self, from: data) else { return nil }
+            return interests
+        }
+        set {
+            if let interests = newValue,
+               let data = try? JSONEncoder().encode(interests) {
+                interestsData = data
+                print("내 관심사 UserDefaults 저장 성공: \(interests)")
+            } else {
+                interestsData = nil
+            }
+        }
+    }
+    
     @AppStorage("voice") private var voiceData: Data?
     public var voice: VoiceDTO? {
         get {

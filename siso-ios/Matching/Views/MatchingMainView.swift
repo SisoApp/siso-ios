@@ -105,6 +105,9 @@ public struct MatchingMainView: View {
             await viewModel.fetchMyVoice { voice in
                 appSettings.voice = voice
             }
+            await viewModel.fetchMyInterests { interests in
+                appSettings.interests = interests
+            }
         }
     }
     

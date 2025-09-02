@@ -85,7 +85,8 @@ public struct ProfileView: View {
                 viewModel.setViewModel(
                     profile: appSettings.userProfile,
                     images: appSettings.profileImages,
-                    voice: appSettings.voice
+                    voice: appSettings.voice,
+                    interests: appSettings.interests
                 )
                 bindViewValue()
                 didInit = true
