@@ -110,6 +110,9 @@ public struct AuthNavigator: View {
             .navigationDestination(for: IntegrationPage.self) { page in
                 coordinator.build(page)
             }
+            .sheet(item: $coordinator.profileSheet) { sheet in
+                coordinator.build(sheet: sheet)
+            }
         }
     }
 }
