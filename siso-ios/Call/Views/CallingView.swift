@@ -192,7 +192,10 @@ public struct CallingView: View {
             // 통화 종료 버튼
             Button {
                 // Singleton 대신 주입받은 viewModel의 메서드를 호출합니다.
-                callViewModel.endCall()
+                Task{
+                   await callViewModel.endCall()
+                }
+                
             } label: {
                 
                 actionButtonContent(imageName: "endcall", text: "통화 종료", condition: false)

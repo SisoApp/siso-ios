@@ -75,9 +75,6 @@ struct MainTabView: View {
             .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
         }
         .tint(Color.Siso.Primary._100)
-        .sheet(item: $coordinator.afterCallSheetProfile) { profile in
-            AfterCallAssessmentView(opponentProfile: profile, matchingDelegate: coordinator)
-        }
         .sheet(item: $coordinator.matchingSheet) { sheet in
             coordinator.build(sheet: sheet)
         }

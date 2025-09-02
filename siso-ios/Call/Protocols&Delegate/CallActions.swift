@@ -7,6 +7,7 @@
 
 import Foundation
 import model
+import network
 
 public enum CallAgoraActions {
     // MARK: - Core Calling Actions
@@ -22,7 +23,7 @@ public enum CallAgoraActions {
 
 // MARK: - Call State Changes
 public enum CallViewActions {
-   
+    
     case muteModeOn
     
     case muteModeOff
@@ -33,32 +34,42 @@ public enum CallViewActions {
     
 }
 
+// 1. 중첩된 enum을 제거하고, Equatable 프로토콜 채택
 public enum CallState: Equatable {
-    // Equatable을 채택하여 상태 변경을 더 쉽게 감지할 수 있습니다.
     
-    /// 통화 관련 활동이 없는 유휴 상태
-    case idle
+    case idle // 통화 없음
+        
+        // ✅ 발신 중: 상대방 프로필(profile)과 통신 정보(info)를 모두 가짐
+        case connecting(profile: MatchingProfile, info: CallInfoDto)
+        
+        // ✅ 수신 중: 처음엔 통신 정보(info)만 가짐
+        case receiving(info: CallInfoDto)
+        
+        // ✅ 통화 중: 상대방 프로필(profile)과 통신 정보(info)를 모두 가짐
+        case inCall(profile: MatchingProfile, info: CallInfoDto)
+        
+        // ✅ 평가 대기: 통화가 끝난 후 평가를 위해 프로필과 통신 정보를 가짐
+        case assessment(profile: MatchingProfile, info: CallInfoDto)
     
-    /// A에게서 전화가 오고 있는 수신 상태 (B의 입장)
-    case receiving(info: CallInfoDto)
-    
-    /// B에게 전화를 걸고 있는 발신 상태 (A의 입장)
-    case connecting(info: CallInfoDto)
-    
-    /// 통화가 연결되어 진행 중인 상태
-    case inCall(info: CallInfoDto)
-    
-    // Equatable 구현
+    // 3. Equatable 구현부를 새로운 구조에 맞게 수정
     public static func == (lhs: CallState, rhs: CallState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle):
             return true
+            
+        // 'connecting' 상태 비교: 프로필 ID와 통화 ID가 모두 같아야 함
+        case (.connecting(let lhsProfile, let lhsInfo), .connecting(let rhsProfile, let rhsInfo)):
+            return lhsProfile.id == rhsProfile.id && lhsInfo.id == rhsInfo.id
+            
+        // 'receiving' 상태 비교: 통화 ID가 같아야 함
         case (.receiving(let lhsInfo), .receiving(let rhsInfo)):
             return lhsInfo.id == rhsInfo.id
-        case (.connecting(let lhsInfo), .connecting(let rhsInfo)):
-            return lhsInfo.id == rhsInfo.id
-        case (.inCall(let lhsInfo), .inCall(let rhsInfo)):
-            return lhsInfo.id == rhsInfo.id
+            
+        // 'inCall' 상태 비교: 프로필 ID와 통화 ID가 모두 같아야 함
+        case (.inCall(let lhsProfile, let lhsInfo), .inCall(let rhsProfile, let rhsInfo)):
+            return lhsProfile.id == rhsProfile.id && lhsInfo.id == rhsInfo.id
+            
+        // 위에 해당하지 않는 모든 다른 조합은 '다름'으로 간주
         default:
             return false
         }

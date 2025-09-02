@@ -27,17 +27,18 @@ public struct ActiveCallView: View {
                     delegate.dismissCallFlow()
                 }
             
-        case .connecting(let info):
+        case .connecting(let profile, let info):
             ConnectingView(receiverCallInfo: info, delegate: delegate)
             
         case .receiving(let info):
             DummyView()
             
-        case .inCall(let info):
-            // callState가 .inCall로 바뀌면, 이 뷰가 자동으로 렌더링됩니다.
-            // 여기서 CallViewModel을 생성하여 CallingView에 전달합니다.
+        case .inCall(let profile, let info):
+           
             let viewModel = CallViewModel(opponentCallInfo: info)
             CallingView(inCallViewModel: viewModel, delegate: delegate)
+        case .assessment(profile: let profile, info: let info):
+            AfterCallAssessmentView(opponentProfile: profile, callInfo: info, delegate: delegate)
         }
     }
 }

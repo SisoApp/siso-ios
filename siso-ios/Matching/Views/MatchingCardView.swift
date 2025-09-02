@@ -36,30 +36,8 @@ public struct MatchingCardView: View {
             Spacer()
         }
         // background는 VStack의 background로 설정하는 것이 더 일반적입니다.
-        .background(backgroundView)
-    }
-    
-    // MARK: - Subviews (UI Components)
-    @ViewBuilder
-    private var backgroundView: some View {
-        // 🔥 변경: viewModel의 계산 프로퍼티 사용
-        if let firstImgUrl = cardViewModel.profileImageURLs.first {
-            AsyncImage(url: firstImgUrl) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .blur(radius: 60)
-                    .overlay(Color.black.opacity(0.6))
-            } placeholder: {
-                Color.black
-                    .blur(radius: 60)
-                    .overlay(Color.black.opacity(0.6))
-            }
-            .ignoresSafeArea() // 배경이 화면 전체를 채우도록
-        } else {
-            // 이미지가 없는 경우 기본 배경
-            Color.black.ignoresSafeArea()
-        }
+        .background(.white)
+       
     }
     
     private var stateView: some View {
@@ -72,14 +50,32 @@ public struct MatchingCardView: View {
     
     private var profileImageView: some View {
         TabView {
-            // 🔥 변경: viewModel의 계산 프로퍼티 사용
-            ForEach(cardViewModel.profileImageURLs, id: \.self) { url in
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                } placeholder: {
-                    ProgressView()
+            // profileImageURLs가 비어있는 경우를 대비
+            if cardViewModel.profileImageURLs.isEmpty {
+                // 여기에 로고 이미지를 표시하는 뷰를 직접 넣습니다.
+                Image("seeting_LOGO") // Assets에 있는 로고 이미지 이름
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.gray.opacity(0.2)) // 배경색 추가
+            } else {
+                ForEach(cardViewModel.profileImageURLs, id: \.self) { url in
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .scaledToFit()
+                    } placeholder: {
+                        // 이미지 로딩 중일 때 보여줄 뷰
+                        ZStack {
+                            Color.gray.opacity(0.2)
+                            
+                            Image(systemName: "person.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: 32, maxHeight: 32)
+                                .foregroundStyle(Color.Siso.Gray._40)
+                        }
+                    }
                 }
             }
         }
@@ -89,20 +85,34 @@ public struct MatchingCardView: View {
         .padding(.horizontal)
     }
     
-    @ViewBuilder
+    // @ViewBuilder
     private var makeUserStateView: some View {
-        let isOnline = cardViewModel.isOnline
-        let circleColor: Color = isOnline ? .green : .gray
-        let statusText: String = isOnline ? "온라인" : "오프라인"
         
-        HStack {
+        
+        let status = cardViewModel.presenceStatus
+        let circleColor: Color
+        let statusText: String
+        
+        switch status {
+        case .inCall:
+            circleColor = .yellow
+            statusText = "통화중"
+        case .offline:
+            circleColor = .gray
+            statusText = "오프라인"
+        case .online:
+            circleColor = .green
+            statusText = "온라인"
+        }
+        
+        return HStack {
             Circle()
                 .fill(circleColor)
                 .frame(width: 10, height: 10)
             
             // 폰트 색상을 배경에 맞게 수정 (예: white)
             Text(statusText)
-                .foregroundStyle(.white)
+                .foregroundStyle(.black)
         }
     }
     
@@ -113,7 +123,7 @@ public struct MatchingCardView: View {
             Text("\(cardViewModel.age)세")
         }
         .font(.system(size: 24, weight: .bold))
-        .foregroundStyle(.white) // 배경이 어두우므로 white로 변경
+        .foregroundStyle(.black) // 배경이 어두우므로 white로 변경
     }
     
     private var locationInfoSection: some View {
@@ -121,7 +131,7 @@ public struct MatchingCardView: View {
             Image("locationicon_inverse") // 아이콘 이름 확인 필요
             // 🔥 변경: viewModel의 계산 프로퍼티 사용
             Text(cardViewModel.location)
-                .foregroundStyle(.white) // 배경에 맞게 white로 변경
+                .foregroundStyle(.black) // 배경에 맞게 white로 변경
             Spacer()
         }
         .padding(.horizontal)
@@ -137,7 +147,7 @@ public struct MatchingCardView: View {
                 let systemName = cardViewModel.voiceSampleURL != nil ? (isCurrentlyPlayingThisCard ? "pause.fill" : "play.fill") : "play.slash"
                 
                 Image(systemName: systemName)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.black)
                     .frame(width: 24, height: 24)
                 
                 WaveformView(count: 6, height: 20, isPlaying: .constant(isCurrentlyPlayingThisCard))
@@ -169,7 +179,7 @@ public struct MatchingCardView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.white.opacity(0.2))
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                     .clipShape(Capsule())
             }
             Spacer()
@@ -180,7 +190,7 @@ public struct MatchingCardView: View {
     private var introductionSection: some View {
         // 🔥 변경: viewModel의 계산 프로퍼티 사용
         Text(cardViewModel.introduction)
-            .foregroundStyle(Color.white.opacity(0.9))
+            .foregroundStyle(Color.black.opacity(0.9))
             .font(.system(size: 16))
             .lineLimit(2) // 2줄로 제한하고, 더보기 기능을 넣을 수 있음
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -4,21 +4,20 @@
 //
 //  Created by jdios on 8/24/25.
 //
-
+import network
 import SwiftUI
 import model
 import matching
 
 public struct AfterCallAssessmentView: View {
-    var opponentProfile: CallInfoDto
+    var opponentProfile: MatchingProfile
+    var callInfo: CallInfoDto // ✅ callInfo도 함께 받아야 함
+    var delegate: CallCoordinatorDelegate?
     
-    var matchingDelegate: MatchingCoordinatorDelegate?
-    // ChatCoordinator
-    
-    
-    public init(opponentProfile: CallInfoDto, matchingDelegate: MatchingCoordinatorDelegate? = nil) {
+    public init(opponentProfile: MatchingProfile, callInfo: CallInfoDto, delegate: CallCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
-        self.matchingDelegate = matchingDelegate
+        self.callInfo = callInfo
+        self.delegate = delegate
     }
     
     public var body: some View {
@@ -49,12 +48,21 @@ public struct AfterCallAssessmentView: View {
                 
                 HStack {
                     Button {
-                        print("deny")
-                        matchingDelegate?.pushMatching(.home)
+                        print("User chose NOT to continue relationship.")
+                        // ✅ 1. CallManager에게 최종 결정(false)을 알림
+                        Task {
+                            await CallManager.shared.decideRelationship(continueRelationship: false)
+                        }
+                        // ✅ 2. Coordinator를 통해 홈 화면 등으로 이동
+                        //    decideRelationship이 callState를 .idle로 바꾸면
+                        //    ActiveCallView가 알아서 dismissCallFlow를 호출하므로,
+                        //    여기서는 추가적인 화면 전환(popToRoot 등)만 처리하면 됨.
+                        
+                        delegate?.dismissCallFlow()
                     } label: {
                         denyButton
                     }
-
+                    
                     Button {
                         print("accept")
                     } label: {
@@ -66,14 +74,19 @@ public struct AfterCallAssessmentView: View {
             Spacer()
             
             Button {
-                print("sue")
-                // chat으로 화면전환
+                print("User chose to CONTINUE relationship.")
+                // ✅ 1. CallManager에게 최종 결정(true)을 알림
+                Task {
+                    await CallManager.shared.decideRelationship(continueRelationship: true)
+                }
+                // ✅ 2. Coordinator를 통해 채팅방 등으로 이동
+                delegate?.popToRootAndGoToChat()  // 예시: 채팅방으로 이동하는 함수
             } label: {
                 Text("신고하기")
                     .font(.system(size: 18))
                     .foregroundStyle(Color.Siso.Gray._60)
             }
-
+            
             
         }
     }
@@ -117,20 +130,20 @@ public struct AfterCallAssessmentView: View {
                 Text("인연 이어가기")
                     .foregroundStyle(.black)
             }
-           
+            
         }
         
     }
     private var profileImageView: some View {
         ZStack {
             
-            AsyncImage(url: URL(string: opponentProfile.profileImageUrl ?? "testimg")){ image in
+            AsyncImage(url: URL(string: opponentProfile.imageUrls.first ?? "testimg")){ image in
                 
                 image
                     .resizable()
                     .scaledToFill()
                     .frame(width: 140, height: 140)
-                    .clipShape(Circle()) 
+                    .clipShape(Circle())
                 
             } placeholder: {
                 Circle()

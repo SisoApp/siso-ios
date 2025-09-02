@@ -84,9 +84,11 @@ public class CallViewModel: ObservableObject, Identifiable {
                     self.remainingSeconds -= 1
                 } else {
                     // 시간이 다 되면 통화를 종료하고 타이머를 멈춥니다.
-                    print("Time is up! Ending the call.")
-                    self.stopTimer() // 타이머를 먼저 멈추고
-                    self.endCall()   // 통화 종료 로직 호출
+                    Task{
+                        print("Time is up! Ending the call.")
+                        self.stopTimer() // 타이머를 먼저 멈추고
+                        await self.endCall()   // 통화 종료 로직 호출
+                    }
                 }
             }
         // 타이머 구독도 cancellables에 저장하여 생명주기를 관리합니다.
@@ -108,8 +110,8 @@ public class CallViewModel: ObservableObject, Identifiable {
     // MARK: - Public Methods for UI Actions
     
     /// UI에서 통화 종료 버튼을 눌렀을 때 호출됩니다.
-    public func endCall() {
+    public func endCall() async {
         stopTimer()
-        CallManager.shared.endCall(reason: .completed)
+        
     }
 }

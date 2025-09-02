@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import network
 
 public protocol CallCoordinatorDelegate: AnyObject {
     
@@ -16,5 +17,10 @@ public protocol CallCoordinatorDelegate: AnyObject {
     func popToRoot()
     
     func dismissCallFlow()
+    
+    func callToHome()
+    
+    func popToRootAndGoToChat() // 채팅방 이동 함수
+    
 }
 

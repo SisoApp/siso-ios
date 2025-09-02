@@ -1,35 +1,26 @@
-import Foundation
+// model/CallDtos.swift 또는 유사한 파일에 추가
 
-/// 서버에서 오는 통화 상태를 나타내는 열거형입니다.
-public enum CallStatus: String, Codable {
-    // 서버에서 사용하는 문자열 값과 일치해야 합니다. (예: "REQUESTED", "ACCEPT" 등)
-    // 일반적으로 대문자 스네이크 케이스를 많이 사용하므로, case 이름은 소문자로 하되 CodingKey를 사용할 수 있습니다.
-    // 여기서는 서버 값이 소문자라고 가정합니다.
-    case requested
-    case accept
-    case deny
-    case ended
-}
-
-/// 통화 관련 API 응답을 위한 DTO(Data Transfer Object)입니다.
+// 서버의 AgoraCallResponseDto와 일치
 public struct CallResponseDto: Codable, Equatable {
-    
-    // 1. Java DTO 필드 전체 반영
     public let accepted: Bool
-    public let token: String
+    public let token: String?
     public let channelName: String
     public let callerId: Int
     public let receiverId: Int
-    public let callStatus: CallStatus
-    public let duration: Int
+    public let callStatus: String // "ACCEPT", "DENY", "ENDED" 등
+    public let duration: Int?
+    public let callerProfile: UserProfileDto
+    public let receiverProfile: UserProfileDto
+    
+    // CodingKeys는 서버의 key가 camelCase와 다를 경우에만 필요합니다.
+    // 현재는 일치하므로 생략 가능합니다.
+}
 
-    enum CodingKeys: String, CodingKey {
-        case accepted
-        case token
-        case channelName
-        case callerId
-        case receiverId
-        case callStatus
-        case duration
-    }
+// 서버의 UserProfileDto와 일치
+public struct UserProfileDto: Codable, Equatable {
+    public let nickname: String
+    public let age: Int
+    public let location: String?
+    public let interests: [String]
+    public let profileImageUrl: String?
 }

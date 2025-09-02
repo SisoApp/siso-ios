@@ -24,28 +24,49 @@ public struct MatchingMainView: View {
         ZStack {
             // 메인 카드 스크롤 뷰
             // 로딩 및 에러 처리를 위한 ZStack 구성은 이전 답변을 참고하여 추가할 수 있습니다.
-            GeometryReader { geometry in
-                ScrollView(.vertical) {
-                    LazyVStack(spacing: 0) {
-                        ForEach(viewModel.cards) { cardViewModel in
-                            makeView(for: cardViewModel, geometry: geometry)
+            if viewModel.cards.isEmpty {
+                Text ("조건에 맞는 상대가 없습니다.")
+                    .font(.system(size: 25, weight: .bold))
+            } else {
+                GeometryReader { geometry in
+                    ScrollView(.vertical) {
+                        LazyVStack(spacing: 0) {
+                            ForEach(viewModel.cards) { cardViewModel in
+                                makeView(for: cardViewModel, geometry: geometry)
                                 // 🔥 2. id 프로퍼티 사용
                                 // CardViewModel의 id는 이제 서버의 고유 userId(Int)입니다.
-                                .id(cardViewModel.id)
+                                    .id(cardViewModel.id)
+                            }
                         }
+                        .scrollTargetLayout()
                     }
-                    .scrollTargetLayout()
+                    .scrollTargetBehavior(.paging)
+                    .scrollPosition(id: $currentCardId) // $currentCardId는 이제 Int? 타입과 바인딩됩니다.
                 }
-                .scrollTargetBehavior(.paging)
-                .scrollPosition(id: $currentCardId) // $currentCardId는 이제 Int? 타입과 바인딩됩니다.
+                .ignoresSafeArea()
             }
-            .ignoresSafeArea()
             
             // 프로필 작성 요구 뷰 (조건부 표시)
             if viewModel.isProfileWriteDemanded {
                 ProfileDemandingView(matchingViewModel: viewModel, delegate: delegate)
             }
         }
+        .navigationTitle("둘러보기")
+        .toolbar(content: {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    // 종 모양 아이콘을 탭했을 때 실행될 코드
+                    print("알림 버튼 탭!")
+                }) {
+                    // SF Symbols에서 "bell" 아이콘을 사용합니다.
+                    Image(systemName: "bell")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .foregroundStyle(.black)
+                }
+            }
+        })
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }
             
