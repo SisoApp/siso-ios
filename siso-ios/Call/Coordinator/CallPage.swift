@@ -42,7 +42,7 @@ public enum CallPage: Identifiable, Hashable, Equatable {
 
 // CallSheet도 동일하게 수정합니다.
 public enum CallSheet: Identifiable, Hashable {
-    case report(opponent: CallInfoDto)
+    case report(opponentProfile: CallProfileDto)
     
     public var id: String {
         switch self {

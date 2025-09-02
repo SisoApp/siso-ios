@@ -28,14 +28,13 @@ public struct ActiveCallView: View {
                 }
             
         case .connecting(let profile, let info):
-            ConnectingView(receiverCallInfo: info, delegate: delegate)
+            ConnectingView(receiverProfile: profile, delegate: delegate)
             
         case .receiving(let info):
             DummyView()
             
         case .inCall(let profile, let info):
-           
-            let viewModel = CallViewModel(opponentCallInfo: info)
+            let viewModel = CallViewModel(opponentProfile: profile)
             CallingView(inCallViewModel: viewModel, delegate: delegate)
         case .assessment(profile: let profile, info: let info):
             AfterCallAssessmentView(opponentProfile: profile, callInfo: info, delegate: delegate)
