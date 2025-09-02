@@ -82,6 +82,16 @@ public struct MyPageView: View {
                     .foregroundStyle(Color.Siso.Gray._50)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
+                locationView()
+            }
+            .padding(.leading)
+        }
+        .padding(.horizontal, 8)
+    }
+    
+    private func locationView() -> some View {
+        return Group {
+            if !viewModel.location.isEmpty {
                 Label {
                     Text(viewModel.location)
                         .font(.system(size: 18))
@@ -93,9 +103,7 @@ public struct MyPageView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.leading)
         }
-        .padding(.horizontal, 8)
     }
     
     private func profileProgressView() -> some View {
