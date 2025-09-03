@@ -72,35 +72,49 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     /// userInfo 딕셔너리를 파싱하여 CallManager의 상태를 업데이트하는 헬퍼 함수입니다.
     private func handleIncomingCall(userInfo: [AnyHashable: Any]) {
         
-        // --- 1. userInfo 딕셔너리를 JSON 데이터로 변환 ---
-        // JSONSerialization을 사용하여 Dictionary를 Data 타입으로 변환합니다.
-        guard let data = try? JSONSerialization.data(withJSONObject: userInfo, options: []) else {
-            print("🔴 handleIncomingCall: Failed to serialize userInfo to JSON data.")
+        // --- 1. 통화 알림 타입 확인 ---
+        // 'type' 필드를 먼저 확인하여 이것이 정말 전화 알림인지 확인합니다.
+        // 이는 일반 공지사항 푸시와 전화 푸시를 구분하는 데 매우 중요합니다.
+        guard let type = userInfo["type"] as? String, type == "INCOMING_CALL" else {
+            print("ℹ️ 수신된 푸시가 통화 알림 타입('INCOMING_CALL')이 아니므로 무시합니다.")
             return
         }
         
-        // --- 2. JSON 데이터를 IncomingCallInfo 모델로 디코딩 ---
-        do {
-            // JSONDecoder를 사용하여 Data를 우리가 정의한 IncomingCallInfo 구조체로 파싱합니다.
-            let callInfo = try JSONDecoder().decode(CallInfoDto.self, from: data)
+        print("📞 수신: 통화 알림 페이로드를 파싱합니다. \(userInfo)")
+
+        // --- 2. 필요한 데이터 파싱 및 타입 변환 ---
+        // FCM을 통해 온 데이터는 보통 String 타입이므로, 적절한 타입(Int 등)으로 변환해줍니다.
+        guard
+            let idString = userInfo["id"] as? String,
+            let id = Int(idString),
             
-            // --- 3. 파싱된 데이터의 유효성 검사 및 CallManager 호출 ---
-            // 'type' 필드를 확인하여 이것이 정말 전화 알림인지 확인합니다.
-            // 이는 일반 공지사항 푸시와 전화 푸시를 구분하는 데 중요합니다.
-//            guard callInfo.type == "INCOMING_CALL" else {
-//                print("ℹ️ This push is not an incoming call type. Ignoring.")
-//                return
-//            }
-//            
-            // ✅ 모든 것이 정상이면, 파싱된 callInfo 객체를 CallManager에 전달합니다.
-            print("✅ Successfully parsed incoming call info. Notifying CallManager.")
-            CallManager.shared.handleIncomingCall(with: callInfo)
+            let channelName = userInfo["channelName"] as? String,
+            let token = userInfo["token"] as? String,
             
-        } catch {
-            // 디코딩에 실패한 경우 (예: 서버가 보낸 JSON 구조가 모델과 다를 때)
-            print("🔴 handleIncomingCall: Failed to decode JSON payload to IncomingCallInfo: \(error)")
+            let callerIdString = userInfo["callerId"] as? String,
+            let callerId = Int(callerIdString),
+            
+            let receiverIdString = userInfo["receiverId"] as? String,
+            let receiverId = Int(receiverIdString)
+        else {
+            print("🔴 handleIncomingCall: 통화 알림 파싱 실패. 필수 데이터가 누락되었거나 타입이 다릅니다.")
             return
         }
+
+        // --- 3. 파싱된 데이터로 CallInfoDto 객체 생성 ---
+        let incomingCallInfo = CallInfoDto(
+            id: id,
+            channelName: channelName,
+            token: token,
+            callerId: callerId,
+            receiverId: receiverId
+        )
+
+        // --- 4. CallManager에 통화 정보 전달 ---
+        // ✅ 모든 것이 정상이면, 파싱된 callInfo 객체를 CallManager에 전달하여
+        // 전화 수신 플로우를 시작합니다.
+        print("✅ 통화 정보 파싱 성공. CallManager에 전달합니다: \(incomingCallInfo)")
+        CallManager.shared.handleIncomingCall(with: incomingCallInfo)
     }
 }
 

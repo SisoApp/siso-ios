@@ -5,6 +5,13 @@ import Foundation
 
 public struct CallInfoDto: Codable, Equatable, Identifiable {
     
+    public init(id: Int, channelName: String, token: String, callerId: Int, receiverId: Int) {
+        self.id = id
+        self.channelName = channelName
+        self.token = token
+        self.callerId = callerId
+        self.receiverId = receiverId
+    }
     
     // 1. DTO 필드 정확하게 반영
     public let id: Int            // Long -> Int
