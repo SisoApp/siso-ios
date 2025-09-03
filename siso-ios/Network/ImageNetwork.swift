@@ -17,6 +17,7 @@ public final actor ImageNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
+
     public func getMyImages(completion: @escaping ([ImageDTO]) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/images/me"
@@ -29,10 +30,10 @@ public final actor ImageNetworkManager: Sendable {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/user/\(userId)"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
-        
+    
         try? await fetchImages(url, completion: completion)
     }
-    
+
     private func fetchImages(_ url: URL, completion: @escaping ([ImageDTO]) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")

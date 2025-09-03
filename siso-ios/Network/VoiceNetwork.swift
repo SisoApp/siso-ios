@@ -22,7 +22,7 @@ public final actor VoiceNetworkManager: Sendable {
         let urlString: String = baseUrl + "/api/voice-samples/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-       try? await fetchVoice(url, completion: completion)
+        try? await fetchVoice(url, completion: completion)
     }
     
     public func getUserVoice(for userId: Int, completion: @escaping (VoiceDTO) -> Void) async throws {
@@ -30,7 +30,7 @@ public final actor VoiceNetworkManager: Sendable {
         let urlString: String = baseUrl + "/api/voice-samples/user"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-       try? await fetchVoice(url, completion: completion)
+        try? await fetchVoice(url, completion: completion)
     }
     
     private func fetchVoice(_ url: URL, completion: @escaping (VoiceDTO) -> Void) async throws {
@@ -45,16 +45,16 @@ public final actor VoiceNetworkManager: Sendable {
         AF.request(url,
                    method: .get,
                    headers: headers)
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: [VoiceDTO].self) { response in
-                switch response.result {
-                case .success(let voices):
-                    debugPrint("녹음파일 조회 성공: \(voices)")
-                    if !voices.isEmpty { completion(voices[0]) }
-                case .failure(let error):
-                    debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
-                }
+        .validate(statusCode: 200..<300)
+        .responseDecodable(of: [VoiceDTO].self) { response in
+            switch response.result {
+            case .success(let voices):
+                debugPrint("녹음파일 조회 성공: \(voices)")
+                if !voices.isEmpty { completion(voices[0]) }
+            case .failure(let error):
+                debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
             }
+        }
     }
     
     public func uploadVoice(completion: @escaping (VoiceDTO) -> Void) async throws {
@@ -71,17 +71,17 @@ public final actor VoiceNetworkManager: Sendable {
         ]
         
         AF.upload(multipartFormData: { multipartFormData in
-                let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-                let fileURL = paths[0].appendingPathComponent("voice.m4a")
-                
-                multipartFormData.append(fileURL,
-                                         withName: "file",
-                                         fileName: fileURL.lastPathComponent,
-                                         mimeType: "audio/m4a")
-                },
-                to: url,
-                method: .post,
-                headers: headers)
+            let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+            let fileURL = paths[0].appendingPathComponent("voice.m4a")
+            
+            multipartFormData.append(fileURL,
+                                     withName: "file",
+                                     fileName: fileURL.lastPathComponent,
+                                     mimeType: "audio/m4a")
+        },
+        to: url,
+        method: .post,
+        headers: headers)
             .validate(statusCode: 200..<300)
             .responseDecodable(of: VoiceDTO.self) { response in
                 switch response.result {

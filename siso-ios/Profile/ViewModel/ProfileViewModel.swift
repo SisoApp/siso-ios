@@ -124,11 +124,11 @@ public extension ProfileView {
         }
         
         func updateProfile(_ userProfile: UserProfile, completion: @escaping (UserProfileDTO) -> Void) async {
-            guard let drinkingCapacity = DrinkingCapacity(rawValue: userProfile.drinking),
-                  let religion = Religion(rawValue: userProfile.religion),
-                  let sex = Sex(rawValue: userProfile.sex),
-                  let preferenceSex = PreferenceSex(rawValue: userProfile.targetSex),
-                  let mbti = Mbti(rawValue: userProfile.mbti) else { return }
+            let drinkingCapacity = DrinkingCapacity(rawValue: userProfile.drinking)
+            let religion = Religion(rawValue: userProfile.religion)
+            let sex = Sex(rawValue: userProfile.sex)
+            let preferenceSex = PreferenceSex(rawValue: userProfile.targetSex)
+            let mbti = Mbti(rawValue: userProfile.mbti)
             
             let meetings: [Meeting]? = userProfile.meeting.isEmpty
                 ? nil
@@ -156,6 +156,8 @@ public extension ProfileView {
         }
         
         func updateInterests(_ userProfile: UserProfile) async {
+            guard userProfile.interests.count > 0 else { return }
+            
             var request: [InterestRequestDTO] = []
             
             for interest in userProfile.interests {
