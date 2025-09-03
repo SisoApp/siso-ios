@@ -64,9 +64,13 @@ public class CardViewModel: ObservableObject, Identifiable {
     func call() {
         homeCardDelegate?.cardViewModelDidRequestCall(on: self)
         delegate?.changeMatchingToCall(opponentProfile: self.profile)
+        
     }
     
-    func chat() {
-        print("chat button tapped")
+    func chat(opponent: CallInfoDto) {
+        Task {
+            try await NetworkManager.shared.endCall(callInfo: opponent, continueRelationship: true)
+
+        }
     }
 }

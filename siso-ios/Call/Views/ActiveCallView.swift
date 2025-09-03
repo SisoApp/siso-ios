@@ -31,19 +31,19 @@ public struct ActiveCallView: View {
                         delegate.dismissCallFlow()
                     }
                 
-            case .connecting(let profile, let info):
+            case .connecting(let profile, _):
                 ConnectingView(receiverProfile: profile, delegate: delegate)
                 
             case .receiving(let info):
-                ReceivingCallView(callInfo: sampleCallInfo)
+                ReceivingCallView(callInfo: info)
                 
-            case .inCall(let profile, let info):
+            case .inCall(let profile, _):
                 let viewModel = CallViewModel(opponentProfile: profile)
                 CallingView(inCallViewModel: viewModel, delegate: delegate)
             case .assessment(profile: let profile, info: let info):
                 AfterCallAssessmentView(opponentProfile: profile, callInfo: info, delegate: delegate)
             }
-#if DEBUG
+        #if DEBUG
            debugMenuView
                .padding()
                .background(.black.opacity(0.7))
@@ -51,7 +51,9 @@ public struct ActiveCallView: View {
                .padding(.bottom, 40)
            #endif
         }
-        // --- 디버그 메뉴 뷰 ---
+        .onAppear() {
+            callManager.delegate = delegate
+        }
          
         
     }

@@ -35,7 +35,6 @@ public final class NetworkManager {
             encoding: encoding,
             headers: headers
         )
-            .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
             .serializingDecodable(SisoResponse<T>.self)
         
@@ -84,15 +83,13 @@ public final class NetworkManager {
             encoding: URLEncoding.default, // GET 요청
             headers: headers
         )
-            .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
-            .serializingDecodable([MatchingProfile].self) // ✨ SisoResponse<[MatchingProfile]>.self 대신 [MatchingProfile].self 직접 디코딩
+            .serializingDecodable([MatchingProfile].self) // ✨
         
         let response = await dataTask.response
         
         switch response.result {
         case .success(let profiles):
-            print(profiles)
             return profiles // 직접 디코딩된 프로필 배열을 반환
         case .failure(let afError):
             if let data = response.data, let body = String(data: data, encoding: .utf8) {
@@ -132,9 +129,7 @@ public final class NetworkManager {
             encoding: JSONEncoding.default,
             headers: headers
         )
-            .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
-        // ✅ 2. Alamofire에게 위에서 정의한 TempCallRequestResponse 형태로 디코딩하라고 지시합니다.
             .serializingDecodable(TempCallRequestResponse.self)
         
         let response = await dataTask.response
@@ -159,30 +154,30 @@ public final class NetworkManager {
     /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
     /// - Throws: NetworkError
     /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
-       public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
-           
-           // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
-           let parameters = try callInfo.toDictionary()
-           
-           // ✅ 2. 제네릭 request 함수를 호출합니다.
-           //    API 명세에 따라, 응답의 'data'는 배열이므로,
-           //    responseType을 `[CallResponseDto].self`로 지정합니다.
-           let responseArray = try await request(
-               target: .acceptCall,
-               parameters: parameters,
-               responseType: [CallResponseDto].self // 👈 여기가 핵심 수정 사항!
-           )
-           
-           // ✅ 3. 디코딩된 배열에서 첫 번째 요소를 안전하게 추출합니다.
-           guard let response = responseArray.first else {
-               // 서버가 data 배열을 비워서 보내는 예외적인 경우에 대한 방어 코드
-               throw NetworkError.serverError(message: "서버로부터 유효한 통화 수락 정보를 받지 못했습니다.")
-           }
-           
-           // ✅ 4. 추출한 단일 CallResponseDto 객체를 반환합니다.
-           return response
-       }
-       
+    public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+        
+        // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
+        let parameters = try callInfo.toDictionary()
+        
+        // ✅ 2. 제네릭 request 함수를 호출합니다.
+        //    API 명세에 따라, 응답의 'data'는 배열이므로,
+        //    responseType을 `[CallResponseDto].self`로 지정합니다.
+        let responseArray = try await request(
+            target: .acceptCall,
+            parameters: parameters,
+            responseType: [CallResponseDto].self // 👈 여기가 핵심 수정 사항!
+        )
+        
+        // ✅ 3. 디코딩된 배열에서 첫 번째 요소를 안전하게 추출합니다.
+        guard let response = responseArray.first else {
+            // 서버가 data 배열을 비워서 보내는 예외적인 경우에 대한 방어 코드
+            throw NetworkError.serverError(message: "서버로부터 유효한 통화 수락 정보를 받지 못했습니다.")
+        }
+        
+        // ✅ 4. 추출한 단일 CallResponseDto 객체를 반환합니다.
+        return response
+    }
+    
     
     /// [POST] /api/calls/deny - 수신자가 통화를 거절합니다.
     public func denyCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
@@ -202,29 +197,30 @@ public final class NetworkManager {
     
     /// [POST] /api/calls/end - 통화를 종료합니다.
     public func endCall(callInfo: CallInfoDto, continueRelationship: Bool) async throws -> CallResponseDto {
-        // Body 파라미터와 Query 파라미터를 함께 보내야 합니다.
-        // Alamofire는 이를 직접 지원하지 않으므로 URL에 직접 쿼리를 추가해야 합니다.
-        var target = EndPoint.endCall // 👈 EndPoint에 .endCall 추가 필요
         
-        // 1. URL에 Query Parameter 추가
+        struct TempEndCallResponseWrapper: Decodable {
+            let status: Int
+            let data: CallResponseDto // 'data'의 값은 단일 CallResponseDto 객체
+            let errorMessage: String?
+        }
+        // 1. URL, 파라미터, 헤더 준비 (기존과 동일)
+        let target = EndPoint.endCall
         var urlComponents = URLComponents(string: target.baseURL + target.path)!
         urlComponents.queryItems = [URLQueryItem(name: "continueRelationship", value: String(continueRelationship))]
         let urlWithQuery = try urlComponents.asURL()
         
-        // 2. Body Parameter 준비
         let bodyParameters = try callInfo.toDictionary()
         
-        // 3. 직접 AF.request 호출 (범용 request 메서드는 이 경우에 부적합)
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw NetworkError.missingAccessToken
         }
-        
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(accessToken)",
             "Content-Type": "application/json",
             "Accept": "application/json"
         ]
         
+        // 2. Alamofire 요청
         let dataTask = AF.request(
             urlWithQuery,
             method: .post,
@@ -234,18 +230,23 @@ public final class NetworkManager {
         )
             .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
-            .serializingDecodable(SisoResponse<[CallResponseDto]>.self)
+        // HIGHLIGHT: 위에서 정의한 임시 래퍼 구조체로 디코딩하도록 변경
+            .serializingDecodable(TempEndCallResponseWrapper.self)
         
         let response = await dataTask.response
         
         switch response.result {
-        case .success(let sisoResponse):
-            if sisoResponse.success, let data = sisoResponse.data, let callResponse = data.first {
-                return callResponse
-            } else {
-                throw NetworkError.serverError(message: sisoResponse.errorMessage ?? "통화 종료 정보 처리 중 오류 발생")
-            }
+        case .success(let wrapperResponse):
+            // HIGHLIGHT: 디코딩된 래퍼 객체에서 'data' 프로퍼티만 추출하여 반환
+            print("\n✅ END CALL SUCCEEDED with continueRelationship: \(continueRelationship)\n")
+            print(wrapperResponse.data)
+            return wrapperResponse.data
+            
         case .failure(let afError):
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (endCall) 🔴 ---\n\(body)\n------------------------------")
+            }
+            print("🔴 Decoding Error (endCall): \(afError)")
             throw NetworkError.afError(afError)
         }
     }
