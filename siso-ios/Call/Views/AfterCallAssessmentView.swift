@@ -65,6 +65,9 @@ public struct AfterCallAssessmentView: View {
                     
                     Button {
                         print("accept")
+                        Task {
+                            await CallManager.shared.decideRelationship(continueRelationship: true)
+                        }
                     } label: {
                         loveButton
                     }

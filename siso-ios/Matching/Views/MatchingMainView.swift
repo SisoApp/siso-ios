@@ -52,7 +52,6 @@ public struct MatchingMainView: View {
                 ProfileDemandingView(matchingViewModel: viewModel, delegate: delegate)
             }
         }
-        .navigationTitle("둘러보기")
         .toolbar(content: {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
@@ -63,10 +62,14 @@ public struct MatchingMainView: View {
                     Image(systemName: "bell")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 30, height: 30)
                         .foregroundStyle(.black)
                 }
             }
+            ToolbarItem(placement: .topBarLeading) {
+                Text("둘러보기")
+                    .font(.system(size: 24, weight: .bold))
+            }
+            
         })
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }

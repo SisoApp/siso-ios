@@ -177,6 +177,7 @@ public class Coordinator: ObservableObject {
             // Chat
         case .main:
             ChatMainView(delegate: self)
+                .navigationBarBackButtonHidden(true)
         case .detail(let chat):
             ChatMainView.ChatDetailView(chat: chat)
         case .notificationChat:

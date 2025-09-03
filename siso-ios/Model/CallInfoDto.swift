@@ -1,5 +1,4 @@
 import Foundation
-
 // 사용 목적: 알림으로 받은 핵심 통화 정보를 API 요청의 Body에 담아 보낼 때 사용.
 // UI 표시에 필요한 닉네임, 프로필 사진 등은 포함하지 않음.
 
@@ -12,6 +11,8 @@ public struct CallInfoDto: Codable, Equatable, Identifiable {
         self.callerId = callerId
         self.receiverId = receiverId
     }
+    
+  
     
     // 1. DTO 필드 정확하게 반영
     public let id: Int            // Long -> Int
