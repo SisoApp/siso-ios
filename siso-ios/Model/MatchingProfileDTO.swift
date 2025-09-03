@@ -18,6 +18,28 @@ public struct MatchingProfile: Codable, Equatable, Identifiable {
             self.presenceStatus = .online
         }
 
+    public init(
+           userId: Int,
+           nickname: String,
+           age: Int,
+           location: String?,
+           interests: [Interest],
+           introduce: String?,
+           imageUrls: [String],
+           voiceSampleUrl: String?,
+           presenceStatus: PresenceStatus
+       ) {
+           self.userId = userId
+           self.nickname = nickname
+           self.age = age
+           self.location = location
+           self.interests = interests
+           self.introduce = introduce
+           self.imageUrls = imageUrls
+           self.voiceSampleUrl = voiceSampleUrl
+           self.presenceStatus = presenceStatus
+       }
+   
     
     // Identifiable 프로토콜을 위한 id 프로퍼티. userId 값을 사용합니다.
     public var id: Int {

@@ -23,6 +23,15 @@ public final class CallManager: ObservableObject {
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
     
+    // HIGHLIGHT START: 디버깅 헬퍼 함수 추가
+       #if DEBUG
+       /// [DEBUG ONLY] UI 테스트를 위해 외부에서 CallState를 강제로 변경합니다.
+       public func changeStateForDebug(_ newState: CallState) {
+           print("🐞 [Debug] Forcing state change to: \(newState)")
+           self.callState = newState
+       }
+       #endif
+       // HIGHLIGHT END
     private init() {
         print("📞 [CallManager] Initialized and subscribing to Agora events.")
         subscribeToAgoraEvents()
