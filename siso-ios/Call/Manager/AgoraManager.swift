@@ -29,6 +29,18 @@ public final class AgoraManager: NSObject {
     
     public func initalizeAndJoinChannel(channelName: String, token: String? = nil) {
         print("🎙️ [AgoraManager] ➡️ Attempting to initialize and join channel: '\(channelName)'")
+        // --- [✨ 디버깅 로그 추가 ✨] ---
+           // Agora에 접속하기 직전의 모든 중요 정보를 하나의 로그로 출력합니다.
+           // 이렇게 하면 어떤 값으로 접속을 시도했는지 명확하게 알 수 있습니다.
+           print("""
+           🎙️ [AgoraManager] ---> JOINING CHANNEL <---
+               - Channel Name: \(channelName)
+               - Token Exists: \(token != nil && !(token?.isEmpty ?? true))
+               - Token Length: \(token?.count ?? 0)
+               - UID: 0 (자동 할당)
+           ------------------------------------
+           """)
+           // --- [로그 추가 끝] ---
         let config = AgoraRtcEngineConfig()
         config.appId = appId
         config.audioScenario = .chatRoom
