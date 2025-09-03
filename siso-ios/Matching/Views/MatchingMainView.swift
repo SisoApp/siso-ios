@@ -104,6 +104,7 @@ public struct MatchingMainView: View {
             await viewModel.fetchMyProfile { profile in
                 appSettings.userProfile = profile
             }
+
             do {
                 callhistories =  try await NetworkManager.shared.getCallHistoryWithCallerId()
                 callhistories +=  try await NetworkManager.shared.getCallHistoryWithReceiverId()
@@ -113,6 +114,16 @@ public struct MatchingMainView: View {
                 print(error.localizedDescription)
             }
           
+
+            await viewModel.fetchMyImages { images in
+                appSettings.profileImages = images
+            }
+            await viewModel.fetchMyVoice { voice in
+                appSettings.voice = voice
+            }
+            await viewModel.fetchMyInterests { interests in
+                appSettings.interests = interests
+            }
         }
     }
     

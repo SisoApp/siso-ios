@@ -48,6 +48,7 @@ public final actor ProfileNetworkManager: Sendable {
                 case .failure(let error):
                    
                     print(error.localizedDescription)
+                
                 }
             }
     }
@@ -77,6 +78,7 @@ public final actor ProfileNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
+
         AF.request(url,
                    method: .get,
                    headers: headers)
@@ -84,10 +86,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: UserProfileDTO.self) { response in
                 switch response.result {
                 case .success(let profile):
-                   
+
                     completion(profile)
                 case .failure(let error):
-                    print("프로필 조회 실패: \(error.localizedDescription)")
+                    debugPrint("프로필 조회 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -113,15 +115,11 @@ public final actor ProfileNetworkManager: Sendable {
                    headers: headers)
             .validate(statusCode: 200..<300)
             .response { response in
-                if let data  = response.data, let body = String(data: data, encoding: .utf8) {
-                    print("body: \(body)")
-                }
-                
                 switch response.result {
                 case .success:
-                    print("프로필 등록 성공!")
+                    debugPrint("프로필 등록 성공!")
                 case .failure(let error):
-                    print("프로필 등록 실패: ", error.localizedDescription)
+                    debugPrint("프로필 등록 실패: ", error.localizedDescription)
                 }
             }
     }
@@ -148,10 +146,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: UserProfileDTO.self) { response in
                 switch response.result {
                 case .success(let profile):
-                    print("프로필 등록 성공!")
+                    debugPrint("프로필 등록 성공!")
                     completion(profile)
                 case .failure(let error):
-                    print("프로필 수정 실패: \(error.localizedDescription)")
+                    debugPrint("프로필 수정 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -176,10 +174,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: InterestResponseDTO.self) { response in
                 switch response.result {
                 case .success(let interestDTO):
-                    print("관심사 조회 성공!")
-                    completion(interestDTO.data)
+                    debugPrint("관심사 조회 성공!: \(interestDTO.data)")
+                    completion(interestDTO.data.map { $0.interest })
                 case .failure(let error):
-                    print("관심사 조회 실패: \(error.localizedDescription)")
+                    debugPrint("관심사 조회 실패: \(error.localizedDescription)")
                 }
             }
     }
@@ -197,9 +195,6 @@ public final actor ProfileNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        let data = try! JSONEncoder().encode(parameters)
-        let body = String(data: data, encoding: .utf8)
-        
         AF.request(url,
                    method: .post,
                    parameters: parameters,
@@ -209,9 +204,38 @@ public final actor ProfileNetworkManager: Sendable {
             .response { response in
                 switch response.result {
                 case .success:
-                    print("관심사 등록 성공!")
+                    debugPrint("관심사 등록 성공!")
                 case .failure(let error):
-                    print("관심사 등록 실패: \(error.localizedDescription)")
+                    debugPrint("관심사 등록 실패: \(error.localizedDescription)")
+                }
+            }
+    }
+    
+    public func updateInterests(_ parameters: [InterestRequestDTO]) async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/interests/update"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        AF.request(url,
+                   method: .patch,
+                   parameters: parameters,
+                   encoder: JSONParameterEncoder.default,
+                   headers: headers)
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    debugPrint("관심사 수정 성공!")
+                case .failure(let error):
+                    debugPrint("관심사 수정 실패: \(error.localizedDescription)")
                 }
             }
     }

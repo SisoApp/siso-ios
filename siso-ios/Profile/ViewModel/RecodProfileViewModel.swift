@@ -9,6 +9,7 @@ import AVFoundation
 import Combine
 import SwiftUI
 import network
+import model
 
 enum RecordStatus {
     case pending // 녹음 대기
@@ -144,8 +145,10 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         status = .waiting
     }
     
-    func uploadVoice() async {
-        try? await VoiceNetworkManager.shared.uploadVoice()
+    func uploadVoice(completion: @escaping (VoiceDTO) -> Void) async {
+        try? await VoiceNetworkManager.shared.uploadVoice(completion: { voice in
+            completion(voice)
+        })
     }
 }
 
