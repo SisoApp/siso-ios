@@ -77,10 +77,7 @@ public struct AfterCallAssessmentView: View {
             Spacer()
             
             Button {
-              
-                Task {
-                    await CallManager.shared.decideRelationship(continueRelationship: true)
-                }
+                delegate?.openReportSheet(.report(opponentProfile: opponentProfile))
                 
             } label: {
                 Text("신고하기")

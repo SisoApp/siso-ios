@@ -344,6 +344,53 @@ public final class NetworkManager {
         }
     }
     
+    // NetworkManager.swift 클래스 내부에 아래 함수를 추가합니다.
+
+    /// [POST] /api/reports - 사용자를 신고합니다.
+    ///
+    /// 서버 컨트롤러의 `@RequestBody`는 JSON을 의미하므로 Content-Type은 "application/json"으로 전송합니다.
+    /// - Parameter dto: 신고 정보를 담고 있는 `ReportRequestDto` 객체
+    /// - Returns: 신고 처리 결과를 담은 `ReportResponseDto`
+    /// - Throws: `NetworkError` - 네트워크 또는 디코딩 실패 시
+    public func addReport(dto: ReportRequestDto) async throws -> ReportResponseDto {
+        
+        let target = EndPoint.addReport
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
+        
+        // Encodable DTO를 Alamofire가 사용할 수 있는 파라미터로 변환합니다.
+        let parameters = try dto.toDictionary()
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: JSONEncoding.default, // @RequestBody는 JSONEncoding
+            headers: headers
+        )
+            .validate(statusCode: 200..<300) // 201 Created 포함
+            .serializingDecodable(ReportResponseDto.self) // SisoResponse 래퍼 없이 바로 디코딩
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let reportResponse):
+            return reportResponse
+        case .failure(let afError):
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (addReport) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
+    }
 }
 
 public extension Encodable {

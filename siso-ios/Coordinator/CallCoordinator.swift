@@ -8,6 +8,10 @@ import call
 import model
 
 extension Coordinator: @preconcurrency CallCoordinatorDelegate {
+    public func openReportSheet(_ sheet: call.CallSheet) {
+        self.callSheet = sheet
+    }
+    
     // ✅ "인연 이어가기" 선택 시 호출될 새로운 함수
     public func popToRootAndGoToChat() {
         selectedTab = 1 // 탭 인덱스가 1이라고 가정
