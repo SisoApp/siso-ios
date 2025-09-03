@@ -48,7 +48,8 @@ public struct MyPageView: View {
                 profile: appSettings.userProfile,
                 images: appSettings.profileImages,
                 voice: appSettings.voice,
-                interests: nil)
+                interests: appSettings.interests
+            )
         }
     }
     
@@ -75,16 +76,18 @@ public struct MyPageView: View {
             }
             
             VStack(spacing: 4) {
-                Text(viewModel.nickname)
-                    .font(.system(size: 24))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Text(viewModel.age)
-                    .font(.system(size: 22))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color.Siso.Gray._50)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if let profile = viewModel.profile {
+                    Text(profile.nickname)
+                        .font(.system(size: 24))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text(profile.age.description + "세")
+                        .font(.system(size: 22))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 
                 locationView()
             }
@@ -95,9 +98,10 @@ public struct MyPageView: View {
     
     private func locationView() -> some View {
         return Group {
-            if !viewModel.location.isEmpty {
+            if let profile = viewModel.profile,
+               let location = profile.location, !location.isEmpty {
                 Label {
-                    Text(viewModel.location)
+                    Text(location)
                         .font(.system(size: 18))
                 } icon: {
                     Image("location")

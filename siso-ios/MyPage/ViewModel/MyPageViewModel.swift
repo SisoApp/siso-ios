@@ -11,22 +11,10 @@ import model
 public extension MyPageView {
     @MainActor
     class MyPageViewModel: ObservableObject {
-        @Published private var profile: UserProfileDTO?
+        @Published var profile: UserProfileDTO?
         @Published private var images: [ImageDTO]?
         @Published private var voice: VoiceDTO?
         @Published private var interests: [Interest]?
-        
-        var nickname: String {
-            return profile?.nickname ?? ""
-        }
-        
-        var age: String {
-            return (profile?.age.description ?? "")  + "세"
-        }
-        
-        var location: String {
-            return profile?.location ?? ""
-        }
         
         var progress: Int {
             var result: Int = 0
@@ -45,7 +33,8 @@ public extension MyPageView {
                 result += 30
             }
             
-            if let _ = interests, let _ = profile?.meetings {
+            if let interests = interests, !interests.isEmpty,
+               let meetings = profile?.meetings, !meetings.isEmpty {
                 result += 30
             }
         
