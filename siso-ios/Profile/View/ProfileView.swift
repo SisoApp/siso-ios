@@ -82,7 +82,12 @@ public struct ProfileView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             if !didInit {
-                viewModel.setProfile(appSettings.userProfile)
+                viewModel.setViewModel(
+                    profile: appSettings.userProfile,
+                    images: appSettings.profileImages,
+                    voice: appSettings.voice,
+                    interests: appSettings.interests
+                )
                 bindViewValue()
                 didInit = true
             }
@@ -197,7 +202,6 @@ public struct ProfileView: View {
                 .padding()
                 .onChange(of: introduce) { _, newValue in
                     introduce = newValue.prefix(50).description
-                    print(introduce.count)
                 }
             
             VStack {
@@ -227,7 +231,7 @@ public struct ProfileView: View {
                 
                 waveFormView(count: 30, height: 44)
                 
-                Text("00:15")
+                Text("00:\(String(format: "%02d", viewModel.voiceDuration))")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
             }
@@ -458,7 +462,7 @@ public struct ProfileView: View {
     private func completeButton() -> some View {
         return PrimaryButton(title: "완료하기") {
             guard let sex = sex, let targetSex = targetSex else { return }
-            guard introduce.count >= 5 else {
+            guard introduce.count >= 5 || introduce.count == 0 else {
                 showAlert = true
                 return
             }
@@ -473,6 +477,8 @@ public struct ProfileView: View {
                 await viewModel.updateInterests(userProfile)
                 
                 await viewModel.updateProfile(userProfile) { profile in
+                    
+                    
                     appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
                     delegate?.pop()
                 }
@@ -511,8 +517,8 @@ public struct ProfileView: View {
         meetings = viewModel.meetings
         userProfile.meeting = viewModel.meetings
         
-        interests = viewModel.interests
-        userProfile.interests = viewModel.interests
+        interests = viewModel.interestArray
+        userProfile.interests = viewModel.interestArray
     }
 }
 

@@ -87,7 +87,6 @@ struct MainTabView: View {
             .tabItem { Label("내 정보", systemImage: "person") }.tag(2)
         }
         .tint(Color.Siso.Primary._100)
-        
     }
 }
 

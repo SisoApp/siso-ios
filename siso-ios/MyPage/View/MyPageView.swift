@@ -44,43 +44,35 @@ public struct MyPageView: View {
             }
         }
         .onAppear {
-            viewModel.setProfile(appSettings.userProfile)
+            viewModel.setViewModel(
+                profile: appSettings.userProfile,
+                images: appSettings.profileImages,
+                voice: appSettings.voice,
+                interests: appSettings.interests
+            )
+        }
+        .task {
+            await viewModel.getImageUrl(appSettings.profileImages)
         }
     }
     
     private func profileBox() -> some View {
         return HStack {
-            VStack {
-                Image("testimg")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 120, height: 120)
-                    .clipShape(.rect(cornerRadius: 60))
-                    .overlay {
-                        Circle()
-                            .rotation(.degrees(270))
-                            .trim(from: 0, to: 0.36)
-                            .stroke(
-                                Color.Siso.Primary.main,
-                                style: StrokeStyle(
-                                    lineWidth: 8,
-                                    lineCap: .round
-                                )
-                            )
-                    }
-            }
+            profileImageView()
             
             VStack(spacing: 4) {
-                Text(viewModel.nickname)
-                    .font(.system(size: 24))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Text(viewModel.age)
-                    .font(.system(size: 22))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color.Siso.Gray._50)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if let profile = viewModel.profile {
+                    Text(profile.nickname)
+                        .font(.system(size: 24))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text(profile.age.description + "세")
+                        .font(.system(size: 22))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.Siso.Gray._50)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 
                 locationView()
             }
@@ -89,11 +81,39 @@ public struct MyPageView: View {
         .padding(.horizontal, 8)
     }
     
+    private func profileImageView() -> some View {
+        return Group {
+            if let imageUrl = viewModel.mainImageUrl {
+                AsyncImage(url: imageUrl)
+            } else {
+                Image("Camera")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(32)
+            }
+        }
+        .frame(width: 120, height: 120)
+        .clipShape(.rect(cornerRadius: 60))
+        .overlay {
+            Circle()
+                .rotation(.degrees(270))
+                .trim(from: 0, to: (Double(viewModel.progress) / 100))
+                .stroke(
+                    Color.Siso.Primary.main,
+                    style: StrokeStyle(
+                        lineWidth: 8,
+                        lineCap: .round
+                    )
+                )
+        }
+    }
+    
     private func locationView() -> some View {
         return Group {
-            if !viewModel.location.isEmpty {
+            if let profile = viewModel.profile,
+               let location = profile.location, !location.isEmpty {
                 Label {
-                    Text(viewModel.location)
+                    Text(location)
                         .font(.system(size: 18))
                 } icon: {
                     Image("location")
@@ -108,7 +128,7 @@ public struct MyPageView: View {
     
     private func profileProgressView() -> some View {
         return HStack(spacing: 12) {
-            Text("36% 완성")
+            Text("\(viewModel.progress)% 완성")
                 .font(.system(size: 18))
                 .fontWeight(.semibold)
                 .padding(.horizontal, 16)

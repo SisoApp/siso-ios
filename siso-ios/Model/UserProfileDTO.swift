@@ -48,8 +48,7 @@ public struct InterestRequestDTO: Codable, Sendable {
 
 public struct InterestResponseDTO: Codable, Sendable {
     public let status: Int
-    public let errorMessage: String?
-    public let data: [Interest]
+    public let data: [InterestRequestDTO]
 }
 
 public struct UserProfileResponse: Codable, Sendable {
