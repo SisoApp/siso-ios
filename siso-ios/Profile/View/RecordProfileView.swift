@@ -8,8 +8,10 @@
 import SwiftUI
 import designSystem
 import Combine
+import model
 
 public struct RecordProfileView: View {
+    @EnvironmentObject private var appSettings: AppSettings
     @ObservedObject private var userProfile: UserProfile
     @StateObject private var viewModel: RecordProfileViewModel
     @Binding var currentPage: SignUpProfilePage
@@ -153,7 +155,9 @@ public struct RecordProfileView: View {
         
         return PrimaryButton(title: "완료하기", isActive: isActive) {
             Task {
-                await viewModel.uploadVoice()
+                await viewModel.uploadVoice { voice in
+                    appSettings.voice = voice
+                }
             }
             
             switch mode {
