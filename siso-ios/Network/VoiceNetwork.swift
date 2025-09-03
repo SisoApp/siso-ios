@@ -34,18 +34,6 @@ public final actor VoiceNetworkManager: Sendable {
     }
     
     private func fetchVoice(_ url: URL, completion: @escaping (VoiceDTO) -> Void) async throws {
-       try? await fetchVoice(url, completion: completion)
-    }
-    
-    public func getUserVoice(for userId: Int, completion: @escaping (VoiceDTO) -> Void) async throws {
-        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
-        let urlString: String = baseUrl + "/api/voice-samples/user"
-        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
-        
-       try? await fetchVoice(url, completion: completion)
-    }
-    
-    private func fetchVoice(_ url: URL, completion: @escaping (VoiceDTO) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
