@@ -43,10 +43,10 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: [UserProfileDTO].self) { response in
                 switch response.result {
                 case .success(let profiles):
-                    print("전체 프로필 조회 성공!")
+                   
                     completion(profiles)
                 case .failure(let error):
-                    print("전체 프로필 조회 실패!")
+                   
                     print(error.localizedDescription)
                 }
             }
@@ -77,9 +77,6 @@ public final actor ProfileNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        print("---------accessToken----------")
-        print(accessToken)
-        
         AF.request(url,
                    method: .get,
                    headers: headers)
@@ -87,7 +84,7 @@ public final actor ProfileNetworkManager: Sendable {
             .responseDecodable(of: UserProfileDTO.self) { response in
                 switch response.result {
                 case .success(let profile):
-                    print("프로필 조회 성공!: \(profile)")
+                   
                     completion(profile)
                 case .failure(let error):
                     print("프로필 조회 실패: \(error.localizedDescription)")
