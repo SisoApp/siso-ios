@@ -10,10 +10,7 @@ public struct ActiveCallView: View {
     
     // 코디네이터와의 통신을 위한 delegate
     var delegate: CallCoordinatorDelegate
-    // --- ✨ 디버깅용 샘플 데이터 추가 ---
-    
-    private let sampleCallInfo = CallInfoDto(id: 999, channelName: "debug_channel", token: "debug_token", callerId: 200, receiverId: 100)
-    // --- ✨ 디버깅용 샘플 데이터 끝 ---
+   
     public init(delegate: CallCoordinatorDelegate) {
         self.delegate = delegate
     }
@@ -27,7 +24,6 @@ public struct ActiveCallView: View {
                 Color.clear
                     .onAppear {
                         print("Call state is idle. Dismissing call flow.")
-                        // ✨ pop() 대신 dismissCallFlow()를 호출합니다.
                         delegate.dismissCallFlow()
                     }
                 
@@ -51,11 +47,10 @@ public struct ActiveCallView: View {
                .padding(.bottom, 40)
            #endif
         }
+        
         .onAppear() {
             callManager.delegate = delegate
         }
-         
-        
     }
 #if DEBUG
 @ViewBuilder

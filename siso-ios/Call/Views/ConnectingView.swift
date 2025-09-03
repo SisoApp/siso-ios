@@ -57,7 +57,7 @@ public struct ConnectingView: View {
 
                 }
             } label: {
-                ZStack {
+                ZStack(alignment: .center) {
                     RoundedRectangle(cornerRadius: 24)
                         .fill(Color.Siso.Gray._5)
                         .stroke(Color.Siso.Gray._30, lineWidth: 1)
@@ -69,10 +69,11 @@ public struct ConnectingView: View {
                         Text("전화 종료")
                             .font(.headline)
                             .foregroundColor(.black)
-                            .padding()
                     }
                 }
+              
             }
+            .frame(maxWidth: .infinity, maxHeight: 96)
             .padding()
             
             Spacer()
