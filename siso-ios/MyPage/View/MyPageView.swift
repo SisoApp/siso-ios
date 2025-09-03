@@ -51,29 +51,14 @@ public struct MyPageView: View {
                 interests: appSettings.interests
             )
         }
+        .task {
+            await viewModel.getImageUrl(appSettings.profileImages)
+        }
     }
     
     private func profileBox() -> some View {
         return HStack {
-            VStack {
-                Image("testimg")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 120, height: 120)
-                    .clipShape(.rect(cornerRadius: 60))
-                    .overlay {
-                        Circle()
-                            .rotation(.degrees(270))
-                            .trim(from: 0, to: (Double(viewModel.progress) / 100))
-                            .stroke(
-                                Color.Siso.Primary.main,
-                                style: StrokeStyle(
-                                    lineWidth: 8,
-                                    lineCap: .round
-                                )
-                            )
-                    }
-            }
+            profileImageView()
             
             VStack(spacing: 4) {
                 if let profile = viewModel.profile {
@@ -94,6 +79,33 @@ public struct MyPageView: View {
             .padding(.leading)
         }
         .padding(.horizontal, 8)
+    }
+    
+    private func profileImageView() -> some View {
+        return Group {
+            if let imageUrl = viewModel.mainImageUrl {
+                AsyncImage(url: imageUrl)
+            } else {
+                Image("Camera")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(32)
+            }
+        }
+        .frame(width: 120, height: 120)
+        .clipShape(.rect(cornerRadius: 60))
+        .overlay {
+            Circle()
+                .rotation(.degrees(270))
+                .trim(from: 0, to: (Double(viewModel.progress) / 100))
+                .stroke(
+                    Color.Siso.Primary.main,
+                    style: StrokeStyle(
+                        lineWidth: 8,
+                        lineCap: .round
+                    )
+                )
+        }
     }
     
     private func locationView() -> some View {

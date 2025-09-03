@@ -46,17 +46,17 @@ public final actor ImageNetworkManager: Sendable {
         AF.request(url,
                    method: .get,
                    headers: headers)
-        .validate(statusCode: 200..<300)
-        .responseDecodable(of: [ImageDTO].self) { response in
-            switch response.result {
-            case .success(let images):
-                debugPrint("이미지 목록 조회 성공: \(images)")
-                completion(images)
-                break
-            case .failure(let error):
-                debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: [ImageDTO].self) { response in
+                switch response.result {
+                case .success(let images):
+                    debugPrint("이미지 목록 조회 성공: \(images)")
+                    completion(images)
+                    break
+                case .failure(let error):
+                    debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
+                }
             }
-        }
     }
     
     public func uploadImages(_ images: [UIImage]) async throws {
@@ -107,10 +107,35 @@ public final actor ImageNetworkManager: Sendable {
         }
     }
     
-    public func openImageUrl() async throws {
+    public func getImageUrl(for imageId: Int, completion: @escaping (String) -> Void) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
-        let urlString: String = baseUrl + "/api/images/upload"
+        let urlString: String = baseUrl + "/api/images/\(imageId)/presigned-url"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        AF.request(url,
+                   method: .get,
+                   headers: headers)
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    if let data = response.data,
+                       let body = String(data: data, encoding: .utf8) {
+                        print("이미지 url 생성 성공!: \(body)")
+                        completion(body)
+                    }
+                case .failure(let error):
+                    print("이미지 url 생성 실패: \(error.localizedDescription)")
+                }
+            }
     }
     
     public func removeImage(_ id: Int) async throws {

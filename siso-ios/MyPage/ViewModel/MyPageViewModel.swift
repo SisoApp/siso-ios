@@ -7,14 +7,16 @@
 
 import Foundation
 import model
+import network
 
 public extension MyPageView {
     @MainActor
     class MyPageViewModel: ObservableObject {
         @Published var profile: UserProfileDTO?
-        @Published private var images: [ImageDTO]?
-        @Published private var voice: VoiceDTO?
-        @Published private var interests: [Interest]?
+        @Published var images: [ImageDTO]?
+        @Published var voice: VoiceDTO?
+        @Published var interests: [Interest]?
+        @Published var mainImageUrl: URL?
         
         var progress: Int {
             var result: Int = 0
@@ -46,6 +48,14 @@ public extension MyPageView {
             self.images = images
             self.voice = voice
             self.interests = interests
+        }
+        
+        func getImageUrl(_ images: [ImageDTO]?) async {
+            guard let images = images else { return }
+            try? await ImageNetworkManager.shared.getImageUrl(for: images[0].id) { [weak self] urlString in
+                guard let url: URL = URL(string: urlString) else { return }
+                self?.mainImageUrl = url
+            }
         }
     }
 }
