@@ -32,7 +32,7 @@ public struct ProfileView: View {
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
     
-    private var viewModel: ProfileViewModel = .init()
+    @ObservedObject private var viewModel: ProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -92,20 +92,38 @@ public struct ProfileView: View {
                 didInit = true
             }
         }
+        .task {
+            await viewModel.getImageUrl(appSettings.profileImages)
+        }
     }
     
     private func profileImageView() -> some View {
         return ZStack(alignment: .bottomTrailing) {
-            Image("testimg")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 120, height: 120)
-                .clipped()
-                .clipShape(.rect(cornerRadius: 60))
-                .padding(.top, 10)
-                .onTapGesture {
-                    delegate?.pushProfile(.image)
+            Group {
+                if let imageUrl = viewModel.mainImageUrl {
+                    AsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            
+                    } placeholder: {
+                        Image("Camera")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(32)
+                    }
+                } else {
+                    Image("Camera")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(32)
                 }
+            }
+            .frame(width: 120, height: 120)
+            .clipShape(.rect(cornerRadius: 120 / 2))
+            .onTapGesture {
+                delegate?.pushProfile(.image)
+            }
             
             Image("pencil")
                 .resizable()

@@ -10,11 +10,12 @@ import network
 import model
 
 public extension ProfileView {
-    class ProfileViewModel {
+    class ProfileViewModel: ObservableObject {
         private var profile: UserProfileDTO?
         private var images: [ImageDTO]?
         private var voice: VoiceDTO?
         private var interests: [Interest]?
+        @Published var mainImageUrl: URL?
         
         var nickname: String {
             return profile?.nickname ?? ""
@@ -162,6 +163,14 @@ public extension ProfileView {
             }
             
             try? await ProfileNetworkManager.shared.registerInterests(request)
+        }
+        
+        func getImageUrl(_ images: [ImageDTO]?) async {
+            guard let images = images else { return }
+            try? await ImageNetworkManager.shared.getImageUrl(for: images[0].id) { [weak self] urlString in
+                guard let url: URL = URL(string: urlString) else { return }
+                self?.mainImageUrl = url
+            }
         }
     }
 }

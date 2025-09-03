@@ -84,7 +84,17 @@ public struct MyPageView: View {
     private func profileImageView() -> some View {
         return Group {
             if let imageUrl = viewModel.mainImageUrl {
-                AsyncImage(url: imageUrl)
+                AsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        
+                } placeholder: {
+                    Image("Camera")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(32)
+                }
             } else {
                 Image("Camera")
                     .resizable()
