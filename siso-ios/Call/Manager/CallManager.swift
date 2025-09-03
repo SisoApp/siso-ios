@@ -49,12 +49,8 @@ public final class CallManager: ObservableObject {
                   // ✅ 'profile'과 'info'를 모두 담아서 .connecting 상태로 변경!
                   self.callState = .connecting(profile: receiver, info: callInfo)
               }
-              
-              // 임시값으로 처리합니다 추후 변경 필요
-              let tempChannelName = "testChannel"
-              let tempToken = "21232f297a57a5a743894a0e4a801fc3"
-//              agoraManager.initalizeAndJoinChannel(channelName: callInfo.channelName, token: callInfo.token)
-              agoraManager.initalizeAndJoinChannel(channelName: tempChannelName, token: tempToken)
+    
+             agoraManager.initalizeAndJoinChannel(channelName: callInfo.channelName, token: callInfo.token)
           } catch {
               await MainActor.run { self.callState = .idle }
           }
