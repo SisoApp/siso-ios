@@ -205,10 +205,9 @@ public struct MatchingCardView: View {
     private var actionButtonsSection: some View {
         HStack {
             Button {
+                // 여기 버튼 동작
                 print("chat")
-//                // id가 안중요해서 임시로 0 처리
-//                // 채널 네임
-//                cardViewModel.chat(opponent: CallInfoDto.init(id: 0, channelName: "", token: "", callerId: <#T##Int#>, receiverId: <#T##Int#>))
+
             } label: {
                 RoundedRectangle(cornerRadius: 24)
                     .frame(maxWidth: 80, maxHeight: 80)
@@ -240,6 +239,16 @@ public struct MatchingCardView: View {
         }
         .frame(height: 80)
         .padding(.horizontal)
+    }
+    
+    private var chatNoticeBoxView: some View {
+        Text("통화 및 상호 동의 이후 대화가 가능합니다.")
+            .font(.system(size: 20, weight: .semibold))
+            .foregroundColor(Color.Siso.Gray._0)
+            .background {
+                RoundedRectangle(cornerRadius: 8)
+                    .foregroundStyle(Color.Siso.Gray._90)
+            }
     }
 }
 

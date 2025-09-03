@@ -177,14 +177,11 @@ public final class CallManager: ObservableObject {
             return
         }
         
-        
-        
         await MainActor.run {
             self.callState = .idle
         }
         if continueRelationship {
             delegate?.popToRootAndGoToChat()
-        
         }
         // ✅ 서버에 최종 결정 사항(continueRelationship)을 전송
         Task.detached {

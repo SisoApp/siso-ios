@@ -36,6 +36,16 @@ public final class NetworkManager {
             headers: headers
         )
             .validate(statusCode: 200..<300)
+            .responseString { response in
+                        print("📄 [RAW JSON RESPONSE for \(target)]")
+                        switch response.result {
+                        case .success(let jsonString):
+                            print(jsonString)
+                        case .failure(let error):
+                            print("Failed to get raw string: \(error)")
+                        }
+                        print("------------------------------------")
+                    }
             .serializingDecodable(SisoResponse<T>.self)
         
         let response = await dataTask.response
@@ -250,6 +260,90 @@ public final class NetworkManager {
             throw NetworkError.afError(afError)
         }
     }
+    
+    /// [GET] /api/calls/caller - 내가 발신한 통화 기록 목록을 조회합니다.
+    // HIGHLIGHT START: 통화 기록 API 전용 래퍼 구조체 정의
+    private struct TempCallHistoryResponseWrapper: Decodable {
+        let status: Int
+        let data: [CallHistoryItemDto]? // 'data'의 값은 CallHistoryItemDto 배열
+        let errorMessage: String?
+    }
+    public func getCallHistoryWithCallerId() async throws -> [CallHistoryItemDto] {
+        
+        let target = EndPoint.getCallHistoryWithCallerId
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            // GET 요청이므로 parameters는 nil
+            encoding: URLEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // HIGHLIGHT: 임시 래퍼 사용
+            .serializingDecodable(TempCallHistoryResponseWrapper.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let wrapperResponse):
+            // data 필드가 옵셔널이므로 nil 검사
+            guard let callHistory = wrapperResponse.data else {
+                throw NetworkError.serverError(message: wrapperResponse.errorMessage ?? "통화 기록 데이터가 비어있습니다.")
+            }
+            return callHistory
+            
+        case .failure(let afError):
+            // 에러 로그는 이미 기존의 코드가 출력하고 있습니다.
+            throw NetworkError.afError(afError)
+        }
+    }
+
+    /// [GET] /api/calls/receiver - 내가 수신한 통화 기록 목록을 조회합니다.
+    public func getCallHistoryWithReceiverId() async throws -> [CallHistoryItemDto] {
+        
+        let target = EndPoint.getCallHistoryWithReceiverId
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            encoding: URLEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // HIGHLIGHT: 임시 래퍼 사용
+            .serializingDecodable(TempCallHistoryResponseWrapper.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let wrapperResponse):
+            guard let callHistory = wrapperResponse.data else {
+                throw NetworkError.serverError(message: wrapperResponse.errorMessage ?? "통화 기록 데이터가 비어있습니다.")
+            }
+            return callHistory
+            
+        case .failure(let afError):
+            throw NetworkError.afError(afError)
+        }
+    }
+    
 }
 
 public extension Encodable {

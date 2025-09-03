@@ -199,7 +199,6 @@ public final actor ProfileNetworkManager: Sendable {
         
         let data = try! JSONEncoder().encode(parameters)
         let body = String(data: data, encoding: .utf8)
-        print(body)
         
         AF.request(url,
                    method: .post,

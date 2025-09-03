@@ -1,6 +1,6 @@
 import SwiftUI
 import model
-
+import network
 public struct MatchingMainView: View {
     // MARK: - Properties
     @EnvironmentObject var appSettings: AppSettings
@@ -96,12 +96,23 @@ public struct MatchingMainView: View {
             // 🔥 4. 첫 번째 카드의 id 설정
             // 뷰가 나타날 때 첫 번째 카드의 id (Int?)를 currentCardId에 할당합니다.
             currentCardId = viewModel.cards.first?.id
+            
         }
         .task {
+            var callhistories: [CallHistoryItemDto]
             await viewModel.fetchCards()
             await viewModel.fetchMyProfile { profile in
                 appSettings.userProfile = profile
             }
+            do {
+                callhistories =  try await NetworkManager.shared.getCallHistoryWithCallerId()
+                callhistories +=  try await NetworkManager.shared.getCallHistoryWithReceiverId()
+                print("용해야 로그는 이거를 봐다오 !!!")
+                print(callhistories.count)
+            } catch {
+                print(error.localizedDescription)
+            }
+          
         }
     }
     
