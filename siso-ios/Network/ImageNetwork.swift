@@ -115,6 +115,9 @@ public final actor ImageNetworkManager: Sendable {
             "Content-Type": "multipart/form-data"
         ]
         
+        print(url)
+        print(images)
+        
         return try await withCheckedThrowingContinuation { continuation in
             AF.upload(
                 multipartFormData: { multipartFormData in
@@ -149,7 +152,7 @@ public final actor ImageNetworkManager: Sendable {
         }
     }
     
-    public func removeImage(_ id: Int) async throws {
+    public func removeImage(for id: Int) async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/images/\(id)"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
