@@ -53,10 +53,40 @@ public final actor LoginNetworkManager: Sendable {
                 // 2. KeyChainManager를 사용해 RefreshToken 토큰 저장
                 self?.keychain.save(token: token.accessToken, for: "accessToken")
                 self?.keychain.save(token: token.refreshToken, for: "refreshToken")
+                Task {
+                    do {
+                        // 3. 방금 받은 refreshToken으로 getRefreshToken을 호출합니다.
+                        //    이 함수는 내부적으로 userId를 가져오고 FCM 토큰을 서버에 등록합니다.
+                        if let refreshResult = try await self?.getRefreshToken(refreshToken: token.refreshToken) {
+                            
+                            // 4. getRefreshToken의 결과(registrationStatus)를 사용하여 최종 상태를 결정합니다.
+                            await MainActor.run {
+                                print("✅ 최초 로그인 성공 후, 리프레시 및 FCM 토큰 등록까지 완료.")
+                                completionHandler(refreshResult.registrationStatus, nil)
+                            }
+                            
+                        } else {
+                            // self가 nil인 예외적인 경우
+                            await MainActor.run {
+                                completionHandler("", AFError.explicitlyCancelled)
+                            }
+                        }
+                    } catch {
+                        // getRefreshToken 호출 실패 시 에러 처리
+                        print("🔴 최초 로그인 후 getRefreshToken 호출 실패: \(error)")
+                        await MainActor.run {
+                            completionHandler("", error as? AFError)
+                        }
+                    }
+                }
                 if !token.hasProfile  {
                     token.registrationStatus = "REGISTER" // 동의 항목 이동
                 }
                 completionHandler(token.registrationStatus, nil)
+                
+                
+                
+                
             case .failure(let error):
                 completionHandler("", error)
                 return
@@ -101,6 +131,7 @@ public final actor LoginNetworkManager: Sendable {
         keychain.save(token: response.token.accessToken, for: "accessToken")
         keychain.save(token: response.token.refreshToken, for: "refreshToken")
         print("refreshToken : \(response.token.refreshToken)")
+        
         if !response.token.hasProfile {
             response.token.registrationStatus = "REGISTER"
         }

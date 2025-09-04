@@ -165,9 +165,25 @@ extension AppDelegate: MessagingDelegate {
         KeyChainManager.shared.save(token: token, for: "fcmToken")
         print("🔥 FCM Registration Token: \(token)")
         
-        // 🚨 중요: 이 새로운/갱신된 FCM 토큰을 백엔드 서버로 전송하여
-        // 사용자의 정보와 함께 저장해야 합니다.
-        // 예: ApiClient.shared.sendFCMTokenToServer(token: token)
+        // 2. 현재 로그인한 사용자의 ID가 키체인에 있는지 확인합니다.
+               if let userIdString = KeyChainManager.shared.get(for: "myUserId"),
+                  let userId = Int(userIdString) {
+                   
+                   // 3. 로그인 상태라면, 즉시 서버로 갱신된 토큰을 전송합니다.
+                   Task {
+                       do {
+                           let dto = FcmTokenRequestDto(userId: userId, token: token)
+                           try await NetworkManager.shared.registerFcmToken(dto: dto)
+                           print("✅ AppDelegate: 갱신된 FCM 토큰을 서버에 성공적으로 전송했습니다.")
+                       } catch {
+                           print("🔴 AppDelegate: 갱신된 FCM 토큰을 서버에 전송하는 데 실패했습니다: \(error)")
+                       }
+                   }
+               } else {
+                   // 4. 비로그인 상태라면, 토큰을 저장만 해두고 넘어갑니다.
+                   //    (나중에 로그인 성공 시 LoginNetworkManager가 전송해 줄 것입니다.)
+                   print("ℹ️ 비로그인 상태이므로, FCM 토큰 서버 전송은 다음 로그인 시 진행됩니다.")
+               }
     }
    
 }

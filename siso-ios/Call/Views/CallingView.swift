@@ -43,6 +43,7 @@ public struct CallingView: View {
                     
                 }
             }
+            .padding()
             
             Spacer()
             
