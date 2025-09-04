@@ -1,7 +1,6 @@
 //
 //  SuePopupView.swift
 //  auth
-//
 //  Created by jdios on 8/24/25.
 //
 

@@ -175,7 +175,7 @@ public struct MatchingCardView: View {
                 let systemName = cardViewModel.voiceSampleURL != nil ? (isCurrentlyPlayingThisCard ? "pause.fill" : "play.fill") : "play.slash"
                 
                 Image(systemName: systemName)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .frame(width: 24, height: 24)
                 
                 WaveformView(count: 6, height: 20, isPlaying: .constant(isCurrentlyPlayingThisCard))
