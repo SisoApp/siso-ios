@@ -145,10 +145,28 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         status = .waiting
     }
     
-    func uploadVoice(completion: @escaping (VoiceDTO) -> Void) async {
-        try? await VoiceNetworkManager.shared.uploadVoice(completion: { voice in
-            completion(voice)
-        })
+    func uploadVoice() async throws {
+        try await VoiceNetworkManager.shared.uploadVoice()
+    }
+    
+    func registerWholeProfile(_ userProfile: UserProfile) async throws {
+        let request: UserProfileDTO = UserProfile.convertToDTO(userProfile)
+        
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await ProfileNetworkManager.shared.registerProfile(request)
+            }
+            
+            group.addTask {
+                try await ImageNetworkManager.shared.uploadImages(userProfile.profileImages)
+            }
+            
+            group.addTask {
+                try await VoiceNetworkManager.shared.uploadVoice()
+            }
+            
+            for try await _ in group { }
+        }
     }
 }
 

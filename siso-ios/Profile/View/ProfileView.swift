@@ -15,6 +15,7 @@ public enum ProfileMode {
 public struct ProfileView: View {
     @EnvironmentObject private var appSettings: AppSettings
     @ObservedObject var userProfile: UserProfile
+    @ObservedObject private var viewModel: ProfileViewModel = .init()
     
     @State private var nickname: String = ""
     @State private var age: String = ""
@@ -24,15 +25,12 @@ public struct ProfileView: View {
     @State private var religion: String = ""
     @State private var meetings: [String] = []
     @State private var interests: [String] = []
-    
     @State private var showAlert: Bool = false
     @State private var isPlaying: Bool = false
-    @State private var didInit: Bool = false
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
     
-    @ObservedObject private var viewModel: ProfileViewModel = .init()
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -80,20 +78,11 @@ public struct ProfileView: View {
             }
         }
         .toolbar(.hidden, for: .tabBar)
-        .onAppear {
-            if !didInit {
-                viewModel.setViewModel(
-                    profile: appSettings.userProfile,
-                    images: appSettings.profileImages,
-                    voice: appSettings.voice,
-                    interests: appSettings.interests
-                )
-                bindViewValue()
-                didInit = true
-            }
-        }
         .task {
-            await viewModel.getImageUrl(appSettings.profileImages)
+            await viewModel.getMyProfile()
+            await MainActor.run {
+                bindViewValue()
+            }
         }
     }
     
@@ -329,7 +318,7 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.religion)
                 }
             
-            inputView(title: "흡연", item: userProfile.smoking ? "흡연자" : "비흡연자")
+            inputView(title: "흡연", item: viewModel.smokeDescription)
                 .onTapGesture {
                     delegate?.pushProfile(.smoke)
                 }
@@ -497,7 +486,7 @@ public struct ProfileView: View {
                 await viewModel.updateProfile(userProfile) { profile in
                     
                     
-                    appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
+                    //appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
                     delegate?.pop()
                 }
             }
@@ -517,26 +506,26 @@ public struct ProfileView: View {
     }
     
     private func bindViewValue() {
-        nickname = viewModel.nickname
-        age = viewModel.age
-        introduce = viewModel.introduce
-        sex = viewModel.sex
-        targetSex = viewModel.preferenceSex
+        nickname = viewModel.profile?.nickname ?? ""
+        age = viewModel.profile?.age.description ?? ""
+        introduce = viewModel.profile?.introduce ?? ""
+        sex = viewModel.profile?.sex?.rawValue
+        targetSex = viewModel.profile?.preferenceSex?.rawValue
         
-        religion = viewModel.religion
-        userProfile.religion = viewModel.religion
+        religion = viewModel.profile?.religion?.rawValue ?? ""
+        userProfile.religion = viewModel.profile?.religion?.rawValue ?? ""
         
         userProfile.smoking = viewModel.smoke
-        userProfile.mbti = viewModel.mbti
-        userProfile.drinking = viewModel.drinkingCapacity
+        userProfile.mbti = viewModel.profile?.mbti?.rawValue ?? ""
+        userProfile.drinking = viewModel.profile?.drinkingCapacity?.rawValue ?? ""
         
-        userProfile.location = viewModel.location
+        userProfile.location = viewModel.profile?.location ?? ""
         
-        meetings = viewModel.meetings
-        userProfile.meeting = viewModel.meetings
+        meetings = viewModel.profile?.meetings?.map { $0.rawValue } ?? []
+        userProfile.meeting = viewModel.profile?.meetings?.map { $0.rawValue } ?? []
         
-        interests = viewModel.interestArray
-        userProfile.interests = viewModel.interestArray
+        interests = viewModel.interests?.map { $0.rawValue } ?? []
+        userProfile.interests = viewModel.interests?.map { $0.rawValue } ?? []
     }
 }
 

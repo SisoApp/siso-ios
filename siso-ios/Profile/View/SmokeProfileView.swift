@@ -29,7 +29,7 @@ enum SmokingStatus: CaseIterable {
 
 public struct SmokeProfileView: View {
     @ObservedObject private var userProfile: UserProfile
-    @State private var smoking: Bool
+    @State private var smoking: Bool?
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {

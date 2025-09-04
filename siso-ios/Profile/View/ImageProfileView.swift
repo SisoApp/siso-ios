@@ -8,13 +8,18 @@
 import SwiftUI
 import designSystem
 import network
+import model
 
 public struct ImageProfileView: View {
+    @EnvironmentObject private var appSettings: AppSettings
     @ObservedObject private var userProfile: UserProfile
     @Binding var currentPage: SignUpProfilePage
+    @State private var showAlert: Bool = false
+    
     private var images: [UIImage] = [] // 이미지 등록을 건너뛸 때 초기 값으로 복구하기 위한 초기값 저장 변수
     
     weak var delegate: ProfileCoordinatorDelegate?
+    private var viewModel: ImageProfileViewModel = .init()
     private let mode: ProfileMode
     private let limit: Int = 5
     
@@ -197,16 +202,24 @@ public struct ImageProfileView: View {
         let isActive: Bool = userProfile.profileImages.count > 0
         
         return PrimaryButton(title: "계속하기", isActive: isActive) {
-            Task {
-                try await ImageNetworkManager.shared.uploadImages(userProfile.profileImages)
-            }
-        
             switch mode {
             case .signUp:
                 currentPage = .introduce
             case .edit:
-                delegate?.pop()
+                Task {
+                    do {
+                        try await viewModel.uploadImages(userProfile.profileImages)
+                        delegate?.pop()
+                    } catch {
+                        showAlert = true
+                    }
+                }
             }
+        }
+        .alert("오류", isPresented: $showAlert) {
+            Button("확인") { }
+        } message: {
+            Text("이미지 등록이 실패했습니다. 다시 시도해주세요.")
         }
     }
     

@@ -11,58 +11,27 @@ import model
 
 public extension ProfileView {
     class ProfileViewModel: ObservableObject {
-        private var profile: UserProfileDTO?
-        private var images: [ImageDTO]?
-        private var voice: VoiceDTO?
-        private var interests: [Interest]?
+        @Published var profile: UserProfileDTO?
+        var images: [ImageDTO]?
+        var voice: VoiceDTO?
+        var interests: [Interest]?
         @Published var mainImageUrl: URL?
         
-        var nickname: String {
-            return profile?.nickname ?? ""
+        var smoke: Bool? {
+            return profile?.smoke
         }
         
-        var age: String {
-            return profile?.age.description ?? ""
-        }
-        
-        var introduce: String {
-            return profile?.introduce ?? ""
-        }
-        
-        var location: String {
-            return profile?.location ?? ""
-        }
-        
-        var smoke: Bool {
-            return profile?.smoke ?? false
-        }
-        
-        var sex: String? {
-            return profile?.sex?.rawValue
-        }
-        
-        var preferenceSex: String? {
-            return profile?.preferenceSex?.rawValue
-        }
-        
-        var drinkingCapacity: String {
-            return profile?.drinkingCapacity?.rawValue ?? ""
-        }
-        
-        var religion: String {
-            return profile?.religion?.rawValue ?? ""
-        }
-        
-        var mbti: String {
-            return profile?.mbti?.rawValue ?? ""
-        }
-        
-        var meetings: [String] {
-            return profile?.meetings?.map { $0.rawValue } ?? []
-        }
-        
-        var interestArray: [String] {
-            return interests?.map { $0.rawValue } ?? []
+        var smokeDescription: String {
+            if let smoke = profile?.smoke {
+                switch smoke {
+                case true:
+                    return "흡연자"
+                case false:
+                    return "비흡연자"
+                }
+            }
+            
+            return ""
         }
         
         var voiceId: Int? {
@@ -74,7 +43,7 @@ public extension ProfileView {
         }
         
         var voiceUrl: String {
-            return voice?.url ?? ""
+            return voice?.presignedUrl ?? ""
         }
         
         var sexOptions: [(String, String)] {
@@ -113,38 +82,15 @@ public extension ProfileView {
             return descriptions
         }
         
-        func setViewModel(profile: UserProfileDTO?, images: [ImageDTO]?, voice: VoiceDTO?, interests: [Interest]?) {
-            self.profile = profile
-            self.images = images
-            self.voice = voice
-            self.interests = interests
+        func getMyProfile() async {
+            let profile: UserProfileDTO? = try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            await MainActor.run {
+                self.profile = profile
+            }
         }
         
         func updateProfile(_ userProfile: UserProfile, completion: @escaping (UserProfileDTO) -> Void) async {
-            let drinkingCapacity = DrinkingCapacity(rawValue: userProfile.drinking)
-            let religion = Religion(rawValue: userProfile.religion)
-            let sex = Sex(rawValue: userProfile.sex)
-            let preferenceSex = PreferenceSex(rawValue: userProfile.targetSex)
-            let mbti = Mbti(rawValue: userProfile.mbti)
-            let location = !userProfile.location.isEmpty ? userProfile.location : nil
-            
-            let meetings: [Meeting]? = userProfile.meeting.isEmpty
-                ? nil
-                : userProfile.meeting.compactMap { Meeting(rawValue: $0) }
-            
-            let request: UserProfileDTO = UserProfileDTO(
-                drinkingCapacity: drinkingCapacity,
-                religion: religion,
-                smoke: userProfile.smoking,
-                age: userProfile.age,
-                nickname: userProfile.nickname,
-                introduce: userProfile.introduce,
-                location: location,
-                sex: sex,
-                preferenceSex: preferenceSex,
-                mbti: mbti,
-                meetings: meetings
-            )
+            let request: UserProfileDTO = UserProfile.convertToDTO(userProfile)
             
             try? await ProfileNetworkManager.shared.updateProfile(request) { profile in
                 completion(profile)
@@ -163,14 +109,6 @@ public extension ProfileView {
             }
             
             try? await ProfileNetworkManager.shared.registerInterests(request)
-        }
-        
-        func getImageUrl(_ images: [ImageDTO]?) async {
-            guard let images = images else { return }
-            try? await ImageNetworkManager.shared.getImageUrl(for: images[0].id) { [weak self] urlString in
-                guard let url: URL = URL(string: urlString) else { return }
-                self?.mainImageUrl = url
-            }
         }
     }
 }

@@ -43,16 +43,8 @@ public struct MyPageView: View {
                 settingButton()
             }
         }
-        .onAppear {
-            viewModel.setViewModel(
-                profile: appSettings.userProfile,
-                images: appSettings.profileImages,
-                voice: appSettings.voice,
-                interests: appSettings.interests
-            )
-        }
         .task {
-            await viewModel.getImageUrl(appSettings.profileImages)
+            await viewModel.getMyProfile()
         }
     }
     

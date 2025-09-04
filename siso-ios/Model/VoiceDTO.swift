@@ -10,6 +10,7 @@ import Foundation
 public struct VoiceDTO: Codable, Sendable {
     public let id: Int
     public let userId: Int
-    public let url: String
+    //public let url: String
     public let duration: Int
+    public let presignedUrl: String
 }

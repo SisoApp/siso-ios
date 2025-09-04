@@ -15,9 +15,11 @@ public struct RecordProfileView: View {
     @ObservedObject private var userProfile: UserProfile
     @StateObject private var viewModel: RecordProfileViewModel
     @Binding var currentPage: SignUpProfilePage
+    @State private var showAlert: Bool = false
     
-    private let mode: ProfileMode
     weak var delegate: ProfileCoordinatorDelegate?
+    private let mode: ProfileMode
+    private var errorMessage: String = ""
     
     public init(delegate: ProfileCoordinatorDelegate?, currentPage: Binding<SignUpProfilePage>, userProfile: UserProfile, mode: ProfileMode) {
         self.delegate = delegate
@@ -155,17 +157,28 @@ public struct RecordProfileView: View {
         
         return PrimaryButton(title: "완료하기", isActive: isActive) {
             Task {
-                await viewModel.uploadVoice { voice in
-                    appSettings.voice = voice
+                switch mode {
+                case .signUp:
+                    do {
+                        try await viewModel.registerWholeProfile(userProfile)
+                        delegate?.pushProfile(.complete)
+                    } catch {
+                        showAlert = true
+                    }
+                case .edit:
+                    do {
+                        try await viewModel.uploadVoice()
+                        delegate?.pop()
+                    } catch {
+                        showAlert = true 
+                    }
                 }
             }
-            
-            switch mode {
-            case .signUp:
-                delegate?.pushProfile(.complete)
-            case .edit:
-                delegate?.pop()
-            }
+        }
+        .alert("오류", isPresented: $showAlert) {
+            Button("확인") {  }
+        } message: {
+            Text("서버 업로드 실패! 다시 시도해주세요.")
         }
     }
     
