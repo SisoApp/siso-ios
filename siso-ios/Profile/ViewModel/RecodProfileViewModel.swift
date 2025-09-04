@@ -25,6 +25,7 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     
     private var recorder: AVAudioRecorder?
     private var player: AVAudioPlayer?
+    private var urlPlayer: AVPlayer?
     private var fileName: String = "voice.m4a"
     
     private var timer: Timer.TimerPublisher?
@@ -138,10 +139,30 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         }
     }
     
+    func startPlaying(url: URL) {
+        urlPlayer = AVPlayer(url: url)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(urlPlayerDidFinishPlaying),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: urlPlayer?.currentItem
+        )
+        
+        startTimer()
+        urlPlayer?.play()
+        status = .playing
+    }
+    
     func stopPlaying() {
         removeTimer()
+        
         player?.stop()
         player = nil
+        
+        urlPlayer?.pause()
+        urlPlayer = nil
+        
         status = .waiting
     }
     
@@ -184,16 +205,14 @@ extension RecordProfileViewModel {
         removeTimer()
         
         // 녹음 정리
-        if let recorder = recorder, recorder.isRecording {
-            recorder.stop()
-        }
+        recorder?.stop()
         recorder = nil
         
         // 재생 정리
-        if let player = player, player.isPlaying {
-            player.stop()
-        }
+        player?.stop()
         player = nil
+        urlPlayer?.pause()
+        urlPlayer = nil
         
         // AVAudioSession 정리
         try? AVAudioSession.sharedInstance().setActive(false)
@@ -214,6 +233,10 @@ extension RecordProfileViewModel {
         default:
             break
         }
+    }
+    
+    @objc private func urlPlayerDidFinishPlaying() {
+        stopPlaying()
     }
 }
 
