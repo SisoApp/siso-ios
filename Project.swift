@@ -134,6 +134,21 @@ let matching: Target = .target(
     ]
 )
 
+let notification: Target = .target(
+    name: "notification",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).matching",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Notification/**"],
+    dependencies: [
+        .target(name: "model"),
+        .target(name: "network"),
+        .target(name: "designSystem"),
+    ]
+)
+
 let call: Target = .target(
     name: "call",
     destinations: .iOS,
@@ -222,6 +237,7 @@ let coordinator: Target = .target(
         .target(name: "model"),
         .target(name: "mypage"),
         .target(name: "chat"),
+        .target(name: "notification"),
         
     ]
 )
@@ -276,6 +292,7 @@ let project = Project(
         designSystem,
         model,
         call,
-        chat
+        chat,
+        notification,
     ]
 )

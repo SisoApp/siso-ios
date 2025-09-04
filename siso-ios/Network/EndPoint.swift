@@ -35,6 +35,11 @@ public enum EndPoint {
     case getCallHistoryWithCallerId   // 내가 건 통화 기록
     case getCallHistoryWithReceiverId // 내가 받은 통화 기록
     case addReport
+    case registerFcmToken
+    
+    // MARK: - Notification
+    case getNotification
+    case markNotificationAsRead(notificationId: Int)
 }
 
 // MARK: - EndPoint Extension (TargetType 준수)
@@ -80,6 +85,16 @@ extension EndPoint: TargetType {
         case .getCallHistoryWithCallerId: return "/api/calls/caller"
         case .getCallHistoryWithReceiverId: return "/api/calls/receiver"
         case .addReport: return "/api/reports"
+            
+            // FCM
+        case .registerFcmToken: return "/api/fcm/token"
+            
+            // Notification
+        case .getNotification:
+            return "/api/notifications"
+            
+        case .markNotificationAsRead(let notificationId):
+                    return "/api/notifications/\(notificationId)/read"
         }
     }
     
@@ -87,11 +102,11 @@ extension EndPoint: TargetType {
         switch self {
             // POST
         case .kakaoLogin, .appleLogin, .refreshToken, .logout, .selectInterests,
-                .createReport, .requestCall, .acceptCall, .denyCall, .endCall, .addReport:
+                .createReport, .requestCall, .acceptCall, .denyCall, .endCall, .addReport, .registerFcmToken:
             return .post
             
             // PATCH
-        case .updateUserNotifications, .updateInterests:
+        case .updateUserNotifications, .updateInterests, .markNotificationAsRead:
             return .patch
             
             // DELETE

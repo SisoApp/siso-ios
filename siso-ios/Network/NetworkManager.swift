@@ -391,6 +391,115 @@ public final class NetworkManager {
             throw NetworkError.afError(afError)
         }
     }
+    /// [POST] /api/fcm/token - 서버에 FCM 토큰을 등록합니다.
+    ///
+    /// 성공 시 특정 객체를 반환하지 않고, 성공 여부만 확인합니다.
+    /// - Parameter dto: 사용자 ID와 FCM 토큰을 담은 `FcmTokenRequestDto`
+    /// - Throws: `NetworkError` - 네트워크 요청 실패 시
+    public func registerFcmToken(dto: FcmTokenRequestDto) async throws {
+        
+        let target = EndPoint.registerFcmToken
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json"
+        ]
+        
+        // Encodable DTO를 Alamofire 파라미터로 변환
+        let parameters = try dto.toDictionary()
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: JSONEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // HIGHLIGHT: 응답 본문이 단순 문자열이므로 .serializingString() 사용
+            .serializingString()
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let responseString):
+            // 성공 시, 서버가 보낸 문자열을 로그로 출력하고 아무것도 반환하지 않음 (Void)
+            print("✅ FCM Token registered successfully: \(responseString)")
+            return
+            
+        case .failure(let afError):
+            // 실패 시 에러 처리
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (registerFcmToken) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
+    }
+    
+    /// 서버 응답의 `data` 필드에 포함된 알림 DTO 배열을 반환합니다.
+    /// - Returns: 알림 DTO 배열 `[NotificationResponseDto]`
+    /// - Throws: `NetworkError` - 네트워크 통신 또는 디코딩 실패 시
+    public func getNotifications() async throws -> [NotificationResponseDto] {
+        // 범용 `request` 함수를 사용합니다.
+        // 이 API는 표준 SisoResponse<[DTO]> 구조를 따르므로,
+        // responseType에 [NotificationResponseDto].self (배열 타입)을 지정하면
+        // request 함수가 알아서 래퍼를 벗겨내고 data 배열을 반환합니다.
+        return try await request(
+            target: .getNotification,
+            responseType: [NotificationResponseDto].self
+        )
+    }
+    /// [PATCH] /api/notifications/{notificationId}/read - 특정 알림을 읽음 상태로 변경합니다.
+    ///
+    /// 성공 시 반환되는 데이터가 없으므로, 함수의 반환 타입은 Void입니다.
+    /// - Parameter notificationId: 읽음 처리할 알림의 ID
+    /// - Throws: `NetworkError` - 네트워크 요청 실패 시
+    public func markNotificationAsRead(notificationId: Int) async throws {
+        
+        // 범용 `request` 함수는 성공 시 data 필드를 기대하는데,
+        // 이 API의 data는 null 또는 비어있을 수 있어 직접 처리하는 것이 더 안전합니다.
+        
+        let target = EndPoint.markNotificationAsRead(notificationId: notificationId)
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+            // PATCH 요청이지만 Body가 없으므로 Content-Type은 불필요
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            // Body가 없으므로 parameters는 nil
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            .serializingData() // 응답 본문이 없거나 무시해도 되므로 .serializingData() 사용
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success:
+            // HTTP 상태 코드가 200-299 범위 안에 들어오면 성공으로 간주하고 함수를 종료합니다.
+            print("✅ Notification (id: \(notificationId)) marked as read successfully.")
+            return
+            
+        case .failure(let afError):
+            // 실패 시 에러 처리
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (markNotificationAsRead) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
+    }
+
 }
 
 public extension Encodable {
