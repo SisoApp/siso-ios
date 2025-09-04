@@ -95,34 +95,57 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func startRecoding() {
-        let session = AVAudioSession.sharedInstance()
-        
-        do {
-            try session.setCategory(.playAndRecord, mode: .default)
-            try session.setActive(true)
-            
-            let settings: [String: Any] = [
-                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-                AVSampleRateKey: 12000,
-                AVNumberOfChannelsKey: 1,
-                AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
-            ]
-            
-            status = .recording
-            recorder = try AVAudioRecorder(url: audioFileUrl, settings: settings)
-            recorder?.record()
-            startTimer()
-        } catch {
-            print("Failed to start recording:", error)
+        Task {
+            await withCheckedContinuation { continuation in
+                DispatchQueue.global().async { [weak self] in
+                    guard let self = self else { return }
+                    let session = AVAudioSession.sharedInstance()
+                    
+                    do {
+                        try session.setCategory(.playAndRecord, mode: .default)
+                        try session.setActive(true)
+                        
+                        let settings: [String: Any] = [
+                            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                            AVSampleRateKey: 12000,
+                            AVNumberOfChannelsKey: 1,
+                            AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
+                        ]
+                        
+                        let recorder = try AVAudioRecorder(url: self.audioFileUrl, settings: settings)
+                        recorder.record()
+                        
+                        DispatchQueue.main.async {
+                            self.recorder = recorder
+                            self.status = .recording
+                            self.startTimer()
+                            continuation.resume()
+                        }
+                    } catch {
+                        print("Failed to start recording:", error)
+                        continuation.resume()
+                    }
+                }
+            }
         }
     }
     
     func stopRecording() {
         removeTimer()
-        recorder?.stop()
-        recorder = nil
         status = .waiting
         userProfile.voice = true
+        
+        Task {
+            await MainActor.run {
+                recorder?.stop()
+                recorder = nil
+            }
+            
+            // 시간이 오래 소요되는 비활성화는 백그라운드 작업으로 전환
+            try? await Task.detached {
+                try AVAudioSession.sharedInstance().setActive(false)
+            }.value
+        }
         
         try? AVAudioSession.sharedInstance().setActive(false) // AVAudioSession 비활성화
     }
@@ -167,6 +190,7 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func uploadVoice() async throws {
+        print("upload Voice")
         try await VoiceNetworkManager.shared.uploadVoice()
     }
     

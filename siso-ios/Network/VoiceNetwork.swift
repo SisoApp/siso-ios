@@ -71,7 +71,8 @@ public final actor VoiceNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)"
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "multipart/form-data"
         ]
         
         return try await withCheckedThrowingContinuation { continuation in
