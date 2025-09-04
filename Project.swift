@@ -61,11 +61,11 @@ let sisoApp: Target = .target(
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
     ],
-//    settings: .settings(
-//           base: [
-//               "OTHER_LDFLAGS": "-ObjC"
-//           ]
-//       )
+    settings: .settings(
+           base: [
+               "OTHER_LDFLAGS": "-ObjC"
+           ]
+       )
 )
 
 let sisoAppTest: Target = .target(
@@ -127,6 +127,21 @@ let matching: Target = .target(
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Matching/**"],
+    dependencies: [
+        .target(name: "model"),
+        .target(name: "network"),
+        .target(name: "designSystem"),
+    ]
+)
+
+let notification: Target = .target(
+    name: "notification",
+    destinations: .iOS,
+    product: .staticLibrary,
+    bundleId: "\(bundleId).matching",
+    deploymentTargets: .iOS("17.0"),
+    infoPlist: .default,
+    sources: ["siso-ios/Notification/**"],
     dependencies: [
         .target(name: "model"),
         .target(name: "network"),
@@ -222,6 +237,7 @@ let coordinator: Target = .target(
         .target(name: "model"),
         .target(name: "mypage"),
         .target(name: "chat"),
+        .target(name: "notification"),
         
     ]
 )
@@ -276,6 +292,7 @@ let project = Project(
         designSystem,
         model,
         call,
-        chat
+        chat,
+        notification,
     ]
 )

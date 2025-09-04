@@ -4,7 +4,7 @@ import Foundation
 
 // 서버의 UserProfileDto와 일치 (이름을 CallProfileDto로 사용)
 public struct CallProfileDto: Codable, Equatable {
-    public var id = UUID()
+    public var id: Int
     public let nickname: String
     public let age: Int
     public let location: String?
@@ -20,5 +20,6 @@ public struct CallProfileDto: Codable, Equatable {
         self.location = profile.location
         self.interests = profile.interests
         self.profileImageUrl = profile.imageUrls.first // MatchingProfile의 이미지 URL 배열에서 첫 번째 이미지를 사용
+        self.id = UUID().hashValue
     }
 }

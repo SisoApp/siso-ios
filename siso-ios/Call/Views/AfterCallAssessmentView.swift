@@ -65,6 +65,9 @@ public struct AfterCallAssessmentView: View {
                     
                     Button {
                         print("accept")
+                        Task {
+                            await CallManager.shared.decideRelationship(continueRelationship: true)
+                        }
                     } label: {
                         loveButton
                     }
@@ -74,13 +77,8 @@ public struct AfterCallAssessmentView: View {
             Spacer()
             
             Button {
-                print("User chose to CONTINUE relationship.")
-                // ✅ 1. CallManager에게 최종 결정(true)을 알림
-                Task {
-                    await CallManager.shared.decideRelationship(continueRelationship: true)
-                }
-                // ✅ 2. Coordinator를 통해 채팅방 등으로 이동
-                delegate?.popToRootAndGoToChat()  // 예시: 채팅방으로 이동하는 함수
+                delegate?.openReportSheet(.report(opponentProfile: opponentProfile))
+                
             } label: {
                 Text("신고하기")
                     .font(.system(size: 18))

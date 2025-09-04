@@ -1,6 +1,6 @@
 import SwiftUI
 import model
-
+import network
 public struct MatchingMainView: View {
     // MARK: - Properties
     @EnvironmentObject var appSettings: AppSettings
@@ -52,27 +52,28 @@ public struct MatchingMainView: View {
                 ProfileDemandingView(matchingViewModel: viewModel, delegate: delegate)
             }
         }
-        .navigationTitle("둘러보기")
         .toolbar(content: {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
                     // 종 모양 아이콘을 탭했을 때 실행될 코드
                     print("알림 버튼 탭!")
+                    delegate?.pushMatching(.notification)
                 }) {
                     // SF Symbols에서 "bell" 아이콘을 사용합니다.
                     Image(systemName: "bell")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 30, height: 30)
                         .foregroundStyle(.black)
                 }
             }
+            ToolbarItem(placement: .topBarLeading) {
+                Text("둘러보기")
+                    .font(.system(size: 24, weight: .bold))
+            }
+            
         })
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }
-            
-            // 🔥 3. id로 카드 찾기
-            // 'uuid'가 아닌 'id' 프로퍼티로 현재 카드를 찾습니다.
             if let currentIndex = viewModel.cards.firstIndex(where: { $0.id == newID }) {
                 let newWatchingCard = viewModel.cards[currentIndex]
                 viewModel.nowWatching = newWatchingCard
@@ -80,7 +81,7 @@ public struct MatchingMainView: View {
                 print("👀 Now Watching: \(newWatchingCard.nickname), Index: \(currentIndex)")
                 
                 // 무한 스크롤 로직 (비동기 호출은 Task로 감싸야 합니다)
-                if Double(currentIndex) / Double(viewModel.cards.count) > 0.8 {
+                if currentIndex == viewModel.cards.count - 2 { 
                     Task {
                         await viewModel.fetchCards()
                     }
@@ -89,10 +90,8 @@ public struct MatchingMainView: View {
         }
         .onAppear {
             viewModel.injectDelegateToCards()
-            
-            // 🔥 4. 첫 번째 카드의 id 설정
-            // 뷰가 나타날 때 첫 번째 카드의 id (Int?)를 currentCardId에 할당합니다.
             currentCardId = viewModel.cards.first?.id
+            
         }
         .task {
             await viewModel.fetchCards()

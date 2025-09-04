@@ -11,9 +11,7 @@ import network
 
 public enum CallPage: Identifiable, Hashable, Equatable {
     case manner(opponentProfile: MatchingProfile)
-//    case connecting(opponentProfile: UserProfileServer)
-//    case calling(viewModel: CallViewModel) // ViewModel은 Hashable/Equatable을 준수해야 합니다.
-//    case incomingCall(callInfo: IncomingCallInfo)
+
     case activeCall
     case reportFeedbackPopup
     
@@ -42,7 +40,7 @@ public enum CallPage: Identifiable, Hashable, Equatable {
 
 // CallSheet도 동일하게 수정합니다.
 public enum CallSheet: Identifiable, Hashable {
-    case report(opponentProfile: CallProfileDto)
+    case report(opponentProfile: MatchingProfile)
     
     public var id: String {
         switch self {

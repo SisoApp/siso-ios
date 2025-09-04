@@ -9,6 +9,7 @@ public struct MatchingCardView: View {
     
     @ObservedObject var cardViewModel: CardViewModel
     @ObservedObject var audioPlayer: AudioPlayerManager
+    @State private var showChatNotice: Bool = false
     
     public init(cardViewModel: CardViewModel, audioPlayer: AudioPlayerManager) {
         self._cardViewModel = .init(wrappedValue: cardViewModel)
@@ -18,26 +19,48 @@ public struct MatchingCardView: View {
     // MARK: - Main Body
     
     public var body: some View {
-        VStack {
-            Spacer()
-            stateView
-            profileImageView
-            locationInfoSection
-            HStack {
-                userInfoSection
-                    .fixedSize()
+        ZStack(alignment: .bottom) {
+            VStack {
                 Spacer()
-                voicePlayerSection
+                stateView
+                profileImageView
+                locationInfoSection
+                HStack {
+                    userInfoSection
+                        .fixedSize()
+                    Spacer()
+                    voicePlayerSection
+                }
+                .padding(.horizontal)
+                
+                interestTagsSection
+                
+                introductionSection
+                Spacer()
+                
+                actionButtonsSection
+                Spacer()
             }
-            .padding(.horizontal)
-            interestTagsSection
-            introductionSection
-            actionButtonsSection
-            Spacer()
+            if showChatNotice {
+                chatNoticeBoxView
+                    .padding(.bottom, 120) // 하단 버튼 위로 위치 조정
+                    .transition(.opacity.combined(with: .move(edge: .bottom))) // 나타나고 사라질 때 애니메이션
+                    .onAppear {
+                        // 뷰가 나타난 후 3초 뒤에 사라지도록 타이머 설정
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            // 애니메이션과 함께 상태 변경
+                            withAnimation {
+                                showChatNotice = false
+                            }
+                        }
+                    }
+            }
         }
         // background는 VStack의 background로 설정하는 것이 더 일반적입니다.
         .background(.white)
+        
        
+        
     }
     
     private var stateView: some View {
@@ -48,32 +71,36 @@ public struct MatchingCardView: View {
         .padding(.horizontal)
     }
     
+    /// 프로필 이미지들을 보여주는 TabView
     private var profileImageView: some View {
         TabView {
-            // profileImageURLs가 비어있는 경우를 대비
+            // 프로필 이미지가 하나도 없는 경우
             if cardViewModel.profileImageURLs.isEmpty {
-                // 여기에 로고 이미지를 표시하는 뷰를 직접 넣습니다.
-                Image("seeting_LOGO") // Assets에 있는 로고 이미지 이름
-                    .resizable()
-                    .scaledToFit()
+                placeholderImage
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.gray.opacity(0.2)) // 배경색 추가
             } else {
+                // 프로필 이미지가 있는 경우, 각 URL에 대해 이미지 뷰를 생성
                 ForEach(cardViewModel.profileImageURLs, id: \.self) { url in
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    } placeholder: {
-                        // 이미지 로딩 중일 때 보여줄 뷰
-                        ZStack {
-                            Color.gray.opacity(0.2)
+                    
+                    // AsyncImage의 phase를 사용하여 로딩 상태를 세밀하게 제어
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            // 로딩 중일 때 ProgressView를 포함한 플레이스홀더 표시
+                            loadingPlaceholder
                             
-                            Image(systemName: "person.fill")
+                        case .success(let image):
+                            // 로딩 성공 시 이미지 표시
+                            image
                                 .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: 32, maxHeight: 32)
-                                .foregroundStyle(Color.Siso.Gray._40)
+                                .aspectRatio(contentMode: .fit) // fill로 꽉 채우기
+                            
+                        case .failure(let error):
+                            // 로딩 실패 시 에러 아이콘을 포함한 플레이스홀더 표시
+                            failurePlaceholder(error: error, url: url)
+                            
+                        @unknown default:
+                            EmptyView()
                         }
                     }
                 }
@@ -81,6 +108,7 @@ public struct MatchingCardView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .automatic))
         .frame(height: 242)
+        .background(Color.gray.opacity(0.1)) // 이미지 뒤에 연한 배경색 추가
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .padding(.horizontal)
     }
@@ -147,7 +175,7 @@ public struct MatchingCardView: View {
                 let systemName = cardViewModel.voiceSampleURL != nil ? (isCurrentlyPlayingThisCard ? "pause.fill" : "play.fill") : "play.slash"
                 
                 Image(systemName: systemName)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .frame(width: 24, height: 24)
                 
                 WaveformView(count: 6, height: 20, isPlaying: .constant(isCurrentlyPlayingThisCard))
@@ -205,7 +233,10 @@ public struct MatchingCardView: View {
     private var actionButtonsSection: some View {
         HStack {
             Button {
-                cardViewModel.chat()
+                // 여기 버튼 동작
+                print("chat")
+                showChatNotice = true
+                
             } label: {
                 RoundedRectangle(cornerRadius: 24)
                     .frame(maxWidth: 80, maxHeight: 80)
@@ -238,6 +269,53 @@ public struct MatchingCardView: View {
         .frame(height: 80)
         .padding(.horizontal)
     }
+    
+    private var chatNoticeBoxView: some View {
+        Text("통화 및 상호 동의 이후 대화가 가능합니다.")
+            .font(.system(size: 20, weight: .semibold))
+            .foregroundColor(Color.Siso.Gray._0)
+            .padding()
+            .background {
+                RoundedRectangle(cornerRadius: 8)
+                    .foregroundStyle(Color.Siso.Gray._90.opacity(0.7))
+                
+            }
+            .frame(maxWidth: .infinity)
+           
+    }
+    
+    /// 이미지가 아예 없을 때 보여줄 기본 플레이스홀더
+    private var placeholderImage: some View {
+        // 여기에 브랜드 로고나 기본 이미지를 넣을 수 있습니다.
+        Image("seeting_LOGO")
+            .resizable()
+            .scaledToFit()
+            .padding(40) // 로고가 너무 꽉 차지 않도록 여백 추가
+    }
+    
+    /// 이미지 로딩 중에 보여줄 플레이스홀더
+    private var loadingPlaceholder: some View {
+        ZStack {
+            Color.clear // 배경색을 투명하게 하여 .background modifier의 색이 보이도록 함
+            ProgressView()
+        }
+    }
+    
+    /// 이미지 로딩 실패 시 보여줄 플레이스홀더
+    private func failurePlaceholder(error: Error, url: URL) -> some View {
+        ZStack {
+            Color.clear
+            Image(systemName: "photo.on.rectangle.angled")
+                .font(.largeTitle)
+                .foregroundColor(.gray.opacity(0.5))
+        }
+        .onAppear {
+            // 이제 이 스코프에서는 error와 url 변수를 정상적으로 사용할 수 있습니다.
+            print("🖼️ [AsyncImage] Failed to load image from \(url).")
+            print("🖼️ [AsyncImage] Error: \(error.localizedDescription)")
+        }
+    }
+    
 }
 
 

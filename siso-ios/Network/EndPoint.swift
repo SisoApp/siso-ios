@@ -11,7 +11,7 @@ public enum EndPoint {
     case appleLogin
     case refreshToken
     case logout
-   
+    
     // MARK: - Users (사용자 정보 관련)
     case getUserInfo
     case updateUserNotifications
@@ -19,7 +19,7 @@ public enum EndPoint {
     case selectInterests(userId: Int)
     case updateInterests(userId: Int)
     case getInterests(userId: Int)
-
+    
     // MARK: - Profiles (프로필 관련)
     case getMatchingProfiles
     case getUserProfile(userId: Int)
@@ -32,6 +32,14 @@ public enum EndPoint {
     case acceptCall
     case denyCall
     case endCall
+    case getCallHistoryWithCallerId   // 내가 건 통화 기록
+    case getCallHistoryWithReceiverId // 내가 받은 통화 기록
+    case addReport
+    case registerFcmToken
+    
+    // MARK: - Notification
+    case getNotification
+    case markNotificationAsRead(notificationId: Int)
 }
 
 // MARK: - EndPoint Extension (TargetType 준수)
@@ -45,16 +53,16 @@ extension EndPoint: TargetType {
         }
         return serverURL
     }
-
+    
     public var path: String {
         switch self {
-        // Auth
+            // Auth
         case .kakaoLogin: return "/api/auth/kakao"
         case .appleLogin: return "/api/auth/apple"
         case .refreshToken: return "/api/auth/refresh"
         case .logout: return "/api/users/logout"
             
-        // Users
+            // Users
         case .getUserInfo: return "/api/users/info"
         case .updateUserNotifications: return "/api/users/notification"
         case .deleteUser: return "/api/users/delete"
@@ -62,37 +70,50 @@ extension EndPoint: TargetType {
         case .updateInterests(let userId): return "/api/users/\(userId)/interests/update"
         case .getInterests(let userId): return "/api/users/\(userId)/interests/list"
             
-        // Profiles
+            // Profiles
         case .getMatchingProfiles: return "/api/filter/matching"
         case .getUserProfile(let userId): return "/api/profiles/user/\(userId)"
             
-        // Reports
+            // Reports
         case .createReport: return "/api/reports"
             
-        // Call
+            // Call
         case .requestCall: return "/api/calls/request"
         case .acceptCall: return "/api/calls/accept"
         case .denyCall: return "/api/calls/deny"
         case .endCall: return "/api/calls/end"
+        case .getCallHistoryWithCallerId: return "/api/calls/caller"
+        case .getCallHistoryWithReceiverId: return "/api/calls/receiver"
+        case .addReport: return "/api/reports"
+            
+            // FCM
+        case .registerFcmToken: return "/api/fcm/token"
+            
+            // Notification
+        case .getNotification:
+            return "/api/notifications"
+            
+        case .markNotificationAsRead(let notificationId):
+                    return "/api/notifications/\(notificationId)/read"
         }
     }
     
     public var method: HTTPMethod {
         switch self {
-        // POST
+            // POST
         case .kakaoLogin, .appleLogin, .refreshToken, .logout, .selectInterests,
-             .createReport, .requestCall, .acceptCall, .denyCall, .endCall:
+                .createReport, .requestCall, .acceptCall, .denyCall, .endCall, .addReport, .registerFcmToken:
             return .post
             
-        // PATCH
-        case .updateUserNotifications, .updateInterests:
+            // PATCH
+        case .updateUserNotifications, .updateInterests, .markNotificationAsRead:
             return .patch
             
-        // DELETE
+            // DELETE
         case .deleteUser:
             return .delete
             
-        // GET
+            // GET
         default:
             return .get
         }

@@ -10,6 +10,7 @@ import Alamofire
 import CryptoKit
 import model
 
+
 // MARK: - Network Manager
 
 public final actor LoginNetworkManager: Sendable {
@@ -104,7 +105,14 @@ public final actor LoginNetworkManager: Sendable {
             response.token.registrationStatus = "REGISTER"
         }
         
-        return RefreshResult(user: response.user, registrationStatus: response.token.registrationStatus)
+        let refreshResult =  RefreshResult(user: response.user, registrationStatus: response.token.registrationStatus)
+        // 키체인에 저장하는 유저 정보
+        keychain.save(token: "\(refreshResult.user.userId)", for: "myUserId")
+        let fcmtoken = keychain.get(for: "fcmToken") ?? ""
+        
+        try await NetworkManager.shared.registerFcmToken(dto: FcmTokenRequestDto.init(userId: refreshResult.user.userId, token: fcmtoken))
+        
+        return refreshResult
     }
     
     /// 로그아웃하고 모든 토큰을 삭제합니다.

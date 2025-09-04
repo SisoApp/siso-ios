@@ -35,8 +35,17 @@ public final class NetworkManager {
             encoding: encoding,
             headers: headers
         )
-            .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
+            .responseString { response in
+                        print("📄 [RAW JSON RESPONSE for \(target)]")
+                        switch response.result {
+                        case .success(let jsonString):
+                            print(jsonString)
+                        case .failure(let error):
+                            print("Failed to get raw string: \(error)")
+                        }
+                        print("------------------------------------")
+                    }
             .serializingDecodable(SisoResponse<T>.self)
         
         let response = await dataTask.response
@@ -84,15 +93,13 @@ public final class NetworkManager {
             encoding: URLEncoding.default, // GET 요청
             headers: headers
         )
-            .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
-            .serializingDecodable([MatchingProfile].self) // ✨ SisoResponse<[MatchingProfile]>.self 대신 [MatchingProfile].self 직접 디코딩
+            .serializingDecodable([MatchingProfile].self) // ✨
         
         let response = await dataTask.response
         
         switch response.result {
         case .success(let profiles):
-            print(profiles)
             return profiles // 직접 디코딩된 프로필 배열을 반환
         case .failure(let afError):
             if let data = response.data, let body = String(data: data, encoding: .utf8) {
@@ -132,9 +139,7 @@ public final class NetworkManager {
             encoding: JSONEncoding.default,
             headers: headers
         )
-            .cURLDescription { print($0) }
             .validate(statusCode: 200..<300)
-        // ✅ 2. Alamofire에게 위에서 정의한 TempCallRequestResponse 형태로 디코딩하라고 지시합니다.
             .serializingDecodable(TempCallRequestResponse.self)
         
         let response = await dataTask.response
@@ -159,30 +164,30 @@ public final class NetworkManager {
     /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
     /// - Throws: NetworkError
     /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
-       public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
-           
-           // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
-           let parameters = try callInfo.toDictionary()
-           
-           // ✅ 2. 제네릭 request 함수를 호출합니다.
-           //    API 명세에 따라, 응답의 'data'는 배열이므로,
-           //    responseType을 `[CallResponseDto].self`로 지정합니다.
-           let responseArray = try await request(
-               target: .acceptCall,
-               parameters: parameters,
-               responseType: [CallResponseDto].self // 👈 여기가 핵심 수정 사항!
-           )
-           
-           // ✅ 3. 디코딩된 배열에서 첫 번째 요소를 안전하게 추출합니다.
-           guard let response = responseArray.first else {
-               // 서버가 data 배열을 비워서 보내는 예외적인 경우에 대한 방어 코드
-               throw NetworkError.serverError(message: "서버로부터 유효한 통화 수락 정보를 받지 못했습니다.")
-           }
-           
-           // ✅ 4. 추출한 단일 CallResponseDto 객체를 반환합니다.
-           return response
-       }
-       
+    public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+        
+        // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
+        let parameters = try callInfo.toDictionary()
+        
+        // ✅ 2. 제네릭 request 함수를 호출합니다.
+        //    API 명세에 따라, 응답의 'data'는 배열이므로,
+        //    responseType을 `[CallResponseDto].self`로 지정합니다.
+        let responseArray = try await request(
+            target: .acceptCall,
+            parameters: parameters,
+            responseType: [CallResponseDto].self // 👈 여기가 핵심 수정 사항!
+        )
+        
+        // ✅ 3. 디코딩된 배열에서 첫 번째 요소를 안전하게 추출합니다.
+        guard let response = responseArray.first else {
+            // 서버가 data 배열을 비워서 보내는 예외적인 경우에 대한 방어 코드
+            throw NetworkError.serverError(message: "서버로부터 유효한 통화 수락 정보를 받지 못했습니다.")
+        }
+        
+        // ✅ 4. 추출한 단일 CallResponseDto 객체를 반환합니다.
+        return response
+    }
+    
     
     /// [POST] /api/calls/deny - 수신자가 통화를 거절합니다.
     public func denyCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
@@ -202,19 +207,155 @@ public final class NetworkManager {
     
     /// [POST] /api/calls/end - 통화를 종료합니다.
     public func endCall(callInfo: CallInfoDto, continueRelationship: Bool) async throws -> CallResponseDto {
-        // Body 파라미터와 Query 파라미터를 함께 보내야 합니다.
-        // Alamofire는 이를 직접 지원하지 않으므로 URL에 직접 쿼리를 추가해야 합니다.
-        var target = EndPoint.endCall // 👈 EndPoint에 .endCall 추가 필요
         
-        // 1. URL에 Query Parameter 추가
+        struct TempEndCallResponseWrapper: Decodable {
+            let status: Int
+            let data: CallResponseDto // 'data'의 값은 단일 CallResponseDto 객체
+            let errorMessage: String?
+        }
+        // 1. URL, 파라미터, 헤더 준비 (기존과 동일)
+        let target = EndPoint.endCall
         var urlComponents = URLComponents(string: target.baseURL + target.path)!
         urlComponents.queryItems = [URLQueryItem(name: "continueRelationship", value: String(continueRelationship))]
         let urlWithQuery = try urlComponents.asURL()
         
-        // 2. Body Parameter 준비
         let bodyParameters = try callInfo.toDictionary()
         
-        // 3. 직접 AF.request 호출 (범용 request 메서드는 이 경우에 부적합)
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
+        
+        // 2. Alamofire 요청
+        let dataTask = AF.request(
+            urlWithQuery,
+            method: .post,
+            parameters: bodyParameters,
+            encoding: JSONEncoding.default,
+            headers: headers
+        )
+            .cURLDescription { print($0) }
+            .validate(statusCode: 200..<300)
+        // HIGHLIGHT: 위에서 정의한 임시 래퍼 구조체로 디코딩하도록 변경
+            .serializingDecodable(TempEndCallResponseWrapper.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let wrapperResponse):
+            // HIGHLIGHT: 디코딩된 래퍼 객체에서 'data' 프로퍼티만 추출하여 반환
+            print("\n✅ END CALL SUCCEEDED with continueRelationship: \(continueRelationship)\n")
+            print(wrapperResponse.data)
+            return wrapperResponse.data
+            
+        case .failure(let afError):
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (endCall) 🔴 ---\n\(body)\n------------------------------")
+            }
+            print("🔴 Decoding Error (endCall): \(afError)")
+            throw NetworkError.afError(afError)
+        }
+    }
+    
+    /// [GET] /api/calls/caller - 내가 발신한 통화 기록 목록을 조회합니다.
+    // HIGHLIGHT START: 통화 기록 API 전용 래퍼 구조체 정의
+    private struct TempCallHistoryResponseWrapper: Decodable {
+        let status: Int
+        let data: [CallHistoryItemDto]? // 'data'의 값은 CallHistoryItemDto 배열
+        let errorMessage: String?
+    }
+    public func getCallHistoryWithCallerId() async throws -> [CallHistoryItemDto] {
+        
+        let target = EndPoint.getCallHistoryWithCallerId
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            // GET 요청이므로 parameters는 nil
+            encoding: URLEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // HIGHLIGHT: 임시 래퍼 사용
+            .serializingDecodable(TempCallHistoryResponseWrapper.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let wrapperResponse):
+            // data 필드가 옵셔널이므로 nil 검사
+            guard let callHistory = wrapperResponse.data else {
+                throw NetworkError.serverError(message: wrapperResponse.errorMessage ?? "통화 기록 데이터가 비어있습니다.")
+            }
+            return callHistory
+            
+        case .failure(let afError):
+            // 에러 로그는 이미 기존의 코드가 출력하고 있습니다.
+            throw NetworkError.afError(afError)
+        }
+    }
+
+    /// [GET] /api/calls/receiver - 내가 수신한 통화 기록 목록을 조회합니다.
+    public func getCallHistoryWithReceiverId() async throws -> [CallHistoryItemDto] {
+        
+        let target = EndPoint.getCallHistoryWithReceiverId
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            encoding: URLEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // HIGHLIGHT: 임시 래퍼 사용
+            .serializingDecodable(TempCallHistoryResponseWrapper.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let wrapperResponse):
+            guard let callHistory = wrapperResponse.data else {
+                throw NetworkError.serverError(message: wrapperResponse.errorMessage ?? "통화 기록 데이터가 비어있습니다.")
+            }
+            return callHistory
+            
+        case .failure(let afError):
+            throw NetworkError.afError(afError)
+        }
+    }
+    
+    // NetworkManager.swift 클래스 내부에 아래 함수를 추가합니다.
+
+    /// [POST] /api/reports - 사용자를 신고합니다.
+    ///
+    /// 서버 컨트롤러의 `@RequestBody`는 JSON을 의미하므로 Content-Type은 "application/json"으로 전송합니다.
+    /// - Parameter dto: 신고 정보를 담고 있는 `ReportRequestDto` 객체
+    /// - Returns: 신고 처리 결과를 담은 `ReportResponseDto`
+    /// - Throws: `NetworkError` - 네트워크 또는 디코딩 실패 시
+    public func addReport(dto: ReportRequestDto) async throws -> ReportResponseDto {
+        
+        let target = EndPoint.addReport
+        
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw NetworkError.missingAccessToken
         }
@@ -225,30 +366,140 @@ public final class NetworkManager {
             "Accept": "application/json"
         ]
         
+        // Encodable DTO를 Alamofire가 사용할 수 있는 파라미터로 변환합니다.
+        let parameters = try dto.toDictionary()
+        
         let dataTask = AF.request(
-            urlWithQuery,
-            method: .post,
-            parameters: bodyParameters,
-            encoding: JSONEncoding.default,
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: JSONEncoding.default, // @RequestBody는 JSONEncoding
             headers: headers
         )
-            .cURLDescription { print($0) }
-            .validate(statusCode: 200..<300)
-            .serializingDecodable(SisoResponse<[CallResponseDto]>.self)
+            .validate(statusCode: 200..<300) // 201 Created 포함
+            .serializingDecodable(ReportResponseDto.self) // SisoResponse 래퍼 없이 바로 디코딩
         
         let response = await dataTask.response
         
         switch response.result {
-        case .success(let sisoResponse):
-            if sisoResponse.success, let data = sisoResponse.data, let callResponse = data.first {
-                return callResponse
-            } else {
-                throw NetworkError.serverError(message: sisoResponse.errorMessage ?? "통화 종료 정보 처리 중 오류 발생")
-            }
+        case .success(let reportResponse):
+            return reportResponse
         case .failure(let afError):
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (addReport) 🔴 ---\n\(body)\n------------------------------")
+            }
             throw NetworkError.afError(afError)
         }
     }
+    /// [POST] /api/fcm/token - 서버에 FCM 토큰을 등록합니다.
+    ///
+    /// 성공 시 특정 객체를 반환하지 않고, 성공 여부만 확인합니다.
+    /// - Parameter dto: 사용자 ID와 FCM 토큰을 담은 `FcmTokenRequestDto`
+    /// - Throws: `NetworkError` - 네트워크 요청 실패 시
+    public func registerFcmToken(dto: FcmTokenRequestDto) async throws {
+        
+        let target = EndPoint.registerFcmToken
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json"
+        ]
+        
+        // Encodable DTO를 Alamofire 파라미터로 변환
+        let parameters = try dto.toDictionary()
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: JSONEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // HIGHLIGHT: 응답 본문이 단순 문자열이므로 .serializingString() 사용
+            .serializingString()
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let responseString):
+            // 성공 시, 서버가 보낸 문자열을 로그로 출력하고 아무것도 반환하지 않음 (Void)
+            print("✅ FCM Token registered successfully: \(responseString)")
+            return
+            
+        case .failure(let afError):
+            // 실패 시 에러 처리
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (registerFcmToken) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
+    }
+    
+    /// 서버 응답의 `data` 필드에 포함된 알림 DTO 배열을 반환합니다.
+    /// - Returns: 알림 DTO 배열 `[NotificationResponseDto]`
+    /// - Throws: `NetworkError` - 네트워크 통신 또는 디코딩 실패 시
+    public func getNotifications() async throws -> [NotificationResponseDto] {
+        // 범용 `request` 함수를 사용합니다.
+        // 이 API는 표준 SisoResponse<[DTO]> 구조를 따르므로,
+        // responseType에 [NotificationResponseDto].self (배열 타입)을 지정하면
+        // request 함수가 알아서 래퍼를 벗겨내고 data 배열을 반환합니다.
+        return try await request(
+            target: .getNotification,
+            responseType: [NotificationResponseDto].self
+        )
+    }
+    /// [PATCH] /api/notifications/{notificationId}/read - 특정 알림을 읽음 상태로 변경합니다.
+    ///
+    /// 성공 시 반환되는 데이터가 없으므로, 함수의 반환 타입은 Void입니다.
+    /// - Parameter notificationId: 읽음 처리할 알림의 ID
+    /// - Throws: `NetworkError` - 네트워크 요청 실패 시
+    public func markNotificationAsRead(notificationId: Int) async throws {
+        
+        // 범용 `request` 함수는 성공 시 data 필드를 기대하는데,
+        // 이 API의 data는 null 또는 비어있을 수 있어 직접 처리하는 것이 더 안전합니다.
+        
+        let target = EndPoint.markNotificationAsRead(notificationId: notificationId)
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+            // PATCH 요청이지만 Body가 없으므로 Content-Type은 불필요
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            // Body가 없으므로 parameters는 nil
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            .serializingData() // 응답 본문이 없거나 무시해도 되므로 .serializingData() 사용
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success:
+            // HTTP 상태 코드가 200-299 범위 안에 들어오면 성공으로 간주하고 함수를 종료합니다.
+            print("✅ Notification (id: \(notificationId)) marked as read successfully.")
+            return
+            
+        case .failure(let afError):
+            // 실패 시 에러 처리
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (markNotificationAsRead) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
+    }
+
 }
 
 public extension Encodable {

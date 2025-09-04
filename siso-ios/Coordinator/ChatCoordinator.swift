@@ -14,7 +14,7 @@ extension Coordinator: @preconcurrency ChatCoordinatorDelegate {
         switch page {
             case .main: return .main
             case .detail(let chat): return .detail(chat: chat)
-            case .notificationChat: return .notificationChat
+            case .notificationChat: return .notification
         }
     }
     

@@ -22,5 +22,7 @@ public protocol CallCoordinatorDelegate: AnyObject {
     
     func popToRootAndGoToChat() // 채팅방 이동 함수
     
+    func openReportSheet(_ sheet: CallSheet)
+    
 }
 

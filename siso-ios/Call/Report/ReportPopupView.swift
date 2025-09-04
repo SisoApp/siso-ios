@@ -1,50 +1,32 @@
 //
 //  SuePopupView.swift
 //  auth
-//
 //  Created by jdios on 8/24/25.
 //
 
 import SwiftUI
 import model
-
-
-enum ReportReasonType: String, CaseIterable, Identifiable {
-    case impersonation = "사칭 의심 (본인 아님 / 프로필과 다름)"
-    case inappropriate = "부적절한 언행 (욕설, 음란, 폭력)"
-    case spam = "스팸/광고"
-    case harassment = "괴롭힘/혐오 발언"
-    case illegalContent = "불법 콘텐츠 (마약, 불법광고 등)"
-    case privacy = "개인정보 유출"
-    case other = "기타"
-    
-    // ForEach에서 id로 사용될 값
-    var id: Self { self }
-    
-    // 화면에 표시될 텍스트 (rawValue를 그대로 사용)
-    var displayText: String {
-        return self.rawValue
-    }
-}
+import network
 
 public struct ReportPopupView: View {
-    @State private var otherSueReason: String = ""
-    @State private var selectedType: ReportReasonType? = nil
+    @State private var otherReportReason: String = ""
+    @State private var selectedType: ServerReportType? = nil
     
     
-    var opponentProfile: CallProfileDto
+    var opponentProfile: MatchingProfile
+    var onComplete: (() -> Void)?
     
-    public init(opponentProfile: CallProfileDto) {
+    public init(opponentProfile: MatchingProfile) {
         self.opponentProfile = opponentProfile
     }
     
-   public var body: some View {
+    public var body: some View {
         headerView
-       profileImageView(profile: opponentProfile)
+        profileImageView(profile: opponentProfile)
         
         radioButtons
-        if selectedType == .other {
-            TextEditor(text: $otherSueReason)
+        if selectedType == .OTHER {
+            TextEditor(text: $otherReportReason)
                 .frame(width: .infinity, height: 100)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -56,7 +38,10 @@ public struct ReportPopupView: View {
         }
         
         Button {
-            print("sue")
+            Task {
+                await submitReport()
+            }
+            
         } label: {
             Text("신고하기")
                 .font(.system(size: 18, weight: .semibold))
@@ -69,7 +54,7 @@ public struct ReportPopupView: View {
                 )
                 .padding()
         }
-
+        
         
     }
     private var headerView: some View {
@@ -79,12 +64,12 @@ public struct ReportPopupView: View {
     }
     
     @ViewBuilder
-    private func profileImageView(profile: CallProfileDto) -> some View {
+    private func profileImageView(profile: MatchingProfile) -> some View {
         // profileImageUrls가 비어있을 경우를 대비
-        if profile.profileImageUrl == nil {
+        if profile.imageUrls.first == nil {
             placeholderImage
         } else {
-            let urlString = profile.profileImageUrl ?? "https://imgur.com/a/24214AF"
+            let urlString = profile.imageUrls.first ?? "https://imgur.com/a/24214AF"
             AsyncImage(url: URL(string: urlString)) { image in
                 image
                     .resizable()
@@ -118,11 +103,11 @@ public struct ReportPopupView: View {
     private var radioButtons: some View {
         VStack(alignment: .leading) {
             // UI 목록은 ReportReasonType으로 생성
-            ForEach(ReportReasonType.allCases) { reasonType in
+            ForEach(ServerReportType.allCases) { reasonType in
                 Button(action: { self.selectedType = reasonType }) {
                     HStack {
                         Image(systemName: self.selectedType == reasonType ? "largecircle.fill.circle" : "circle")
-                            
+                        
                         Text(reasonType.displayText)
                             .font(.system(size: 18))
                         
@@ -132,9 +117,39 @@ public struct ReportPopupView: View {
                     .padding()
                 }
             }
-            
-            
-           
+        }
+    }
+    
+    /// 신고 내용을 서버에 전송하는 비동기 함수
+    private func submitReport() async {
+        guard let selectedType = selectedType else {
+            print("🚨 신고 사유를 선택해주세요.")
+            // TODO: 사용자에게 알림 표시
+            return
+        }
+        
+        // title과 description을 description 프로퍼티로 통일
+        let reportTitle = selectedType.displayText
+        let description = (selectedType == .OTHER) ? otherReportReason : selectedType.displayText
+        
+        // 서버로 보낼 DTO 생성 (변환 함수 없이 selectedType을 직접 사용)
+        let reportDto = ReportRequestDto(
+            reportedId: opponentProfile.userId,
+            reportTitle: reportTitle,
+            description: description,
+            reportType: selectedType // ✅ 변환 없이 바로 사용!
+        )
+        
+        do {
+            let response = try await NetworkManager.shared.addReport(dto: reportDto)
+            print("✅ 신고 성공: \(response)")
+            await MainActor.run {
+                onComplete?()
+            }
+        } catch {
+            print("🔴 신고 실패: \(error.localizedDescription)")
+            // TODO: 사용자에게 실패 알림 표시
         }
     }
 }
+

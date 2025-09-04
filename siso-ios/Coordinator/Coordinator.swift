@@ -9,6 +9,7 @@ import mypage
 import model
 import call
 import chat
+import notification
 
 @MainActor
 public class Coordinator: ObservableObject {
@@ -55,6 +56,7 @@ public class Coordinator: ObservableObject {
     var locationViewModel: LocationViewModel
     var nowWatching: CardViewModel?
     var appSettings: AppSettings = AppSettings()
+    var notificationViewModel: NotificationViewModel?
     
     public init(userProfile: UserProfile, matchingViewModel: MatchingViewModel, authViewModel: SocialLoginView.LoginViewModel, locationViewModel: LocationViewModel) {
         self.userProfile = userProfile
@@ -62,6 +64,7 @@ public class Coordinator: ObservableObject {
         self.authViewModel = authViewModel
         self.locationViewModel = locationViewModel
         self.matchingViewModel.delegate = self
+        self.notificationViewModel = NotificationViewModel()
         // ✅ 4. 수신 전화 Publisher는 계속 사용
         subscribeToIncomingCalls()
     }
@@ -177,10 +180,12 @@ public class Coordinator: ObservableObject {
             // Chat
         case .main:
             ChatMainView(delegate: self)
+                .navigationBarBackButtonHidden(true)
         case .detail(let chat):
             ChatMainView.ChatDetailView(chat: chat)
-        case .notificationChat:
-            NotificationChatView()
+            
+        case .notificationCommon:
+            NotificationCommonView(viewModel: notificationViewModel ?? NotificationViewModel())
         }
     }
 }

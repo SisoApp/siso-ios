@@ -30,7 +30,8 @@ public struct CallingView: View {
         VStack {
             
             HStack {
-                profileImageView(profile: callViewModel.opponentProfile)
+                profileImageView
+                
                 VStack(alignment: .leading, spacing: 0){
                     Text("\(callViewModel.opponentProfile.nickname)")
                         .font(.system(size: 24, weight: .bold))
@@ -93,41 +94,56 @@ public struct CallingView: View {
     
     // MARK: - View Components (Functions)
     @ViewBuilder
-    private func profileImageView(profile: CallProfileDto) -> some View {
-        // profileImageUrls가 비어있을 경우를 대비
-        if profile.profileImageUrl == nil {
-            placeholderImage
-        } else {
-            let urlString = profile.profileImageUrl!
-            AsyncImage(url: URL(string: urlString)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(.circle)
-                    .frame(width: 100 ,height: 100)
-            } placeholder: {
-                
-                ZStack{
-                    Rectangle()
-                        .foregroundStyle(.white)
-                    ProgressView()
-                }
-                .frame(width: 100, height: 100)
-                
-            }
-        }
-    }
+    private var profileImageView: some View {
+           let urlString = callViewModel.opponentProfile.profileImageUrl
+           
+           // URL 문자열이 유효한지 확인
+           if let urlString = urlString, let url = URL(string: urlString) {
+               
+               // AsyncImage의 phase를 사용하여 로딩 상태를 세밀하게 제어
+               AsyncImage(url: url) { phase in
+                   switch phase {
+                   case .empty:
+                       // 로딩 중일 때 ProgressView 표시
+                       ProgressView()
+                           .frame(width: 100, height: 100)
+                           .background(Color.gray.opacity(0.1))
+                           .clipShape(Circle())
+                       
+                   case .success(let image):
+                       // 로딩 성공 시 이미지 표시
+                       image
+                           .resizable()
+                           .scaledToFill() 
+                           .frame(width: 100, height: 100)
+                           .clipShape(Circle())
+                       
+                   case .failure:
+                       // 로딩 실패 시 플레이스홀더 표시
+                       placeholderImage
+                       
+                   @unknown default:
+                       // 미래를 위한 대비
+                       EmptyView()
+                   }
+               }
+               
+           } else {
+               // URL 자체가 없을 경우 플레이스홀더 표시
+               placeholderImage
+           }
+       }
     
-    /// 이미지가 없을 때 표시할 플레이스홀더
-    private var placeholderImage: some View {
-        Rectangle()
-            .fill(Color.gray.opacity(0.2))
-            .overlay(
-                Image(systemName: "photo.on.rectangle.angled")
-                    .font(.largeTitle)
-                    .foregroundColor(.gray)
-            )
-    }
+    /// 이미지가 없거나 로딩 실패 시 표시할 플레이스홀더
+       private var placeholderImage: some View {
+           // 시스템 아이콘을 사용하여 더 깔끔한 플레이스홀더 제공
+           Image(systemName: "person.circle.fill")
+               .resizable()
+               .scaledToFit()
+               .frame(width: 100, height: 100)
+               .foregroundColor(Color.gray.opacity(0.3)) // 좀 더 연한 회색으로
+               .clipShape(Circle())
+       }
     
     /// 사용자 이름과 나이를 표시하는 뷰
     private func userInfoSection(profile: CallProfileDto) -> some View {
@@ -156,15 +172,6 @@ public struct CallingView: View {
         .padding(.horizontal)
     }
     
-    /// 자기소개 텍스트를 표시하는 뷰
-//    private func introductionSection(profile: CallInfoDto) -> some View {
-//        Text(profile.introduce)
-//            .foregroundStyle(.black)
-//            .font(.system(size: 16))
-//            .lineLimit(2)
-//            .frame(maxWidth: .infinity, alignment: .leading)
-//            .padding(.horizontal)
-//    }
     
     private func commonInterestView(profile: CallProfileDto) -> some View {
         HStack {
