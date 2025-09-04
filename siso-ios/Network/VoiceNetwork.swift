@@ -38,7 +38,7 @@ public final actor VoiceNetworkManager: Sendable {
             .responseDecodable(of: [VoiceDTO].self) { response in
                 switch response.result {
                 case .success(let voices):
-                    debugPrint("녹음파일 조회 성공")
+                    debugPrint("녹음파일 조회 성공 id: \(voices[0].id)")
                     if !voices.isEmpty { continuation.resume(returning: voices[0]) }
                 case .failure(let error):
                     debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
@@ -115,6 +115,47 @@ public final actor VoiceNetworkManager: Sendable {
                 case .failure(let error):
                     debugPrint("녹음파일 업로드 실패: ", error.localizedDescription)
                     continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    public func removeVoice(for id: Int) async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/voice-samples/\(id)"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        return await withCheckedContinuation { continuation in
+            AF.upload(
+                multipartFormData: { multipartFormData in
+                    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    let fileURL = paths[0].appendingPathComponent("voice.m4a")
+                    
+                    multipartFormData.append(fileURL,
+                                             withName: "file",
+                                             fileName: fileURL.lastPathComponent,
+                                             mimeType: "audio/m4a")
+                },
+                to: url,
+                method: .delete,
+                headers: headers
+            )
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    debugPrint("녹음파일 삭제 성공! id: \(id)")
+                    continuation.resume()
+                case .failure(let error):
+                    debugPrint("녹음파일 삭제 실패: ", error.localizedDescription)
                 }
             }
         }

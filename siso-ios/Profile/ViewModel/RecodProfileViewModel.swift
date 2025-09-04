@@ -22,6 +22,7 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     @ObservedObject private var userProfile: UserProfile
     @Published var status: RecordStatus = .pending
     @Published var playTime: Int = 0
+    @Published var voice: VoiceDTO?
     
     private var recorder: AVAudioRecorder?
     private var player: AVAudioPlayer?
@@ -189,8 +190,15 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         status = .waiting
     }
     
+    // MARK: - APIs
     func uploadVoice() async throws {
+        if let voice = voice { try? await VoiceNetworkManager.shared.removeVoice(for: voice.id) } // 서버 파일 중복 방지
         try await VoiceNetworkManager.shared.uploadVoice()
+    }
+    
+    func getMyVoice() async {
+        let voice = try? await VoiceNetworkManager.shared.getMyVoice()
+        self.voice = voice
     }
     
     func registerWholeProfile(_ userProfile: UserProfile) async throws {

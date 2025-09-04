@@ -57,6 +57,11 @@ public struct RecordProfileView: View {
             }
         }
         .toolbar(.hidden, for: .tabBar)
+        .task {
+            if mode == .edit {
+                await viewModel.getMyVoice()
+            }
+        }
     }
     
     private func informationText() -> some View {

@@ -26,9 +26,12 @@ public struct ProfileView: View {
     @State private var meetings: [String] = []
     @State private var interests: [String] = []
     @State private var showAlert: Bool = false
+    @State private var didInit: Bool = false
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
+    
+    
     
     weak var delegate: ProfileCoordinatorDelegate?
     
@@ -80,7 +83,10 @@ public struct ProfileView: View {
         .task {
             await viewModel.setViewModel()
             await MainActor.run {
-                bindViewValue()
+                if !didInit {
+                    bindViewValue()
+                    didInit = true
+                }
             }
         }
     }
@@ -486,13 +492,11 @@ public struct ProfileView: View {
             userProfile.targetSex = targetSex
             
             Task {
-                await viewModel.updateInterests(userProfile)
-                
-                await viewModel.updateProfile(userProfile) { profile in
-                    
-                    
-                    //appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
+                do {
+                    try await viewModel.updateWholeProfile(userProfile)
                     delegate?.pop()
+                } catch {
+                    
                 }
             }
         }

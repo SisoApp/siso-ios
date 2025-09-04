@@ -91,21 +91,15 @@ public extension ProfileView {
             async let imageTask = try? await ImageNetworkManager.shared.getMyImages()
             async let profileTask: UserProfileDTO? = try? await ProfileNetworkManager.shared.getCurrentUserProfile()
             async let voiceTask: VoiceDTO? = try? await VoiceNetworkManager.shared.getMyVoice()
+            async let interestTask: [Interest]? = try? await ProfileNetworkManager.shared.getInterests()
             
-            let (fetchedImages, fetchedProfile, fetchedVoice) = await (imageTask, profileTask, voiceTask)
+            let (fetchedImages, fetchedProfile, fetchedVoice, fetchedInterests) = await (imageTask, profileTask, voiceTask, interestTask)
             
             await MainActor.run {
                 self.images = fetchedImages
                 self.profile = fetchedProfile
                 self.voice = fetchedVoice
-            }
-        }
-        
-        func updateProfile(_ userProfile: UserProfile, completion: @escaping (UserProfileDTO) -> Void) async {
-            let request: UserProfileDTO = UserProfile.convertToDTO(userProfile)
-            
-            try? await ProfileNetworkManager.shared.updateProfile(request) { profile in
-                completion(profile)
+                self.interests = fetchedInterests
             }
         }
         
@@ -121,6 +115,20 @@ public extension ProfileView {
             }
             
             try? await ProfileNetworkManager.shared.registerInterests(request)
+        }
+        
+        func updateWholeProfile(_ userProfile: UserProfile) async throws {
+            let profileRequest: UserProfileDTO = UserProfile.convertToDTO(userProfile)
+            
+            var interestRequest: [InterestRequestDTO] = []
+            for interest in userProfile.interests {
+                if let interestDTO = Interest(rawValue: interest) {
+                    interestRequest.append(InterestRequestDTO(interest: interestDTO))
+                }
+            }
+            
+            try await ProfileNetworkManager.shared.updateProfile(profileRequest)
+            try await ProfileNetworkManager.shared.registerInterests(interestRequest)
         }
         
         // MARK: - 녹음 관련 메서드
@@ -140,6 +148,7 @@ public extension ProfileView {
                         self.playTime += 1
                     } else {
                         self.removeTimer()
+                        self.stopPlaying()
                     }
                 }
                 .store(in: &cancellables)

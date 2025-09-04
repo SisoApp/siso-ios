@@ -90,4 +90,22 @@ public class UserProfile: ObservableObject {
         
         return profileDto
     }
+    
+    static func convertFromDTO(_ userProfileDTO: UserProfileDTO) -> UserProfile {
+        return UserProfile(
+            nickname: userProfileDTO.nickname,
+            age: userProfileDTO.age,
+            sex: userProfileDTO.sex?.rawValue ?? "",
+            targetSex: userProfileDTO.preferenceSex?.rawValue ?? "",
+            profileImageUrl: [],
+            interests: [],
+            introduce: userProfileDTO.introduce ?? "",
+            religion: userProfileDTO.religion?.rawValue ?? "",
+            smoking: userProfileDTO.smoke,
+            drinking: userProfileDTO.drinkingCapacity?.rawValue ?? "",
+            meeting: userProfileDTO.meetings?.map { $0.rawValue } ?? [],
+            mbti: userProfileDTO.mbti?.rawValue ?? "",
+            location: userProfileDTO.location ?? ""
+        )
+    }
 }
