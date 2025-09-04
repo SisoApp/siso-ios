@@ -16,11 +16,14 @@ public struct ImageHelperSheet: View {
     public var completion: ([UIImage]) -> Void
     private let limit: Int = 5
     private var available: Int { return limit - userProfile.profileImages.count }
+    private var mode: ProfileMode
     
     public init(delegate: ProfileCoordinatorDelegate?,
+                mode: ProfileMode,
                 userProfile: UserProfile,
                 completion: @escaping (([UIImage]) -> Void)) {
         self.delegate = delegate
+        self.mode = mode
         self.userProfile = userProfile
         self.completion = completion
     }
@@ -100,7 +103,7 @@ public struct ImageHelperSheet: View {
             VStack(spacing: 8) {
                 cameraButton()
                 galleryButton()
-                skipButton()
+                if mode == .signUp { skipButton() }
             }
             .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
         }
@@ -157,7 +160,7 @@ public struct ImageHelperSheet: View {
 }
 
 #Preview {
-    ImageHelperSheet(delegate: nil, userProfile: .empty) { images in
+    ImageHelperSheet(delegate: nil, mode: .signUp, userProfile: .empty) { images in
         
     }
 }

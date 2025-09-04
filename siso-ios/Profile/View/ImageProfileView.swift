@@ -180,7 +180,7 @@ public struct ImageProfileView: View {
         let isActive: Bool = userProfile.profileImages.count >= 0 && userProfile.profileImages.count < 5
         
         return PrimaryButton(title: "사진 추가하기 (\(userProfile.profileImages.count)/\(limit))", isActive: isActive) {
-            delegate?.presentProfile(sheet: .imageHelper({ images in
+            delegate?.presentProfile(sheet: .imageHelper(mode, { images in
                 delegate?.dismissProfileSheet()
                 userProfile.profileImages.append(contentsOf: images)
             }))
