@@ -172,15 +172,6 @@ public struct CallingView: View {
         .padding(.horizontal)
     }
     
-    /// 자기소개 텍스트를 표시하는 뷰
-//    private func introductionSection(profile: CallInfoDto) -> some View {
-//        Text(profile.introduce)
-//            .foregroundStyle(.black)
-//            .font(.system(size: 16))
-//            .lineLimit(2)
-//            .frame(maxWidth: .infinity, alignment: .leading)
-//            .padding(.horizontal)
-//    }
     
     private func commonInterestView(profile: CallProfileDto) -> some View {
         HStack {

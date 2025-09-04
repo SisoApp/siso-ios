@@ -169,6 +169,7 @@ extension AppDelegate: MessagingDelegate {
         // 사용자의 정보와 함께 저장해야 합니다.
         // 예: ApiClient.shared.sendFCMTokenToServer(token: token)
     }
+   
 }
 
 

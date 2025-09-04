@@ -74,9 +74,6 @@ public struct MatchingMainView: View {
         })
         .onChange(of: currentCardId) { oldValue, newValue in
             guard let newID = newValue else { return }
-            
-            // 🔥 3. id로 카드 찾기
-            // 'uuid'가 아닌 'id' 프로퍼티로 현재 카드를 찾습니다.
             if let currentIndex = viewModel.cards.firstIndex(where: { $0.id == newID }) {
                 let newWatchingCard = viewModel.cards[currentIndex]
                 viewModel.nowWatching = newWatchingCard
@@ -84,7 +81,7 @@ public struct MatchingMainView: View {
                 print("👀 Now Watching: \(newWatchingCard.nickname), Index: \(currentIndex)")
                 
                 // 무한 스크롤 로직 (비동기 호출은 Task로 감싸야 합니다)
-                if Double(currentIndex) / Double(viewModel.cards.count) > 0.8 {
+                if currentIndex == viewModel.cards.count - 2 { 
                     Task {
                         await viewModel.fetchCards()
                     }

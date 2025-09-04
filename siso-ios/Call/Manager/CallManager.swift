@@ -51,7 +51,8 @@ public final class CallManager: ObservableObject {
     // [핵심 1] 발신자: 통화 시작
     public func startCall(to receiver: MatchingProfile) async {
         do {
-            let callInfo = try await NetworkManager.shared.requestCall(receiverId: receiver.userId)
+            let callInfo = try await NetworkManager.shared.requestCall(receiverId: 1)
+//            let callInfo = try await NetworkManager.shared.requestCall(receiverId: receiver.userId)
             print("📞 서버로부터 받은 통화 정보(callInfo): \(callInfo)")
             if callInfo.token.isEmpty {
                 print("🚨🚨🚨 Agora 토큰이 비어있습니다! 🚨🚨🚨")
