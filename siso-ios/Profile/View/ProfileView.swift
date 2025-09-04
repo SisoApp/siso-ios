@@ -26,7 +26,6 @@ public struct ProfileView: View {
     @State private var meetings: [String] = []
     @State private var interests: [String] = []
     @State private var showAlert: Bool = false
-    @State private var isPlaying: Bool = false
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
@@ -229,19 +228,24 @@ public struct ProfileView: View {
     private func recordView() -> some View {
         return HStack {
             HStack {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                Image(systemName: viewModel.status == .playing ? "pause.fill" : "play.fill")
                     .resizable()
                     .foregroundStyle(.white)
                     .frame(width: 15, height: 15)
                     .onTapGesture {
-                        isPlaying.toggle()
+                        if viewModel.status == .playing {
+                            viewModel.stopPlaying()
+                        } else if viewModel.status == .waiting {
+                            viewModel.startPlaying()
+                        }
                     }
                 
                 waveFormView(count: 30, height: 44)
                 
-                Text("00:\(String(format: "%02d", viewModel.voiceDuration))")
-                    .font(.system(size: 18, weight: .semibold))
+                Text("00:\(viewModel.voiceTimeText)")
+                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
                     .foregroundStyle(.white)
+                    .frame(minWidth: 60)
             }
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
@@ -272,7 +276,7 @@ public struct ProfileView: View {
                 ForEach(0..<count, id: \.self) { index in
                     
                     let heightRatio: CGFloat = {
-                        if isPlaying {
+                        if viewModel.status == .playing {
                             let now = timeline.date.timeIntervalSinceReferenceDate
                             let factor = randomFactors[index]
                             let sinValue = sin(now * factor.speed + factor.offset)
@@ -288,7 +292,7 @@ public struct ProfileView: View {
                         .cornerRadius(4)
                 }
             }
-            .animation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 0.5), value: isPlaying)
+            .animation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 0.5), value: viewModel.status)
         }
         .frame(height: height)
     }

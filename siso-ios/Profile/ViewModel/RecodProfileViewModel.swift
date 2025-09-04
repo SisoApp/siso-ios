@@ -190,7 +190,6 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func uploadVoice() async throws {
-        print("upload Voice")
         try await VoiceNetworkManager.shared.uploadVoice()
     }
     
