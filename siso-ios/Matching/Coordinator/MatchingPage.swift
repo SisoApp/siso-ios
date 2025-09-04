@@ -9,7 +9,7 @@ import Foundation
 
 public enum MatchingPage: String, Identifiable, Hashable {
     
-    case tutorial, home
+    case tutorial, home, notification
     
     public var id: String {self.rawValue}
     
