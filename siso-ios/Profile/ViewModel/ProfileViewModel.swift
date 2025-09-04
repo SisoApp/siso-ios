@@ -12,7 +12,7 @@ import model
 public extension ProfileView {
     class ProfileViewModel: ObservableObject {
         @Published var profile: UserProfileDTO?
-        var images: [ImageDTO]?
+        @Published var images: [ImageDTO]?
         var voice: VoiceDTO?
         var interests: [Interest]?
         @Published var mainImageUrl: URL?
@@ -82,10 +82,15 @@ public extension ProfileView {
             return descriptions
         }
         
-        func getMyProfile() async {
-            let profile: UserProfileDTO? = try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+        func setViewModel() async {
+            async let imageTask = try? await ImageNetworkManager.shared.getMyImages()
+            async let profileTask: UserProfileDTO? = try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            
+            let (fetchedImages, fetchedProfile) = await (imageTask, profileTask)
+            
             await MainActor.run {
-                self.profile = profile
+                self.images = fetchedImages
+                self.profile = fetchedProfile
             }
         }
         

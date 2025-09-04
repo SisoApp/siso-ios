@@ -39,7 +39,7 @@ public final actor ImageNetworkManager: Sendable {
             .responseDecodable(of: [ImageDTO].self) { response in
                 switch response.result {
                 case .success(let images):
-                    debugPrint("이미지 목록 조회 성공: \(images)")
+                    debugPrint("이미지 목록 조회 성공")
                     continuation.resume(returning: images)
                 case .failure(let error):
                     debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
@@ -69,36 +69,13 @@ public final actor ImageNetworkManager: Sendable {
             .responseDecodable(of: [ImageDTO].self) { response in
                 switch response.result {
                 case .success(let images):
-                    debugPrint("이미지 목록 조회 성공: \(images)")
+                    debugPrint("이미지 목록 조회 성공")
                     continuation.resume(returning: images)
                 case .failure(let error):
                     debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
                 }
             }
         }
-    }
-
-    private func fetchImages(_ url: URL, completion: @escaping ([ImageDTO]) -> Void) async throws {
-        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
-            throw AFError.invalidURL(url: "accessToken -> nil")
-        }
-        
-        let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)"
-        ]
-        
-        AF.request(url,
-                   method: .get,
-                   headers: headers)
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: [ImageDTO].self) { response in
-                switch response.result {
-                case .success(let images):
-                    debugPrint("이미지 목록 조회 성공: \(images)")
-                case .failure(let error):
-                    debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
-                }
-            }
     }
     
     public func uploadImages(_ images: [UIImage]) async throws {
@@ -114,9 +91,6 @@ public final actor ImageNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)",
             "Content-Type": "multipart/form-data"
         ]
-        
-        print(url)
-        print(images)
         
         return try await withCheckedThrowingContinuation { continuation in
             AF.upload(

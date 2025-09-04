@@ -75,7 +75,8 @@ public struct MyPageView: View {
     
     private func profileImageView() -> some View {
         return Group {
-            if let imageUrl = viewModel.mainImageUrl {
+            if let image = viewModel.images?[0],
+               let imageUrl = URL(string: image.presignedUrl) {
                 AsyncImage(url: imageUrl) { image in
                     image
                         .resizable()

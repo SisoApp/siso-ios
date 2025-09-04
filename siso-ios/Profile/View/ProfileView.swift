@@ -79,7 +79,7 @@ public struct ProfileView: View {
         }
         .toolbar(.hidden, for: .tabBar)
         .task {
-            await viewModel.getMyProfile()
+            await viewModel.setViewModel()
             await MainActor.run {
                 bindViewValue()
             }
@@ -89,7 +89,8 @@ public struct ProfileView: View {
     private func profileImageView() -> some View {
         return ZStack(alignment: .bottomTrailing) {
             Group {
-                if let imageUrl = viewModel.mainImageUrl {
+                if let image = viewModel.images?[0],
+                   let imageUrl = URL(string: image.presignedUrl) {
                     AsyncImage(url: imageUrl) { image in
                         image
                             .resizable()

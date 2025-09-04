@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ImageDTO: Codable, Sendable {
+public struct ImageDTO: Codable, Sendable, Equatable {
     public let id: Int
     public let userId: Int
     //public let path: String
