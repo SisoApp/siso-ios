@@ -8,6 +8,8 @@
 import Foundation
 import model
 import network
+
+@MainActor
 public class NotificationViewModel: ObservableObject {
     @Published var notifications: [NotificationResponseDto] = []
     
