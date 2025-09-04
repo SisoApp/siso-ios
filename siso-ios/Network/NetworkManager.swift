@@ -443,16 +443,52 @@ public final class NetworkManager {
     /// 서버 응답의 `data` 필드에 포함된 알림 DTO 배열을 반환합니다.
     /// - Returns: 알림 DTO 배열 `[NotificationResponseDto]`
     /// - Throws: `NetworkError` - 네트워크 통신 또는 디코딩 실패 시
-    public func getNotifications() async throws -> [NotificationResponseDto] {
-        // 범용 `request` 함수를 사용합니다.
-        // 이 API는 표준 SisoResponse<[DTO]> 구조를 따르므로,
-        // responseType에 [NotificationResponseDto].self (배열 타입)을 지정하면
-        // request 함수가 알아서 래퍼를 벗겨내고 data 배열을 반환합니다.
-        return try await request(
-            target: .getNotification,
-            responseType: [NotificationResponseDto].self
-        )
+    // 알림 API 전용 래퍼 구조체 (NetworkManager 내부에 private으로 선언)
+    private struct TempNotificationResponseWrapper: Decodable {
+        let status: Int
+        let data: [NotificationResponseDto]?
+        let errorMessage: String?
     }
+
+    /// [GET] /api/notifications - 현재 사용자의 모든 알림 목록을 조회합니다.
+    public func getNotifications() async throws -> [NotificationResponseDto] {
+        
+        let target = EndPoint.getNotification
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            encoding: URLEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // ✅ 비표준 래퍼를 처리하기 위해 임시 래퍼로 디코딩
+            .serializingDecodable(TempNotificationResponseWrapper.self)
+        
+        let response = await dataTask.response
+        
+        switch response.result {
+        case .success(let wrapperResponse):
+            // ✅ 래퍼에서 data 배열을 추출하여 반환
+            return wrapperResponse.data ?? []
+            
+        case .failure(let afError):
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (getNotifications) 🔴 ---\n\(body)\n------------------------------")
+            }
+            throw NetworkError.afError(afError)
+        }
+    }
+
     /// [PATCH] /api/notifications/{notificationId}/read - 특정 알림을 읽음 상태로 변경합니다.
     ///
     /// 성공 시 반환되는 데이터가 없으므로, 함수의 반환 타입은 Void입니다.
