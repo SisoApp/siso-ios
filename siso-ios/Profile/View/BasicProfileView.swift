@@ -56,7 +56,7 @@ public struct BasicProfileView: View {
                         .keyboardType(.numbersAndPunctuation)
                         .submitLabel(.done)
                         .onChange(of: age) { _, newValue in
-                            let filtered: String = newValue.filter { "0123456790".contains($0) }
+                            let filtered: String = newValue.filter { "0123456789".contains($0) }
                             age = String(filtered.prefix(2))
                         }
                         .onSubmit {
