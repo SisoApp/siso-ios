@@ -80,7 +80,7 @@ public enum IntegrationPage: Hashable, Identifiable {
         case .reportFeedbackPopup: return "reportFeedbackPopup"
         case .main: return "main"
         case .detail(let chat): return "detail-\(chat.id)"
-       // case .notificationChat: return "notificationChat"
+        case .notificationChat: return "notificationChat"
         case .notificationCommon:
             return "notificationCommon"
         }
