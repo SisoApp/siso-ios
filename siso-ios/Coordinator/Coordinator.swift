@@ -186,6 +186,8 @@ public class Coordinator: ObservableObject {
             
         case .notificationCommon:
             NotificationCommonView(viewModel: notificationViewModel ?? NotificationViewModel())
+        case .notificationChat:
+            NotificationCommonView(viewModel: notificationViewModel ?? NotificationViewModel())
         }
     }
 }
