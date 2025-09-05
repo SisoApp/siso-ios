@@ -7,14 +7,15 @@
 
 import SwiftUI
 import designSystem
+import model
 
 extension ChatMainView {
     struct ContactView: View {
         let contact: Contact?
-        let chat: RecentChat?
+        let chat: ChatRoomResponseDTO?
         let type: ContactType
         let delegate: ChatCoordinatorDelegate?
-        init(contact: Contact? = nil, chat: RecentChat? = nil, type: ContactType, delegate: ChatCoordinatorDelegate?) {
+        init(contact: Contact? = nil, chat: ChatRoomResponseDTO? = nil, type: ContactType, delegate: ChatCoordinatorDelegate?) {
             self.contact = contact
             self.chat = chat
             self.type = type
@@ -33,11 +34,23 @@ extension ChatMainView {
                             callView(username: contact.userName, time: Date.formatTime(date: contact.time))
                         }
                     case .recentChat:
-                    if let chat = chat {
-                            Image(systemName: chat.icon)
-                                .resizable()
-                                .frame(width: 56, height: 56)
-                        recentChatView(username: chat.userName, recentMessage: chat.recentMessage, time: Date.formatTime(date: chat.time), hasMessages: chat.hasMessages)
+                        if let chat = chat {
+                            AsyncImage(url: URL(string: chat.otherUserProfileImagePath)) { image in
+                                image.resizable()
+                                     .scaledToFill()
+                            } placeholder: {
+                                Circle()
+                                    .fill(Color.Siso.Gray._30)
+                            }
+                            .frame(width: 56, height: 56)
+                            .clipShape(Circle())
+
+                            recentChatView(
+                                username: chat.otherUserNickName,
+                                recentMessage: chat.lastMessageContent,
+                                time: chat.lastMessageSentAt,
+                                hasMessages: chat.unreadMessageCount > 0
+                            )
                         }
                 }
                 

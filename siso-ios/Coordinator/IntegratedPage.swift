@@ -44,7 +44,8 @@ public enum IntegrationPage: Hashable, Identifiable {
     
     // Chat
     case main
-    case detail(chat: RecentChat)
+    case detail(chat: ChatRoomResponseDTO)
+    case notificationChat
     
     // Notification
     case notificationCommon
