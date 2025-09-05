@@ -14,6 +14,8 @@ public struct AfterCallAssessmentView: View {
     var callInfo: CallInfoDto // ✅ callInfo도 함께 받아야 함
     var delegate: CallCoordinatorDelegate?
     
+    @State var isReported: Bool = false
+    
     public init(opponentProfile: MatchingProfile, callInfo: CallInfoDto, delegate: CallCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.callInfo = callInfo
@@ -21,71 +23,71 @@ public struct AfterCallAssessmentView: View {
     }
     
     public var body: some View {
-        
-        VStack(spacing: 30) {
-            Spacer()
-            
-            VStack{
-                profileImageView
+        ZStack {
+            VStack(spacing: 30) {
+                Spacer()
                 
-                HStack {
-                    Text("\(opponentProfile.nickname),")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.black)
-                    Text("\(opponentProfile.age)세")
-                        .foregroundStyle(Color.Siso.Gray._60)
-                        .font(.system(size: 24, weight: .bold))
-                }
-                
-            }
-            
-            VStack {
-                Text("\(opponentProfile.nickname)님과의 통화는 어땠나요?")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.black)
-                    .padding()
-                
-                
-                HStack {
-                    Button {
-                        print("User chose NOT to continue relationship.")
-                        // ✅ 1. CallManager에게 최종 결정(false)을 알림
-                        Task {
-                            await CallManager.shared.decideRelationship(continueRelationship: false)
-                        }
-                        // ✅ 2. Coordinator를 통해 홈 화면 등으로 이동
-                        //    decideRelationship이 callState를 .idle로 바꾸면
-                        //    ActiveCallView가 알아서 dismissCallFlow를 호출하므로,
-                        //    여기서는 추가적인 화면 전환(popToRoot 등)만 처리하면 됨.
-                        
-                        delegate?.dismissCallFlow()
-                    } label: {
-                        denyButton
+                VStack{
+                    profileImageView
+                    
+                    HStack {
+                        Text("\(opponentProfile.nickname),")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(.black)
+                        Text("\(opponentProfile.age)세")
+                            .foregroundStyle(Color.Siso.Gray._60)
+                            .font(.system(size: 24, weight: .bold))
                     }
                     
-                    Button {
-                        print("accept")
-                        Task {
-                            await CallManager.shared.decideRelationship(continueRelationship: true)
+                }
+                
+                VStack {
+                    Text("\(opponentProfile.nickname)님과의 통화는 어땠나요?")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .padding()
+                    
+                    
+                    HStack {
+                        Button {
+                            print("User chose NOT to continue relationship.")
+                            // ✅ 1. CallManager에게 최종 결정(false)을 알림
+                            Task {
+                                await CallManager.shared.decideRelationship(continueRelationship: false)
+                            }
+                            // ✅ 2. Coordinator를 통해 홈 화면 등으로 이동
+                            //    decideRelationship이 callState를 .idle로 바꾸면
+                            //    ActiveCallView가 알아서 dismissCallFlow를 호출하므로,
+                            //    여기서는 추가적인 화면 전환(popToRoot 등)만 처리하면 됨.
+                            
+                            delegate?.dismissCallFlow()
+                        } label: {
+                            denyButton
                         }
-                    } label: {
-                        loveButton
+                        
+                        Button {
+                            print("accept")
+                            Task {
+                                await CallManager.shared.decideRelationship(continueRelationship: true)
+                            }
+                        } label: {
+                            loveButton
+                        }
                     }
                 }
-            }
-            
-            Spacer()
-            
-            Button {
-                delegate?.openReportSheet(.report(opponentProfile: opponentProfile))
                 
-            } label: {
-                Text("신고하기")
-                    .font(.system(size: 18))
-                    .foregroundStyle(Color.Siso.Gray._60)
+                Spacer()
+                
+                Button {
+                    // 리포트 화면 호출
+                    delegate?.openReportSheet(.report(opponentProfile: opponentProfile))
+                    
+                } label: {
+                    Text("신고하기")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Color.Siso.Gray._60)
+                }
             }
-            
-            
         }
     }
     

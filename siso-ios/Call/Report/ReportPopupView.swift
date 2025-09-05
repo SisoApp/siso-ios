@@ -9,6 +9,8 @@ import model
 import network
 
 public struct ReportPopupView: View {
+    @Environment(\.dismiss) var dismiss
+    @State private var reportComplete: Bool = false
     @State private var otherReportReason: String = ""
     @State private var selectedType: ServerReportType? = nil
     
@@ -38,8 +40,11 @@ public struct ReportPopupView: View {
         }
         
         Button {
+            // 리포트 제거 후 디스미스 되어야함
             Task {
+                
                 await submitReport()
+                dismiss()
             }
             
         } label: {
@@ -144,7 +149,9 @@ public struct ReportPopupView: View {
             let response = try await NetworkManager.shared.addReport(dto: reportDto)
             print("✅ 신고 성공: \(response)")
             await MainActor.run {
-                onComplete?()
+                withAnimation {
+                                   reportComplete = true
+                               }
             }
         } catch {
             print("🔴 신고 실패: \(error.localizedDescription)")

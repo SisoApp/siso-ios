@@ -35,15 +35,15 @@ public struct ReportRequestDto: Encodable {
 /// 서버의 ReportType Enum과 일치하는 Swift Enum
 public enum ServerReportType: String, Codable, CaseIterable, Identifiable {
     
-    case SPAM = "스팸/광고"
-    case INAPPROPRIATE = "부적절한 언행 (욕설, 음란, 폭력)"
-    case HARASSMENT = "괴롭힘/혐오 발언"
-    case IMPERSONATION = "사칭 의심 (본인 아님 / 프로필과 다름)"
-    case ILLEGAL_CONTENT = "불법 콘텐츠 (마약, 불법광고 등)"
-    case SEXUAL_CONTENT = "성적인 콘텐츠 (성희롱, 음란물)"
-    case VIOLENCE = "폭력적인 행위"
-    case PRIVACY = "개인정보 침해 혹은 탈취 시도"
-    case OTHER = "기타"
+    case SPAM = "SPAM"
+    case INAPPROPRIATE = "INAPPROPRIATE"
+    case HARASSMENT = "HARASSMENT"
+    case IMPERSONATION = "IMPERSONATION"
+    case ILLEGAL_CONTENT = "ILLEGAL_CONTENT"
+    case SEXUAL_CONTENT = "SEXUAL_CONTENT"
+    case VIOLENCE = "VIOLENCE"
+    case PRIVACY = "PRIVACY"
+    case OTHER = "OTHER"
     
     // ForEach에서 id로 사용될 값
     public var id: Self { self }
