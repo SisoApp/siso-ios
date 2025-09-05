@@ -7,6 +7,7 @@
 
 import SwiftUI
 import designSystem
+import model
 
 extension ChatMainView {
     
@@ -14,9 +15,9 @@ extension ChatMainView {
         @Environment(\.dismiss) private var dismiss
         @State private var isShowingOptions = false
         @State private var message: String = ""
-        public let chat: RecentChat
+        public let chat: ChatRoomResponseDTO
         
-        public init(chat: RecentChat) {
+        public init(chat: ChatRoomResponseDTO) {
             self.chat = chat
         }
         
@@ -34,7 +35,7 @@ extension ChatMainView {
                 ToolbarItem(placement: .topBarLeading) {
                     HStack {
                         Image(systemName: "chevron.left")
-                        Text(chat.userName)
+                        Text(chat.otherUserNickName)
                             .font(.system(size: 24, weight: .bold))
                             .lineLimit(1)
                     }
@@ -131,11 +132,11 @@ extension ChatMainView {
     }
 }
 
-#Preview {
-    NavigationStack {
-        ChatMainView.ChatDetailView(
-            chat: RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true)
-        )
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        ChatMainView.ChatDetailView(
+//            chat: ChatRoomResponseDTO()
+//        )
+//    }
+//}
 

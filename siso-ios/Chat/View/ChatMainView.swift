@@ -7,15 +7,8 @@
 import SwiftUI
 import designSystem
 
-
-
-
 public struct ChatMainView: View {
-    @State private var selectedList: ContactType = .callList
-    
-    // 삭제 기능을 위해 상태 변수로 관리합니다.
-    @State private var callHistory: [Contact] = []
-    @State private var recentChats: [RecentChat] = []
+    @StateObject var vm: ChatMainView.ViewModel = .init()
     var delegate: ChatCoordinatorDelegate?
     
     public init(delegate: ChatCoordinatorDelegate?) {
@@ -24,9 +17,9 @@ public struct ChatMainView: View {
     
     public var body: some View {
         VStack {
-                switch selectedList {
+            switch vm.selectedList {
                 case .callList:
-                    if callHistory.isEmpty {
+                    if vm.callHistory.isEmpty {
                         Image("smartphone")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -39,8 +32,8 @@ public struct ChatMainView: View {
                             .foregroundStyle(Color.Siso.Gray._70)
                     }else {
                         List {
-                            ForEach(callHistory) { contact in
-                                ContactView(contact: contact, type: selectedList, delegate: delegate)
+                            ForEach(vm.callHistory) { contact in
+                                ContactView(contact: contact, type: vm.selectedList, delegate: delegate)
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
                                             print("delete!!")
@@ -57,7 +50,7 @@ public struct ChatMainView: View {
                         
                     }
                 case .recentChat:
-                    if recentChats.isEmpty {
+                    if vm.recentChats.isEmpty {
                         Image("coffeecup")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -70,8 +63,8 @@ public struct ChatMainView: View {
                             .foregroundStyle(Color.Siso.Gray._70)
                     }else {
                         List {
-                            ForEach(recentChats) { chat in
-                                ContactView(chat: chat, type: selectedList, delegate: delegate)
+                            ForEach(vm.recentChats) { chat in
+                                ContactView(chat: chat, type: vm.selectedList, delegate: delegate)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         print("나가기")
@@ -94,19 +87,19 @@ public struct ChatMainView: View {
                 HStack {
                     Button(action: {
                         withAnimation {
-                            selectedList = .callList
+                            vm.selectedList = .callList
                         }
                     }, label: {
                         Text("전화 내역")
-                            .foregroundStyle(selectedList == .callList ? .black : Color.Siso.Gray._50)
+                            .foregroundStyle(vm.selectedList == .callList ? .black : Color.Siso.Gray._50)
                     })
                     Button(action: {
                         withAnimation {
-                            selectedList = .recentChat
+                            vm.selectedList = .recentChat
                         }
                     }, label: {
                         Text("최근 채팅")
-                            .foregroundStyle(selectedList == .recentChat ? .black : Color.Siso.Gray._50)
+                            .foregroundStyle(vm.selectedList == .recentChat ? .black : Color.Siso.Gray._50)
                     })
                 }
                 .font(.system(size: 24, weight: .bold))
@@ -121,8 +114,10 @@ public struct ChatMainView: View {
         }
         .onAppear {
             // View가 나타날 때 초기 데이터를 State 변수에 로드합니다.
-            self.recentChats = chats
-            self.callHistory = calls
+            
+        }
+        .task {
+            await vm.fetchAllChat()
         }
     }
 }
@@ -136,16 +131,6 @@ public extension ChatMainView {
             Contact(userName: "박지성", icon: "person.circle.fill", time: Date().addingTimeInterval(-3600)),
             Contact(userName: "최유리", icon: "person.circle.fill", time: Date().addingTimeInterval(-86400)),
             Contact(userName: "정다빈", icon: "person.circle.fill", time: Date().addingTimeInterval(-172800))
-        ]
-    }
-    
-    var chats: [RecentChat] {
-        [
-            RecentChat(userName: "세종대왕", icon: "person.circle.fill", time: Date().addingTimeInterval(-9000), hasMessages: true),
-            RecentChat(userName: "이순신", icon: "person.circle.fill", time: Date().addingTimeInterval(-2500), hasMessages: true),
-            RecentChat(userName: "안중근", icon: "person.circle.fill", time: Date().addingTimeInterval(-500), hasMessages: false),
-            RecentChat(userName: "김구", icon: "person.circle.fill", time: Date().addingTimeInterval(-95000), hasMessages: false),
-            RecentChat(userName: "허준", icon: "person.circle.fill", time: Date().addingTimeInterval(-200000), hasMessages: false)
         ]
     }
 }

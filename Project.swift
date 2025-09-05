@@ -49,7 +49,8 @@ let sisoApp: Target = .target(
             "UIBackgroundModes": [
                 "remote-notification"
             ],
-            "UIUserInterfaceStyle": "Light"
+            "UIUserInterfaceStyle": "Light",
+            "SOKET_URL": "$(SOKET_URL)",
         ]
     ),
     sources: ["siso-ios/Sources/**",],
@@ -58,6 +59,7 @@ let sisoApp: Target = .target(
     dependencies: [
         .target(name: "coordinator"),
         .target(name: "auth"),
+        .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
     ],
@@ -182,13 +184,16 @@ let call: Target = .target(
 let chat: Target = .target(
     name: "chat",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).chat",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
     sources: ["siso-ios/Chat/**"],
     dependencies: [
         .target(name: "designSystem"),
+        .target(name: "network"),
+        .target(name: "model"),
+        .external(name: "SwiftStomp")
     ]
 )
 

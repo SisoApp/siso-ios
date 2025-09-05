@@ -20,7 +20,7 @@ public struct SocialView: View {
                 KakaoSDK.initSDK(appKey: apiKey)
             }
         } else {
-            print("API Key not found")
+            debugPrint("API Key not found")
         }
     }
     

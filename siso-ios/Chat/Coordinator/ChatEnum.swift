@@ -5,9 +5,11 @@
 //  Created by 김용해 on 8/20/25.
 //
 
+import model
+
 public enum ChatPage: Identifiable, Hashable {
     case main
-    case detail(chat: RecentChat)
+    case detail(chat: ChatRoomResponseDTO)
     case notificationChat
     
     public var id: String {

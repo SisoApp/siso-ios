@@ -46,6 +46,7 @@ public extension SocialLoginView {
                         self.userState = convertUserState(refreshResult.registrationStatus)
                     }
                 case .failure(let failure):
+                    print(failure)
                     if failure.responseCode == 401 {
                         alertMessage = "로그인 세션이 만료되었습니다. 다시 로그인 해주세요."
                         showAlert = true
