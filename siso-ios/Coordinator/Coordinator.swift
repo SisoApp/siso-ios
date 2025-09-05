@@ -175,7 +175,7 @@ public class Coordinator: ObservableObject {
                 .navigationBarBackButtonHidden(true)
             
         case .reportFeedbackPopup:
-            ReportFeedBackView(delegate: self)
+            ReportFeedBackView(onDismiss: {})
             
             // Chat
         case .main:
