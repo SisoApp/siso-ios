@@ -152,7 +152,7 @@ public struct ImageProfileView: View {
                 }
             }
             
-            if let item = imageSlots[0] {
+            if imageSlots[0] != nil {
                 Button {
                     removeImage(at: 0)
                 } label: {
@@ -170,6 +170,7 @@ public struct ImageProfileView: View {
                                 .offset(y: -9)
                         }
                 }
+            }
         }
         .padding(.top, 44)
     }
