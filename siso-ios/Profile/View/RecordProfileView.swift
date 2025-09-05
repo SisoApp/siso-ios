@@ -166,6 +166,7 @@ public struct RecordProfileView: View {
                 case .signUp:
                     do {
                         try await viewModel.registerWholeProfile(userProfile)
+                        userProfile.profileImages.removeAll()
                         delegate?.pushProfile(.complete)
                     } catch {
                         showAlert = true

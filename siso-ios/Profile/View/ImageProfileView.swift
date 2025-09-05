@@ -86,11 +86,11 @@ public struct ImageProfileView: View {
                 loadAndMergeImages()
             }
         }
-        .onChange(of: viewModel.serverImages) { _, _ in
-            loadAndMergeImages()
+        .onChange(of: viewModel.serverImages) { oldValue, newValue in
+            if oldValue != newValue { loadAndMergeImages() }
         }
-        .onChange(of: userProfile.profileImages) { _, _ in
-            loadAndMergeImages()
+        .onChange(of: userProfile.profileImages) { oldValue, newValue in
+            if oldValue != newValue { loadAndMergeImages() }
         }
     }
     
@@ -282,6 +282,7 @@ public struct ImageProfileView: View {
                 Task {
                     do {
                         try await viewModel.uploadImages(userProfile.profileImages)
+                        userProfile.profileImages.removeAll()
                         delegate?.pop()
                     } catch {
                         showAlert = true
@@ -314,6 +315,8 @@ public struct ImageProfileView: View {
     // 서버 이미지(URL)와 로컬 이미지(UIImage)를 병합하는 함수
     private func loadAndMergeImages() {
         var mergedImages: [ImageDisplayItem] = []
+        print("serverImage: ", viewModel.serverImages?.count)
+        print("localImage: ", userProfile.profileImages.count)
         
         if let serverImages = viewModel.serverImages {
             for serverImage in serverImages {

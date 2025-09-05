@@ -31,6 +31,8 @@ public final actor ImageNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
+        
+        
         return await withCheckedContinuation { continuation in
             AF.request(url,
                        method: .get,

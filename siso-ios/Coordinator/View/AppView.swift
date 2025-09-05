@@ -40,6 +40,7 @@ public struct AppView: View {
         .animation(.easeInOut, value: authVM.userState)
         .task {
             if authVM.userState == .undefined {
+                await authVM.kakaoLogout()
                 await authVM.autoLogin()
             }
         }

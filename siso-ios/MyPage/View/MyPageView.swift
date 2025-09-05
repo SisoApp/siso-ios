@@ -75,7 +75,7 @@ public struct MyPageView: View {
     
     private func profileImageView() -> some View {
         return Group {
-            if let image = viewModel.images?[0],
+            if let image = viewModel.images?.first,
                let imageUrl = URL(string: image.presignedUrl) {
                 AsyncImage(url: imageUrl) { image in
                     image
