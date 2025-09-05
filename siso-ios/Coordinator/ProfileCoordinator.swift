@@ -55,8 +55,8 @@ extension Coordinator: @preconcurrency ProfileCoordinatorDelegate {
     @ViewBuilder
     public func build(sheet: ProfileSheet) -> some View {
         switch sheet {
-        case .imageHelper(let completion):
-            ImageHelperSheet(delegate: self, userProfile: userProfile, completion: completion)
+        case .imageHelper(let mode, let completion):
+            ImageHelperSheet(delegate: self, mode: mode, userProfile: userProfile, completion: completion)
         case .cameraSheet:
             ImagePicker(userProfile: userProfile)
         case .location:

@@ -56,7 +56,7 @@ public struct BasicProfileView: View {
                         .keyboardType(.numbersAndPunctuation)
                         .submitLabel(.done)
                         .onChange(of: age) { _, newValue in
-                            let filtered: String = newValue.filter { "0123456790".contains($0) }
+                            let filtered: String = newValue.filter { "0123456789".contains($0) }
                             age = String(filtered.prefix(2))
                         }
                         .onSubmit {
@@ -122,26 +122,12 @@ public struct BasicProfileView: View {
     
     private func nextButton() -> some View {
         return PrimaryButton(title: "계속하기", isActive: isActive) {
-            guard let sex = sex, let targetSex = targetSex else { return }
-            
             userProfile.nickname = nickname
             userProfile.age = Int(age) ?? 0
-            userProfile.sex = sex
-            userProfile.targetSex = targetSex
+            userProfile.sex = sex ?? ""
+            userProfile.targetSex = targetSex ?? ""
             
             currentPage = .image
-            
-            let parameters: [String: Any] = [
-                "nickname": userProfile.nickname,
-                "age": userProfile.age,
-                "sex": userProfile.sex,
-                "preferenceSex": userProfile.targetSex
-            ]
-            
-            Task {
-                try await ProfileNetworkManager.shared.registerProfile(parameters)
-                currentPage = .image
-            }
         }
         .padding(.bottom, 8)
     }

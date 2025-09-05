@@ -15,6 +15,7 @@ public enum ProfileMode {
 public struct ProfileView: View {
     @EnvironmentObject private var appSettings: AppSettings
     @ObservedObject var userProfile: UserProfile
+    @ObservedObject private var viewModel: ProfileViewModel = .init()
     
     @State private var nickname: String = ""
     @State private var age: String = ""
@@ -24,15 +25,14 @@ public struct ProfileView: View {
     @State private var religion: String = ""
     @State private var meetings: [String] = []
     @State private var interests: [String] = []
-    
     @State private var showAlert: Bool = false
-    @State private var isPlaying: Bool = false
     @State private var didInit: Bool = false
     
     @FocusState private var ageFocus: Bool
     @FocusState private var introduceFocus: Bool
     
-    private var viewModel: ProfileViewModel = .init()
+    
+    
     weak var delegate: ProfileCoordinatorDelegate?
     
     public init(delegate: ProfileCoordinatorDelegate?, userProfile: UserProfile) {
@@ -80,32 +80,45 @@ public struct ProfileView: View {
             }
         }
         .toolbar(.hidden, for: .tabBar)
-        .onAppear {
-            if !didInit {
-                viewModel.setViewModel(
-                    profile: appSettings.userProfile,
-                    images: appSettings.profileImages,
-                    voice: appSettings.voice,
-                    interests: appSettings.interests
-                )
-                bindViewValue()
-                didInit = true
+        .task {
+            await viewModel.setViewModel()
+            await MainActor.run {
+                if !didInit {
+                    bindViewValue()
+                    didInit = true
+                }
             }
         }
     }
     
     private func profileImageView() -> some View {
         return ZStack(alignment: .bottomTrailing) {
-            Image("testimg")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 120, height: 120)
-                .clipped()
-                .clipShape(.rect(cornerRadius: 60))
-                .padding(.top, 10)
-                .onTapGesture {
-                    delegate?.pushProfile(.image)
+            Group {
+                if let image = viewModel.images?[0],
+                   let imageUrl = URL(string: image.presignedUrl) {
+                    AsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            
+                    } placeholder: {
+                        Image("Camera")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(32)
+                    }
+                } else {
+                    Image("Camera")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(32)
                 }
+            }
+            .frame(width: 120, height: 120)
+            .clipShape(.rect(cornerRadius: 120 / 2))
+            .onTapGesture {
+                delegate?.pushProfile(.image)
+            }
             
             Image("pencil")
                 .resizable()
@@ -221,19 +234,24 @@ public struct ProfileView: View {
     private func recordView() -> some View {
         return HStack {
             HStack {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                Image(systemName: viewModel.status == .playing ? "pause.fill" : "play.fill")
                     .resizable()
                     .foregroundStyle(.white)
                     .frame(width: 15, height: 15)
                     .onTapGesture {
-                        isPlaying.toggle()
+                        if viewModel.status == .playing {
+                            viewModel.stopPlaying()
+                        } else if viewModel.status == .waiting {
+                            viewModel.startPlaying()
+                        }
                     }
                 
                 waveFormView(count: 30, height: 44)
                 
-                Text("00:\(String(format: "%02d", viewModel.voiceDuration))")
-                    .font(.system(size: 18, weight: .semibold))
+                Text("00:\(viewModel.voiceTimeText)")
+                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
                     .foregroundStyle(.white)
+                    .frame(minWidth: 60)
             }
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
@@ -264,7 +282,7 @@ public struct ProfileView: View {
                 ForEach(0..<count, id: \.self) { index in
                     
                     let heightRatio: CGFloat = {
-                        if isPlaying {
+                        if viewModel.status == .playing {
                             let now = timeline.date.timeIntervalSinceReferenceDate
                             let factor = randomFactors[index]
                             let sinValue = sin(now * factor.speed + factor.offset)
@@ -280,7 +298,7 @@ public struct ProfileView: View {
                         .cornerRadius(4)
                 }
             }
-            .animation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 0.5), value: isPlaying)
+            .animation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 0.5), value: viewModel.status)
         }
         .frame(height: height)
     }
@@ -311,7 +329,7 @@ public struct ProfileView: View {
                     delegate?.pushProfile(.religion)
                 }
             
-            inputView(title: "흡연", item: userProfile.smoking ? "흡연자" : "비흡연자")
+            inputView(title: "흡연", item: viewModel.smokeDescription)
                 .onTapGesture {
                     delegate?.pushProfile(.smoke)
                 }
@@ -474,13 +492,11 @@ public struct ProfileView: View {
             userProfile.targetSex = targetSex
             
             Task {
-                await viewModel.updateInterests(userProfile)
-                
-                await viewModel.updateProfile(userProfile) { profile in
-                    
-                    
-                    appSettings.userProfile = profile // 수정된 프로필을 UserDefaults에 저장
+                do {
+                    try await viewModel.updateWholeProfile(userProfile)
                     delegate?.pop()
+                } catch {
+                    
                 }
             }
         }
@@ -499,26 +515,26 @@ public struct ProfileView: View {
     }
     
     private func bindViewValue() {
-        nickname = viewModel.nickname
-        age = viewModel.age
-        introduce = viewModel.introduce
-        sex = viewModel.sex
-        targetSex = viewModel.preferenceSex
+        nickname = viewModel.profile?.nickname ?? ""
+        age = viewModel.profile?.age.description ?? ""
+        introduce = viewModel.profile?.introduce ?? ""
+        sex = viewModel.profile?.sex?.rawValue
+        targetSex = viewModel.profile?.preferenceSex?.rawValue
         
-        religion = viewModel.religion
-        userProfile.religion = viewModel.religion
+        religion = viewModel.profile?.religion?.rawValue ?? ""
+        userProfile.religion = viewModel.profile?.religion?.rawValue ?? ""
         
         userProfile.smoking = viewModel.smoke
-        userProfile.mbti = viewModel.mbti
-        userProfile.drinking = viewModel.drinkingCapacity
+        userProfile.mbti = viewModel.profile?.mbti?.rawValue ?? ""
+        userProfile.drinking = viewModel.profile?.drinkingCapacity?.rawValue ?? ""
         
-        userProfile.location = viewModel.location
+        userProfile.location = viewModel.profile?.location ?? ""
         
-        meetings = viewModel.meetings
-        userProfile.meeting = viewModel.meetings
+        meetings = viewModel.profile?.meetings?.map { $0.rawValue } ?? []
+        userProfile.meeting = viewModel.profile?.meetings?.map { $0.rawValue } ?? []
         
-        interests = viewModel.interestArray
-        userProfile.interests = viewModel.interestArray
+        interests = viewModel.interests?.map { $0.rawValue } ?? []
+        userProfile.interests = viewModel.interests?.map { $0.rawValue } ?? []
     }
 }
 

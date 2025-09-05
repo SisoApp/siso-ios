@@ -22,9 +22,11 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     @ObservedObject private var userProfile: UserProfile
     @Published var status: RecordStatus = .pending
     @Published var playTime: Int = 0
+    @Published var voice: VoiceDTO?
     
     private var recorder: AVAudioRecorder?
     private var player: AVAudioPlayer?
+    private var urlPlayer: AVPlayer?
     private var fileName: String = "voice.m4a"
     
     private var timer: Timer.TimerPublisher?
@@ -94,34 +96,57 @@ class RecordProfileViewModel: NSObject, ObservableObject {
     }
     
     func startRecoding() {
-        let session = AVAudioSession.sharedInstance()
-        
-        do {
-            try session.setCategory(.playAndRecord, mode: .default)
-            try session.setActive(true)
-            
-            let settings: [String: Any] = [
-                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-                AVSampleRateKey: 12000,
-                AVNumberOfChannelsKey: 1,
-                AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
-            ]
-            
-            status = .recording
-            recorder = try AVAudioRecorder(url: audioFileUrl, settings: settings)
-            recorder?.record()
-            startTimer()
-        } catch {
-            print("Failed to start recording:", error)
+        Task {
+            await withCheckedContinuation { continuation in
+                DispatchQueue.global().async { [weak self] in
+                    guard let self = self else { return }
+                    let session = AVAudioSession.sharedInstance()
+                    
+                    do {
+                        try session.setCategory(.playAndRecord, mode: .default)
+                        try session.setActive(true)
+                        
+                        let settings: [String: Any] = [
+                            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                            AVSampleRateKey: 12000,
+                            AVNumberOfChannelsKey: 1,
+                            AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
+                        ]
+                        
+                        let recorder = try AVAudioRecorder(url: self.audioFileUrl, settings: settings)
+                        recorder.record()
+                        
+                        DispatchQueue.main.async {
+                            self.recorder = recorder
+                            self.status = .recording
+                            self.startTimer()
+                            continuation.resume()
+                        }
+                    } catch {
+                        print("Failed to start recording:", error)
+                        continuation.resume()
+                    }
+                }
+            }
         }
     }
     
     func stopRecording() {
         removeTimer()
-        recorder?.stop()
-        recorder = nil
         status = .waiting
         userProfile.voice = true
+        
+        Task {
+            await MainActor.run {
+                recorder?.stop()
+                recorder = nil
+            }
+            
+            // 시간이 오래 소요되는 비활성화는 백그라운드 작업으로 전환
+            try? await Task.detached {
+                try AVAudioSession.sharedInstance().setActive(false)
+            }.value
+        }
         
         try? AVAudioSession.sharedInstance().setActive(false) // AVAudioSession 비활성화
     }
@@ -138,17 +163,62 @@ class RecordProfileViewModel: NSObject, ObservableObject {
         }
     }
     
+    func startPlaying(url: URL) {
+        urlPlayer = AVPlayer(url: url)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(urlPlayerDidFinishPlaying),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: urlPlayer?.currentItem
+        )
+        
+        startTimer()
+        urlPlayer?.play()
+        status = .playing
+    }
+    
     func stopPlaying() {
         removeTimer()
+        
         player?.stop()
         player = nil
+        
+        urlPlayer?.pause()
+        urlPlayer = nil
+        
         status = .waiting
     }
     
-    func uploadVoice(completion: @escaping (VoiceDTO) -> Void) async {
-        try? await VoiceNetworkManager.shared.uploadVoice(completion: { voice in
-            completion(voice)
-        })
+    // MARK: - APIs
+    func uploadVoice() async throws {
+        if let voice = voice { try? await VoiceNetworkManager.shared.removeVoice(for: voice.id) } // 서버 파일 중복 방지
+        try await VoiceNetworkManager.shared.uploadVoice()
+    }
+    
+    func getMyVoice() async {
+        let voice = try? await VoiceNetworkManager.shared.getMyVoice()
+        self.voice = voice
+    }
+    
+    func registerWholeProfile(_ userProfile: UserProfile) async throws {
+        let request: UserProfileDTO = UserProfile.convertToDTO(userProfile)
+        
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await ProfileNetworkManager.shared.registerProfile(request)
+            }
+            
+            group.addTask {
+                try await ImageNetworkManager.shared.uploadImages(userProfile.profileImages)
+            }
+            
+            group.addTask {
+                try await VoiceNetworkManager.shared.uploadVoice()
+            }
+            
+            for try await _ in group { }
+        }
     }
 }
 
@@ -166,16 +236,14 @@ extension RecordProfileViewModel {
         removeTimer()
         
         // 녹음 정리
-        if let recorder = recorder, recorder.isRecording {
-            recorder.stop()
-        }
+        recorder?.stop()
         recorder = nil
         
         // 재생 정리
-        if let player = player, player.isPlaying {
-            player.stop()
-        }
+        player?.stop()
         player = nil
+        urlPlayer?.pause()
+        urlPlayer = nil
         
         // AVAudioSession 정리
         try? AVAudioSession.sharedInstance().setActive(false)
@@ -196,6 +264,10 @@ extension RecordProfileViewModel {
         default:
             break
         }
+    }
+    
+    @objc private func urlPlayerDidFinishPlaying() {
+        stopPlaying()
     }
 }
 

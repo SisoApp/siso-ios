@@ -13,7 +13,7 @@ public enum ProfilePage: String, Identifiable, Hashable {
 }
 
 public enum ProfileSheet: Identifiable, Hashable {
-    case imageHelper(([UIImage]) -> Void)
+    case imageHelper(ProfileMode, ([UIImage]) -> Void)
     case cameraSheet
     case location
     case religion
