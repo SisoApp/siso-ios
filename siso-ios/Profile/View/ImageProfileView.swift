@@ -152,23 +152,24 @@ public struct ImageProfileView: View {
                 }
             }
             
-            Button {
-                removeImage(at: 0)
-            } label: {
-                Image(systemName: "xmark")
-                    .fontWeight(.bold)
-                    .frame(width: 28, height: 28)
-                    .foregroundStyle(Color.Siso.Gray._60)
-                    .background(Color.Siso.Gray._20)
-                    .clipShape(.rect(cornerRadius: 14))
-                    .clipped()
-                    .offset(y: -9)
-                    .overlay {
-                        Circle()
-                            .stroke(Color.Siso.Gray._5, lineWidth: 3)
-                            .offset(y: -9)
-                    }
-            }
+            if let item = imageSlots[0] {
+                Button {
+                    removeImage(at: 0)
+                } label: {
+                    Image(systemName: "xmark")
+                        .fontWeight(.bold)
+                        .frame(width: 28, height: 28)
+                        .foregroundStyle(Color.Siso.Gray._60)
+                        .background(Color.Siso.Gray._20)
+                        .clipShape(.rect(cornerRadius: 14))
+                        .clipped()
+                        .offset(y: -9)
+                        .overlay {
+                            Circle()
+                                .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                .offset(y: -9)
+                        }
+                }
         }
         .padding(.top, 44)
     }
