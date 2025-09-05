@@ -43,19 +43,9 @@ public extension MyPageView {
             return result
         }
         
-        func setViewModel(profile: UserProfileDTO?, images: [ImageDTO]?, voice: VoiceDTO?, interests: [Interest]?) {
-            self.profile = profile
-            self.images = images
-            self.voice = voice
-            self.interests = interests
-        }
-        
-        func getImageUrl(_ images: [ImageDTO]?) async {
-            guard let images = images else { return }
-            try? await ImageNetworkManager.shared.getImageUrl(for: images[0].id) { [weak self] urlString in
-                guard let url: URL = URL(string: urlString) else { return }
-                self?.mainImageUrl = url
-            }
+        func getMyProfile() async {
+            profile = try? await ProfileNetworkManager.shared.getCurrentUserProfile()
+            images = try? await ImageNetworkManager.shared.getMyImages()
         }
     }
 }

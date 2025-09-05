@@ -43,16 +43,8 @@ public struct MyPageView: View {
                 settingButton()
             }
         }
-        .onAppear {
-            viewModel.setViewModel(
-                profile: appSettings.userProfile,
-                images: appSettings.profileImages,
-                voice: appSettings.voice,
-                interests: appSettings.interests
-            )
-        }
         .task {
-            await viewModel.getImageUrl(appSettings.profileImages)
+            await viewModel.getMyProfile()
         }
     }
     
@@ -83,8 +75,19 @@ public struct MyPageView: View {
     
     private func profileImageView() -> some View {
         return Group {
-            if let imageUrl = viewModel.mainImageUrl {
-                AsyncImage(url: imageUrl)
+            if let image = viewModel.images?[0],
+               let imageUrl = URL(string: image.presignedUrl) {
+                AsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        
+                } placeholder: {
+                    Image("Camera")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(32)
+                }
             } else {
                 Image("Camera")
                     .resizable()

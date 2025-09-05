@@ -130,7 +130,6 @@ public final actor LoginNetworkManager: Sendable {
         // 새로 받은 토큰을 다시 저장
         keychain.save(token: response.token.accessToken, for: "accessToken")
         keychain.save(token: response.token.refreshToken, for: "refreshToken")
-        print("refreshToken : \(response.token.refreshToken)")
         
         if !response.token.hasProfile {
             response.token.registrationStatus = "REGISTER"

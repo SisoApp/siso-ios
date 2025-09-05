@@ -17,23 +17,11 @@ public final actor VoiceNetworkManager: Sendable {
         self.baseUrl = Bundle.main.infoDictionary?["SERVER_URL"] as? String
     }
     
-    public func getMyVoice(completion: @escaping (VoiceDTO) -> Void) async throws {
+    public func getMyVoice() async throws -> VoiceDTO {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/voice-samples/me"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
         
-        try? await fetchVoice(url, completion: completion)
-    }
-    
-    public func getUserVoice(for userId: Int, completion: @escaping (VoiceDTO) -> Void) async throws {
-        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
-        let urlString: String = baseUrl + "/api/voice-samples/user"
-        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
-        
-        try? await fetchVoice(url, completion: completion)
-    }
-    
-    private func fetchVoice(_ url: URL, completion: @escaping (VoiceDTO) -> Void) async throws {
         guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
             throw AFError.invalidURL(url: "accessToken -> nil")
         }
@@ -42,23 +30,54 @@ public final actor VoiceNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        AF.request(url,
-                   method: .get,
-                   headers: headers)
-        .validate(statusCode: 200..<300)
-        .responseDecodable(of: [VoiceDTO].self) { response in
-            switch response.result {
-            case .success(let voices):
-                debugPrint("녹음파일 조회 성공: \(voices)")
-                    if !voices.isEmpty { completion(voices[0]) }
-                if !voices.isEmpty { completion(voices[0]) }
-            case .failure(let error):
-                debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
+        return await withCheckedContinuation { continuation in
+            AF.request(url,
+                       method: .get,
+                       headers: headers)
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: [VoiceDTO].self) { response in
+                switch response.result {
+                case .success(let voices):
+                    debugPrint("녹음파일 조회 성공 id: \(voices[0].id)")
+                    if !voices.isEmpty { continuation.resume(returning: voices[0]) }
+                case .failure(let error):
+                    debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
+                }
             }
         }
     }
     
-    public func uploadVoice(completion: @escaping (VoiceDTO) -> Void) async throws {
+    public func getUserVoice(for userId: Int) async throws -> VoiceDTO {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/voice-samples/user"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        return await withCheckedContinuation { continuation in
+            AF.request(url,
+                       method: .get,
+                       headers: headers)
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: [VoiceDTO].self) { response in
+                switch response.result {
+                case .success(let voices):
+                    debugPrint("녹음파일 조회 성공")
+                    if !voices.isEmpty { continuation.resume(returning: voices[0]) }
+                case .failure(let error):
+                    debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    public func uploadVoice() async throws {
         guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
         let urlString: String = baseUrl + "/api/voice-samples/upload"
         guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
@@ -68,31 +87,76 @@ public final actor VoiceNetworkManager: Sendable {
         }
         
         let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "multipart/form-data"
+        ]
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            AF.upload(
+                multipartFormData: { multipartFormData in
+                    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    let fileURL = paths[0].appendingPathComponent("voice.m4a")
+                    
+                    multipartFormData.append(fileURL,
+                                             withName: "file",
+                                             fileName: fileURL.lastPathComponent,
+                                             mimeType: "audio/m4a")
+                },
+                to: url,
+                method: .post,
+                headers: headers
+            )
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    debugPrint("녹음파일 업로드 성공!")
+                    continuation.resume()
+                case .failure(let error):
+                    debugPrint("녹음파일 업로드 실패: ", error.localizedDescription)
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    public func removeVoice(for id: Int) async throws {
+        guard let baseUrl = baseUrl else { throw AFError.invalidURL(url: "base URL is not found.") }
+        let urlString: String = baseUrl + "/api/voice-samples/\(id)"
+        guard let url: URL = URL(string: urlString) else { throw AFError.invalidURL(url: urlString) }
+        
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw AFError.invalidURL(url: "accessToken -> nil")
+        }
+        
+        let headers: HTTPHeaders = [
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        AF.upload(
-            multipartFormData: { multipartFormData in
-                let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-                let fileURL = paths[0].appendingPathComponent("voice.m4a")
-                
-                multipartFormData.append(fileURL,
-                                         withName: "file",
-                                         fileName: fileURL.lastPathComponent,
-                                         mimeType: "audio/m4a")
-            },
-            to: url,
-            method: .post,
-            headers: headers
-        )
-        .validate(statusCode: 200..<300)
-        .responseDecodable(of: VoiceDTO.self) { response in
-            switch response.result {
-            case .success(let voice):
-                debugPrint("녹음파일 업로드 성공!")
-                debugPrint(voice)
-            case .failure(let error):
-                debugPrint("녹음파일 업로드 실패: ", error.localizedDescription)
+        return await withCheckedContinuation { continuation in
+            AF.upload(
+                multipartFormData: { multipartFormData in
+                    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    let fileURL = paths[0].appendingPathComponent("voice.m4a")
+                    
+                    multipartFormData.append(fileURL,
+                                             withName: "file",
+                                             fileName: fileURL.lastPathComponent,
+                                             mimeType: "audio/m4a")
+                },
+                to: url,
+                method: .delete,
+                headers: headers
+            )
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    debugPrint("녹음파일 삭제 성공! id: \(id)")
+                    continuation.resume()
+                case .failure(let error):
+                    debugPrint("녹음파일 삭제 실패: ", error.localizedDescription)
+                }
             }
         }
     }

@@ -51,7 +51,6 @@ public class MatchingViewModel: ObservableObject, @preconcurrency HomeCardDelega
         self.nowWatching = viewModel
         print("👀 nowWatching이 \(viewModel.nickname)(으)로 업데이트 되었습니다.")
     }
-    
     // HIGHLIGHT: fetchCards 함수 전체 수정
        func fetchCards() async {
            fetchTries += 1
@@ -93,30 +92,4 @@ public class MatchingViewModel: ObservableObject, @preconcurrency HomeCardDelega
            // 8. 로딩 종료
            isLoading = false
        }
-    
-    func fetchMyProfile(completion: @escaping (UserProfileDTO) -> Void) async {
-        do {
-            try? await ProfileNetworkManager.shared.getCurrentUserProfile { profile in
-                completion(profile)
-            }
-        }
-    }
-    
-    func fetchMyInterests(completion: @escaping ([Interest]) -> Void) async {
-        try? await ProfileNetworkManager.shared.getInterests { interests in
-            completion(interests)
-        }
-    }
-    
-    func fetchMyImages(completion: @escaping ([ImageDTO]) -> Void) async {
-        try? await ImageNetworkManager.shared.getMyImages(completion: { images in
-            completion(images)
-        })
-    }
-    
-    func fetchMyVoice(completion: @escaping (VoiceDTO) -> Void) async {
-        try? await VoiceNetworkManager.shared.getMyVoice(completion: { voice in
-            completion(voice)
-        })
-    }
 }
