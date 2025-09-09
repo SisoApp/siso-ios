@@ -115,20 +115,26 @@ public struct ImageProfileView: View {
                 if let item = imageSlots[0] {
                     if let urlString = item.url,
                        let url = URL(string: urlString) {
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(height: 206)
-                                .background(Color.Siso.Gray._20)
-                                .clipped()
-                                .clipShape(.rect(cornerRadius: 12))
-                            
-                        } placeholder: {
-                            ProgressView()
-                                .frame(height: 206)
-                                .background(Color.Siso.Gray._20)
-                                .clipShape(.rect(cornerRadius: 12))
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(height: 206)
+                                    .background(Color.Siso.Gray._20)
+                                    .clipShape(.rect(cornerRadius: 12))
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(height: 206)
+                                    .background(Color.Siso.Gray._20)
+                                    .clipped()
+                                    .clipShape(.rect(cornerRadius: 12))
+                            case .failure:
+                                EmptyView()
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
                     } else if let localImage = item.image {
                         Image(uiImage: localImage)
@@ -187,20 +193,26 @@ public struct ImageProfileView: View {
                         if let item = imageItem {
                             if let urlString = item.url,
                                let url = URL(string: urlString) {
-                                AsyncImage(url: url) { image in
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: size, height: size)
-                                        .background(Color.Siso.Gray._20)
-                                        .clipped()
-                                        .clipShape(.rect(cornerRadius: 12))
-                                    
-                                } placeholder: {
-                                    ProgressView()
-                                        .frame(width: size, height: size)
-                                        .background(Color.Siso.Gray._20)
-                                        .clipShape(.rect(cornerRadius: 12))
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(width: size, height: size)
+                                            .background(Color.Siso.Gray._20)
+                                            .clipShape(.rect(cornerRadius: 12))
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: size, height: size)
+                                            .background(Color.Siso.Gray._20)
+                                            .clipped()
+                                            .clipShape(.rect(cornerRadius: 12))
+                                    case .failure:
+                                        EmptyView()
+                                    @unknown default:
+                                        EmptyView()
+                                    }
                                 }
                             } else if let localImage = item.image {
                                 Image(uiImage: localImage)
@@ -315,8 +327,6 @@ public struct ImageProfileView: View {
     // 서버 이미지(URL)와 로컬 이미지(UIImage)를 병합하는 함수
     private func loadAndMergeImages() {
         var mergedImages: [ImageDisplayItem] = []
-        print("serverImage: ", viewModel.serverImages?.count)
-        print("localImage: ", userProfile.profileImages.count)
         
         if let serverImages = viewModel.serverImages {
             for serverImage in serverImages {
