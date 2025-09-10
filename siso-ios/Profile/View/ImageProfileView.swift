@@ -145,6 +145,24 @@ public struct ImageProfileView: View {
                             .clipped()
                             .clipShape(.rect(cornerRadius: 12))
                     }
+                    
+                    Button {
+                        removeImage(at: 0)
+                    } label: {
+                        Image(systemName: "xmark")
+                            .fontWeight(.bold)
+                            .frame(width: 28, height: 28)
+                            .foregroundStyle(Color.Siso.Gray._60)
+                            .background(Color.Siso.Gray._20)
+                            .clipShape(.rect(cornerRadius: 14))
+                            .clipped()
+                            .offset(y: -9)
+                            .overlay {
+                                Circle()
+                                    .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                    .offset(y: -9)
+                            }
+                    }
                 } else {
                     Image("Camera")
                         .resizable()
@@ -155,26 +173,6 @@ public struct ImageProfileView: View {
                         .background(Color.Siso.Gray._20)
                         .clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-            }
-            
-            if imageSlots[0] != nil {
-                Button {
-                    removeImage(at: 0)
-                } label: {
-                    Image(systemName: "xmark")
-                        .fontWeight(.bold)
-                        .frame(width: 28, height: 28)
-                        .foregroundStyle(Color.Siso.Gray._60)
-                        .background(Color.Siso.Gray._20)
-                        .clipShape(.rect(cornerRadius: 14))
-                        .clipped()
-                        .offset(y: -9)
-                        .overlay {
-                            Circle()
-                                .stroke(Color.Siso.Gray._5, lineWidth: 3)
-                                .offset(y: -9)
-                        }
                 }
             }
         }
@@ -223,6 +221,24 @@ public struct ImageProfileView: View {
                                     .clipped()
                                     .clipShape(.rect(cornerRadius: 12))
                             }
+                            
+                            Button {
+                                removeImage(at: index)
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .fontWeight(.bold)
+                                    .frame(width: 28, height: 28)
+                                    .foregroundStyle(Color.Siso.Gray._60)
+                                    .background(Color.Siso.Gray._20)
+                                    .clipShape(.rect(cornerRadius: 14))
+                                    .clipped()
+                                    .offset(y: -9)
+                                    .overlay {
+                                        Circle()
+                                            .stroke(Color.Siso.Gray._5, lineWidth: 3)
+                                            .offset(y: -9)
+                                    }
+                            }
                         } else {
                             Image("Camera")
                                 .resizable()
@@ -233,26 +249,6 @@ public struct ImageProfileView: View {
                                 .background(Color.Siso.Gray._20)
                                 .clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                    }
-                    
-                    if imageItem != nil {
-                        Button {
-                            removeImage(at: index)
-                        } label: {
-                            Image(systemName: "xmark")
-                                .fontWeight(.bold)
-                                .frame(width: 28, height: 28)
-                                .foregroundStyle(Color.Siso.Gray._60)
-                                .background(Color.Siso.Gray._20)
-                                .clipShape(.rect(cornerRadius: 14))
-                                .clipped()
-                                .offset(y: -9)
-                                .overlay {
-                                    Circle()
-                                        .stroke(Color.Siso.Gray._5, lineWidth: 3)
-                                        .offset(y: -9)
-                                }
                         }
                     }
                 }
