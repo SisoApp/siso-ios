@@ -77,16 +77,22 @@ public struct MyPageView: View {
         return Group {
             if let image = viewModel.images?.first,
                let imageUrl = URL(string: image.presignedUrl) {
-                AsyncImage(url: imageUrl) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        
-                } placeholder: {
-                    Image("Camera")
-                        .resizable()
-                        .scaledToFit()
-                        .padding(32)
+                AsyncImage(url: imageUrl) { phase in
+                    switch phase {
+                    case .empty:
+                        Image("Camera")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(32)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .failure:
+                        EmptyView()
+                    @unknown default:
+                        EmptyView()
+                    }
                 }
             } else {
                 Image("Camera")
