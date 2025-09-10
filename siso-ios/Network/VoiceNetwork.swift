@@ -38,8 +38,10 @@ public final actor VoiceNetworkManager: Sendable {
             .responseDecodable(of: [VoiceDTO].self) { response in
                 switch response.result {
                 case .success(let voices):
-                    debugPrint("녹음파일 조회 성공 id: \(voices[0].id)")
-                    if !voices.isEmpty { continuation.resume(returning: voices[0]) }
+                    if !voices.isEmpty {
+                        debugPrint("녹음파일 조회 성공 id: \(voices[0].id)")
+                        continuation.resume(returning: voices[0])
+                    }
                 case .failure(let error):
                     debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
                 }
