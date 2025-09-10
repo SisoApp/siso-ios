@@ -7,7 +7,7 @@ import model
 import network
 // SwiftUI 앱에 연결되기 위해 NSObject와 UIApplicationDelegate를 상속받습니다.
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-
+    
     // MARK: - 1. 앱 시작 시 초기 설정
     
     /// 앱이 처음 시작될 때 호출되는 메서드입니다.
@@ -28,29 +28,29 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         Messaging.messaging().delegate = self
         return true
     }
-
+    
     // MARK: - 2. APNs 등록 및 Device Token 처리
     
     /// `registerForRemoteNotifications()`가 성공하여 APNs로부터 Device Token을 받았을 때 호출됩니다.
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         // Device Token은 Data 형태로 전달됩니다. 서버로 보내기 위해 16진수 문자열로 변환합니다.
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-         // print("✅ APNs Device Token: \(tokenString)")
+        // print("✅ APNs Device Token: \(tokenString)")
         Messaging.messaging().apnsToken = deviceToken
         // 🚨 중요: 이 tokenString을 사용자의 ID와 함께 백엔드 서버로 전송해야 합니다.
         // 예: ApiClient.shared.sendDeviceToken(token: tokenString)
         // 백엔드는 이 토큰을 저장해두었다가, 해당 사용자에게 푸시를 보낼 때 사용합니다.
     }
-
+    
     /// Device Token 등록에 실패했을 때 호출됩니다.
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("🛑 Failed to register for remote notifications: \(error.localizedDescription)")
         
         // 시뮬레이터에서는 항상 실패합니다. 실제 기기에서 테스트해야 합니다.
     }
-
+    
     // MARK: - 3. 원격 알림(푸시) 수신 처리
-
+    
     /// **가장 중요한 부분입니다.**
     /// 앱이 실행 중이거나 백그라운드에 있을 때 원격 알림을 받으면 이 메서드가 호출됩니다.
     /// (앱이 완전히 종료된 상태에서 푸시를 탭하여 실행된 경우는 didFinishLaunchingWithOptions에서 처리할 수도 있습니다)
@@ -60,64 +60,43 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         
         // 여기서 받은 userInfo 딕셔너리가 백엔드에서 보낸 JSON 페이로드입니다.
         // 이 데이터를 파싱하여 CallManager에 전달합니다.
-        handleIncomingCall(userInfo: userInfo)
+        handlePushNotification(userInfo: userInfo)
         
         // 시스템에 데이터 처리가 끝났음을 알립니다.
         // 새로운 데이터를 가져왔으므로 .newData를 전달합니다.
         completionHandler(.newData)
     }
-
+    
     // MARK: - 4. 푸시 데이터 처리 및 CallManager 호출
     
-    /// userInfo 딕셔너리를 파싱하여 CallManager의 상태를 업데이트하는 헬퍼 함수입니다.
-    private func handleIncomingCall(userInfo: [AnyHashable: Any]) {
+    func handlePushNotification(userInfo: [AnyHashable: Any]) {
         
-        // --- 1. 통화 알림 타입 확인 ---
-        // 'type' 필드를 먼저 확인하여 이것이 정말 전화 알림인지 확인합니다.
-        // 이는 일반 공지사항 푸시와 전화 푸시를 구분하는 데 매우 중요합니다.
-        guard let type = userInfo["type"] as? String, type == "INCOMING_CALL" else {
-            print("ℹ️ 수신된 푸시가 통화 알림 타입('INCOMING_CALL')이 아니므로 무시합니다.")
-            return
-        }
-        
-        print("📞 수신: 통화 알림 페이로드를 파싱합니다. \(userInfo)")
-
-        // --- 2. 필요한 데이터 파싱 및 타입 변환 ---
-        // FCM을 통해 온 데이터는 보통 String 타입이므로, 적절한 타입(Int 등)으로 변환해줍니다.
-        guard
-            let idString = userInfo["id"] as? String,
-            let id = Int(idString),
-            
-            let channelName = userInfo["channelName"] as? String,
-            let token = userInfo["token"] as? String,
-            
-            let callerIdString = userInfo["callerId"] as? String,
-            let callerId = Int(callerIdString),
-            
-            let receiverIdString = userInfo["receiverId"] as? String,
-            let receiverId = Int(receiverIdString)
-        else {
-            print("🔴 handleIncomingCall: 통화 알림 파싱 실패. 필수 데이터가 누락되었거나 타입이 다릅니다.")
+        // 1. [AnyHashable: Any]를 JSON 데이터로 변환
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: userInfo, options: []) else {
+            print("🔴 Push Handler: userInfo를 JSON 데이터로 변환 실패")
             return
         }
 
-        // --- 3. 파싱된 데이터로 CallInfoDto 객체 생성 ---
-        let incomingCallInfo = CallInfoDto(
-            id: id,
-            channelName: channelName,
-            token: token,
-            callerId: callerId,
-            receiverId: receiverId
-        )
+        do {
+            // 2. JSON 데이터를 IncomingCallPayload 모델로 디코딩
+            let decoder = JSONDecoder()
+            let payload = try decoder.decode(IncomingCallPayload.self, from: jsonData)
+            
+            // 3. 타입 확인 및 분기 처리
+            if payload.type == "CALL" {
+                print("✅ Push Handler: 통화 알림 수신. CallManager에 전달합니다.")
+                // ✅ CallManager의 메서드에 디코딩된 'payload' 객체 전체를 전달!
+                CallManager.shared.handleIncomingCall(with: payload)
+            } else {
+                // "MESSAGE" 타입 등 다른 푸시 처리
+                print("ℹ️ Push Handler: 일반 메시지 알림 수신.")
+            }
 
-        // --- 4. CallManager에 통화 정보 전달 ---
-        // ✅ 모든 것이 정상이면, 파싱된 callInfo 객체를 CallManager에 전달하여
-        // 전화 수신 플로우를 시작합니다.
-        print("✅ 통화 정보 파싱 성공. CallManager에 전달합니다: \(incomingCallInfo)")
-        CallManager.shared.handleIncomingCall(with: incomingCallInfo)
+        } catch {
+            print("🔴 Push Handler: 푸시 페이로드 디코딩 실패. Error: \(error)")
+        }
     }
 }
-
 // MARK: - UNUserNotificationCenterDelegate 구현
 
 extension AppDelegate {
@@ -131,7 +110,7 @@ extension AppDelegate {
         
         // 여기서도 동일하게 통화 정보를 처리해줍니다.
         // `didReceiveRemoteNotification`이 호출되지 않는 iOS 버전이나 상황을 대비하여 중복으로 처리해주는 것이 안전합니다.
-        handleIncomingCall(userInfo: userInfo)
+        handlePushNotification(userInfo: userInfo)
         
         // 포그라운드에서 전화 수신 UI가 바로 뜨기 때문에, 시스템 알림(배너, 소리)은 보여주지 않도록 빈 배열을 전달합니다.
         // 만약 일반 알림이라면 [.banner, .sound, .badge] 등을 전달하여 알림을 표시할 수 있습니다.
@@ -145,7 +124,7 @@ extension AppDelegate {
         print("👆 User tapped notification: \(userInfo)")
         
         // 사용자가 알림을 탭한 경우에도 통화 정보를 처리합니다.
-        handleIncomingCall(userInfo: userInfo)
+        handlePushNotification(userInfo: userInfo)
         
         completionHandler()
     }

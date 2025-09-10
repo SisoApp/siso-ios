@@ -62,6 +62,7 @@ let sisoApp: Target = .target(
         .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
+        .external(name: "SwiftStomp")
     ],
     settings: .settings(
            base: [
@@ -106,7 +107,7 @@ let auth: Target = .target(
 let network: Target = .target(
     name: "network",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).network",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .extendingDefault(
@@ -117,7 +118,8 @@ let network: Target = .target(
     sources: ["siso-ios/Network/**"],
     dependencies: [
         .external(name: "Alamofire"),
-        .target(name: "model")
+        .target(name: "model"),
+        .external(name: "SwiftStomp")
     ]
 )
 
@@ -193,7 +195,8 @@ let chat: Target = .target(
         .target(name: "designSystem"),
         .target(name: "network"),
         .target(name: "model"),
-        .external(name: "SwiftStomp")
+        .external(name: "SwiftStomp"),
+        .target(name: "call")
     ]
 )
 
@@ -249,7 +252,7 @@ let coordinator: Target = .target(
 let designSystem: Target = .target(
     name: "designSystem",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).designSystem",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,
@@ -260,7 +263,7 @@ let designSystem: Target = .target(
 let model: Target = .target(
     name: "model",
     destinations: .iOS,
-    product: .staticLibrary,
+    product: .framework,
     bundleId: "\(bundleId).model",
     deploymentTargets: .iOS("17.0"),
     infoPlist: .default,

@@ -66,6 +66,10 @@ public class MatchingViewModel: ObservableObject, @preconcurrency HomeCardDelega
            do {
                // 3. 네트워크 매니저 호출 (페이지 번호와 사이즈 전달)
                let newProfiles = try await NetworkManager.shared.getMatchingProfiles()
+                   .filter { matchingProfile in
+                       // `cards` 배열에 포함되어 있지 않은(`!`) 프로필만 true를 반환하여 남깁니다.
+                       return !cards.contains(where: { $0.profile.id == matchingProfile.id })
+                   }
                
                // 4. 받아온 데이터가 없으면, 더 이상 불러올 데이터가 없다고 표시
                if newProfiles.isEmpty {

@@ -34,3 +34,19 @@ public struct CallInfoDto: Codable, Equatable, Identifiable {
     
    
 }
+public extension CallInfoDto {
+    
+    /// IncomingCallPayload와 수신자 ID를 사용하여 CallInfoDto를 생성합니다.
+    /// - Parameters:
+    ///   - payload: 푸시 알림으로 수신된 데이터 객체.
+    ///   - receiverId: 현재 로그인한 사용자(수신자)의 ID.
+    init(from payload: IncomingCallPayload, receiverId: Int) {
+        self.init(
+            id: payload.callId,
+            channelName: payload.agoraChannel,
+            token: payload.agoraToken,
+            callerId: payload.callerId,
+            receiverId: receiverId // 👈 외부에서 받은 나의 ID를 사용
+        )
+    }
+}

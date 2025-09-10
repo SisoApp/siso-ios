@@ -5,7 +5,7 @@ import model
 
 /// 전화 수신 화면을 나타내는 임시 뷰 (디버깅용)
 public struct ReceivingCallView: View {
-    var callInfo: CallInfoDto
+    var callInfo: IncomingCallPayload
     
     public var body: some View {
         ZStack {

@@ -8,7 +8,71 @@ public final class NetworkManager {
     private init() {}
     
     // MARK: - Core Request Method
-    
+    // NetworkManager 클래스 내부에 추가
+    private func _request(
+        target: EndPoint,
+        parameters: Parameters? = nil
+    ) async -> DataResponse<Data, AFError> {
+        
+        // 1. 토큰 및 헤더 생성 (중복 제거)
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            // 실제로는 에러를 던지거나 해야 하지만, 여기서는 응답 객체를 직접 생성하여 반환
+            let error = AFError.sessionInvalidated(error: NetworkError.missingAccessToken)
+            return DataResponse(request: nil, response: nil, data: nil, metrics: nil, serializationDuration: 0, result: .failure(error))
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Accept": "application/json"
+        ]
+        
+        let url = target.baseURL + target.path
+        let encoding: ParameterEncoding = (target.method == .get) ? URLEncoding.default : JSONEncoding.default
+        
+        // 2. 요청/응답 로그 중앙화 (중복 제거)
+        print("\n-------------------- 🚀 [Request: \(target.path)] --------------------")
+        print("URL: \(url)")
+        print("Method: \(target.method.rawValue)")
+        print("Headers: \(headers.dictionary)")
+        if let params = parameters { print("Parameters: \(params)") }
+        print("----------------------------------------------------------------------\n")
+        
+        let dataTask = AF.request(
+            url,
+            method: target.method,
+            parameters: parameters,
+            encoding: encoding,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            .serializingData() // 디코딩은 나중에 하므로 여기선 Data만 받음
+        
+        let response = await dataTask.response
+        
+        print("\n-------------------- ✨ [Response: \(target.path)] -------------------")
+        print("URL: \(response.request?.url?.absoluteString ?? "N/A")")
+        print("Status Code: \(response.response?.statusCode ?? 0)")
+        
+        switch response.result {
+        case .success(let data):
+            print("Result: ✅ Success")
+            if let jsonString = String(data: data, encoding: .utf8)?.prettyJsonString {
+                print("Body:\n\(jsonString)")
+            } else {
+                print("Body: [Non-JSON or Empty]")
+            }
+        case .failure(let error):
+            print("Result: 🔴 Failure")
+            print("Error: \(error.localizedDescription)")
+            if let data = response.data, let errorBody = String(data: data, encoding: .utf8) {
+                print("Error Body:\n\(errorBody)")
+            }
+        }
+        print("----------------------------------------------------------------------\n")
+        
+        return response
+    }
+
     /// 모든 API 요청을 처리하는 제네릭 private 메서드
     public func request<T: Decodable>(
         target: EndPoint,
@@ -164,7 +228,7 @@ public final class NetworkManager {
     /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
     /// - Throws: NetworkError
     /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
-    public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+    public func acceptCall(callInfo: IncomingCallPayload) async throws -> CallResponseDto {
         
         // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
         let parameters = try callInfo.toDictionary()
@@ -190,7 +254,7 @@ public final class NetworkManager {
     
     
     /// [POST] /api/calls/deny - 수신자가 통화를 거절합니다.
-    public func denyCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
+    public func denyCall(callInfo: IncomingCallPayload) async throws -> CallResponseDto {
         let parameters = try callInfo.toDictionary()
         
         let responseArray = try await request(
@@ -444,47 +508,34 @@ public final class NetworkManager {
     /// - Returns: 알림 DTO 배열 `[NotificationResponseDto]`
     /// - Throws: `NetworkError` - 네트워크 통신 또는 디코딩 실패 시
     // 알림 API 전용 래퍼 구조체 (NetworkManager 내부에 private으로 선언)
-    private struct TempNotificationResponseWrapper: Decodable {
+    // ✅ 수정된 TempNotificationResponseWrapper 구조체
+    struct TempNotificationResponseWrapper: Decodable {
         let status: Int
-        let data: [NotificationResponseDto]?
-        let errorMessage: String?
+        let data: [NotificationResponseDto]? // data는 배열이므로 그대로 둡니다.
+        let errorMessage: String? // errorMessage는 null일 수 있으므로 옵셔널(String?)로 선언합니다.
     }
+
 
     /// [GET] /api/notifications - 현재 사용자의 모든 알림 목록을 조회합니다.
     public func getNotifications() async throws -> [NotificationResponseDto] {
         
-        let target = EndPoint.getNotification
+        // 1. 중앙 헬퍼 함수로 요청을 보내고 응답을 받음
+        let response = await _request(target: .getNotification)
         
-        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
-            throw NetworkError.missingAccessToken
-        }
-        
-        let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)",
-            "Accept": "application/json"
-        ]
-        
-        let dataTask = AF.request(
-            target.baseURL + target.path,
-            method: target.method,
-            encoding: URLEncoding.default,
-            headers: headers
-        )
-            .validate(statusCode: 200..<300)
-            // ✅ 비표준 래퍼를 처리하기 위해 임시 래퍼로 디코딩
-            .serializingDecodable(TempNotificationResponseWrapper.self)
-        
-        let response = await dataTask.response
-        
+        // 2. 받은 응답을 처리
         switch response.result {
-        case .success(let wrapperResponse):
-            // ✅ 래퍼에서 data 배열을 추출하여 반환
-            return wrapperResponse.data ?? []
+        case .success(let data):
+            do {
+                // 3. 필요한 타입(TempNotificationResponseWrapper)으로 직접 디코딩
+                let wrapper = try JSONDecoder().decode(TempNotificationResponseWrapper.self, from: data)
+                return wrapper.data ?? []
+            } catch {
+                // 디코딩 실패 시 에러 처리
+                throw NetworkError.decodingError(error)
+            }
             
         case .failure(let afError):
-            if let data = response.data, let body = String(data: data, encoding: .utf8) {
-                print("--- 🔴 Network Error Body (getNotifications) 🔴 ---\n\(body)\n------------------------------")
-            }
+            // 네트워크 실패 시 에러 처리
             throw NetworkError.afError(afError)
         }
     }
@@ -544,5 +595,15 @@ public extension Encodable {
         let data = try JSONEncoder().encode(self)
         let dictionary = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any]
         return dictionary
+    }
+}
+// JSON 문자열을 예쁘게 출력하기 위한 Helper
+extension String {
+    var prettyJsonString: String? {
+        guard let data = self.data(using: .utf8) else { return nil }
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
+              let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
+              let prettyString = String(data: prettyData, encoding: .utf8) else { return nil }
+        return prettyString
     }
 }

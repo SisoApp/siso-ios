@@ -2,7 +2,7 @@
 
 import SwiftUI
 import model
-
+import network
 // 이 뷰는 CallManager의 상태를 보고 적절한 자식 뷰를 렌더링하는 '컨테이너' 역할을 합니다.
 public struct ActiveCallView: View {
     // CallManager의 싱글턴 인스턴스를 @StateObject로 구독하여 상태 변화를 감지합니다.
@@ -30,8 +30,8 @@ public struct ActiveCallView: View {
             case .connecting(let profile, _):
                 ConnectingView(receiverProfile: profile, delegate: delegate)
                 
-            case .receiving(let info):
-                ReceivingCallView(callInfo: info)
+            case .receiving(let payload):
+                ReceivingCallView(callInfo: payload)
                 
             case .inCall(let profile, _):
                 let viewModel = CallViewModel(opponentProfile: profile)
@@ -67,15 +67,16 @@ private var debugMenuView: some View {
                 switch callManager.callState {
                 case .connecting(let profile, let info):
                     callManager.changeStateForDebug(.inCall(profile: profile, info: info))
-                case .receiving(let info):
+                case .receiving(let payload):
                     // receiving 상태는 profile 정보가 없으므로 임시 프로필을 생성해준다.
                     let tempProfile = MatchingProfile(
-                        userId: info.callerId,
-                        nickname: "발신자(Debug)",
+                        userId: payload.callerId,
+                        nickname: payload.callerName,
                         age: 30, location: "서울", interests: [], introduce: "디버그용 임시 프로필",
                         imageUrls: ["https://picsum.photos/200"], voiceSampleUrl: nil, presenceStatus: .online
                     )
-                    callManager.changeStateForDebug(.inCall(profile: tempProfile, info: info))
+                    let myUserId = Int(KeyChainManager.shared.get(for: "myUserId") ?? "0")!
+                    callManager.changeStateForDebug(.inCall(profile: tempProfile, info: CallInfoDto(from: payload, receiverId: myUserId)))
                 default:
                     print("🐞 [Debug] Cannot switch to .inCall from current state: \(callManager.callState)")
                 }
