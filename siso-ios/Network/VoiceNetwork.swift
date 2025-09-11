@@ -30,7 +30,7 @@ public final actor VoiceNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             AF.request(url,
                        method: .get,
                        headers: headers)
@@ -38,12 +38,16 @@ public final actor VoiceNetworkManager: Sendable {
             .responseDecodable(of: [VoiceDTO].self) { response in
                 switch response.result {
                 case .success(let voices):
-                    if !voices.isEmpty {
+                    if voices.isEmpty {
+                        debugPrint("녹음파일 조회 실패: 사용자가 업로드한 녹음파일이 없습니다.")
+                        continuation.resume(throwing: AFError.responseValidationFailed(reason: .dataFileNil))
+                    } else {
                         debugPrint("녹음파일 조회 성공 id: \(voices[0].id)")
                         continuation.resume(returning: voices[0])
                     }
                 case .failure(let error):
                     debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
                 }
             }
         }
@@ -62,7 +66,7 @@ public final actor VoiceNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             AF.request(url,
                        method: .get,
                        headers: headers)
@@ -70,10 +74,16 @@ public final actor VoiceNetworkManager: Sendable {
             .responseDecodable(of: [VoiceDTO].self) { response in
                 switch response.result {
                 case .success(let voices):
-                    debugPrint("녹음파일 조회 성공")
-                    if !voices.isEmpty { continuation.resume(returning: voices[0]) }
+                    if voices.isEmpty {
+                        debugPrint("녹음파일 조회 실패: 사용자가 업로드한 녹음파일이 없습니다.")
+                        continuation.resume(throwing: AFError.responseValidationFailed(reason: .dataFileNil))
+                    } else {
+                        debugPrint("녹음파일 조회 성공 id: \(voices[0].id)")
+                        continuation.resume(returning: voices[0])
+                    }
                 case .failure(let error):
                     debugPrint("녹음파일 조회 실패: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
                 }
             }
         }
@@ -135,7 +145,7 @@ public final actor VoiceNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             AF.upload(
                 multipartFormData: { multipartFormData in
                     let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -158,6 +168,7 @@ public final actor VoiceNetworkManager: Sendable {
                     continuation.resume()
                 case .failure(let error):
                     debugPrint("녹음파일 삭제 실패: ", error.localizedDescription)
+                    continuation.resume(throwing: error)
                 }
             }
         }

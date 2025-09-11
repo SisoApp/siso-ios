@@ -31,9 +31,7 @@ public final actor ImageNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        
-        
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             AF.request(url,
                        method: .get,
                        headers: headers)
@@ -45,6 +43,7 @@ public final actor ImageNetworkManager: Sendable {
                     continuation.resume(returning: images)
                 case .failure(let error):
                     debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
                 }
             }
         }
@@ -63,7 +62,7 @@ public final actor ImageNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             AF.request(url,
                        method: .get,
                        headers: headers)
@@ -75,6 +74,7 @@ public final actor ImageNetworkManager: Sendable {
                     continuation.resume(returning: images)
                 case .failure(let error):
                     debugPrint("이미지 목록 조회 실패: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
                 }
             }
         }
@@ -141,16 +141,20 @@ public final actor ImageNetworkManager: Sendable {
             "Authorization": "Bearer \(accessToken)"
         ]
         
-        AF.request(url,
-                   method: .delete,
-                   headers: headers)
-        .validate(statusCode: 200..<300)
-        .response { response in
-            switch response.result {
-            case .success:
-                debugPrint("이미지 제거 성공")
-            case .failure(let error):
-                debugPrint("이미지 제거 실패: \(error.localizedDescription)")
+        return try await withCheckedThrowingContinuation { continuation in
+            AF.request(url,
+                       method: .delete,
+                       headers: headers)
+            .validate(statusCode: 200..<300)
+            .response { response in
+                switch response.result {
+                case .success:
+                    debugPrint("이미지 제거 성공")
+                    continuation.resume()
+                case .failure(let error):
+                    debugPrint("이미지 제거 실패: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
+                }
             }
         }
     }
