@@ -43,7 +43,7 @@ public enum CallState: Equatable {
     case connecting(profile: MatchingProfile, info: CallInfoDto)
     
     // ✅ 수신 중: 처음엔 통신 정보(info)만 가짐
-    case receiving(info: IncomingCallPayload)
+    case receiving(payload: IncomingCallPayload)
     
     // ✅ 통화 중: 상대방 프로필(profile)과 통신 정보(info)를 모두 가짐
     case inCall(profile: MatchingProfile, info: CallInfoDto)

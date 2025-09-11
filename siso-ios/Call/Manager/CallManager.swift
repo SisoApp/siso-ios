@@ -6,9 +6,11 @@ import model
 import network
 
 // CallEndReason은 그대로 사용해도 좋습니다.
+
 public enum CallEndReason {
     case completed, rejected, missed, cancelled
 }
+
 
 public final class CallManager: ObservableObject {
     public static let shared = CallManager()
@@ -119,6 +121,7 @@ public final class CallManager: ObservableObject {
     
     
     // 수신자 전용 (Push 알림 또는 소켓 이벤트 수신 시)
+    @MainActor
     public func receiveCall(payload: IncomingCallPayload) {
         print("📞 [CallManager] ➡️ receiveCall from callerId: \(payload.callerId).")
         DispatchQueue.main.async {
@@ -128,7 +131,7 @@ public final class CallManager: ObservableObject {
                 return
             }
             print("📞 [CallManager] ✅ Changing state to .receiving.")
-            self.callState = .receiving(info: payload)
+            self.callState = .receiving(payload: payload)
         }
     }
     

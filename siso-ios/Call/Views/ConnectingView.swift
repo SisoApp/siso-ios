@@ -18,6 +18,8 @@ public struct ConnectingView: View {
     var receiverProfile: MatchingProfile
     var delegate: CallCoordinatorDelegate?
     
+    @EnvironmentObject var callManager: CallManager
+    
     public init(receiverProfile: MatchingProfile,
                 delegate: CallCoordinatorDelegate? = nil) {
         self.receiverProfile = receiverProfile
@@ -53,7 +55,7 @@ public struct ConnectingView: View {
             Button {
                 // ✨ 전화를 거는 것을 취소하는 것도 결국 'endCall'
                 Task {
-                    await CallManager.shared.endCall(wasConnected: false)
+                    await callManager.endCall(wasConnected: false)
 
                 }
             } label: {

@@ -10,7 +10,9 @@ import model
 
 public struct IncommingCallToast: View {
   
+    @EnvironmentObject var callManager: CallManager
     let payload: IncomingCallPayload
+    
     
     public init(payload: IncomingCallPayload) {
         self.payload = payload
@@ -22,7 +24,14 @@ public struct IncommingCallToast: View {
                 profileImageView
                 
                 Text("\(payload.callerName)님으로부터\n전화가 걸려왔어요.")
+                Spacer()
             }
+            actionButtonSection
+        }
+        .background {
+            RoundedRectangle(cornerRadius: 20)
+                .foregroundStyle(.white)
+                .shadow(radius: 5)
         }
     }
     @ViewBuilder
@@ -79,17 +88,36 @@ public struct IncommingCallToast: View {
     private var actionButtonSection: some View {
         HStack {
             Button {
-                print("수신")
+                Task{
+                    await callManager.denyCall()
+                }
+                
             } label: {
-                Text("수신")
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .frame(maxWidth: .infinity, maxHeight: 45)
+                        .foregroundStyle(Color.Siso.Green._60)
+                    Image("quitcallicon")
+                         .padding()
+                }
             }
             
+            
             Button {
-                print("거절")
-            } label: {
-                Text("거절")
-            }
+                Task {
+                    await callManager.acceptCall()
 
+                }
+            } label: {
+                ZStack{
+                    RoundedRectangle(cornerRadius: 12)
+                        .frame(maxWidth: .infinity, maxHeight: 45)
+                        .foregroundStyle(Color.Siso.Red._60)
+                    Image("phoneicon")
+                        .padding()
+                }
+            }
+            
         }
         .frame(maxWidth: .infinity, maxHeight: 80)
         .padding(.horizontal)

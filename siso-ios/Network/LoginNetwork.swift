@@ -55,8 +55,7 @@ public final actor LoginNetworkManager: Sendable {
                 self?.keychain.save(token: token.refreshToken, for: "refreshToken")
                 Task {
                     do {
-                        // 3. 방금 받은 refreshToken으로 getRefreshToken을 호출합니다.
-                        //    이 함수는 내부적으로 userId를 가져오고 FCM 토큰을 서버에 등록합니다.
+                       
                         if let refreshResult = try await self?.getRefreshToken(refreshToken: token.refreshToken) {
                             
                             // 4. getRefreshToken의 결과(registrationStatus)를 사용하여 최종 상태를 결정합니다.
@@ -74,9 +73,6 @@ public final actor LoginNetworkManager: Sendable {
                     } catch {
                         // getRefreshToken 호출 실패 시 에러 처리
                         print("🔴 최초 로그인 후 getRefreshToken 호출 실패: \(error)")
-                        await MainActor.run {
-                            completionHandler("", error as? AFError)
-                        }
                     }
                 }
                 if !token.hasProfile  {
@@ -101,8 +97,6 @@ public final actor LoginNetworkManager: Sendable {
         }
         
         do {
-            /// refreshToken을 가지고 서버에 보내서 비교
-            /// 만료되었다면 다시 로그인 시키고 아직 만료까지 남아있다면 토근 재발급 해서 갱신하기
             let res = try await getRefreshToken(refreshToken: refreshToken)
             print("res : \(res)")
             return .success(res)

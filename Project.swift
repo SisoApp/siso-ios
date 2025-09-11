@@ -62,6 +62,7 @@ let sisoApp: Target = .target(
         .target(name: "chat"),
         .external(name: "FirebaseAnalytics"),
         .external(name: "FirebaseMessaging"),
+        
         .external(name: "SwiftStomp")
     ],
     settings: .settings(

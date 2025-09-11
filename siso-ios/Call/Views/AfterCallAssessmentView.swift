@@ -13,7 +13,7 @@ public struct AfterCallAssessmentView: View {
     var opponentProfile: MatchingProfile
     var callInfo: CallInfoDto // ✅ callInfo도 함께 받아야 함
     var delegate: CallCoordinatorDelegate?
-    
+    @EnvironmentObject var callManager: CallManager
     @State var isReported: Bool = false
     
     public init(opponentProfile: MatchingProfile, callInfo: CallInfoDto, delegate: CallCoordinatorDelegate? = nil) {
@@ -53,7 +53,7 @@ public struct AfterCallAssessmentView: View {
                             print("User chose NOT to continue relationship.")
                             // ✅ 1. CallManager에게 최종 결정(false)을 알림
                             Task {
-                                await CallManager.shared.decideRelationship(continueRelationship: false)
+                                await callManager.decideRelationship(continueRelationship: false)
                             }
                             // ✅ 2. Coordinator를 통해 홈 화면 등으로 이동
                             //    decideRelationship이 callState를 .idle로 바꾸면
@@ -68,7 +68,7 @@ public struct AfterCallAssessmentView: View {
                         Button {
                             print("accept")
                             Task {
-                                await CallManager.shared.decideRelationship(continueRelationship: true)
+                                await callManager.decideRelationship(continueRelationship: true)
                             }
                         } label: {
                             loveButton

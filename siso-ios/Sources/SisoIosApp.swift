@@ -54,6 +54,7 @@ struct SisoIosApp: App {
                 .environmentObject(matchingViewModel)
                 .environmentObject(authVM)
                 .environmentObject(locationViewModel)
+                .environmentObject(CallManager.shared)
         }
     }
 }
