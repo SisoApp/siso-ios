@@ -25,4 +25,10 @@ public struct NotificationResponseDto: Codable, Equatable, Identifiable {
     public let type: NotificationType
     public let isRead: Bool
     public let createdAt: String // 서버의 LocalDateTime은 String으로 받습니다.
+    
+    enum CodingKeys: String, CodingKey {
+            case id, receiverId, senderId, senderNickname, title, message, url, type, createdAt
+            case isRead = "read" // "read"라는 JSON 키를 isRead 프로퍼티에 매핑
+        }
 }
+

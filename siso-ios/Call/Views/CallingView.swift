@@ -13,7 +13,8 @@ import designSystem // Color.Siso 등을 사용하기 위해 import
 public struct CallingView: View {
     
     @StateObject var callViewModel: CallViewModel
-    
+   
+
     // Coordinator와 통신이 필요하다면 delegate를 유지하고 init에서 주입받습니다.
     var delegate: CallCoordinatorDelegate?
     

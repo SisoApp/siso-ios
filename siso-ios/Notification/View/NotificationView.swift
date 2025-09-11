@@ -21,7 +21,7 @@ public struct NotificationCommonView: View {
         ZStack {
             if viewModel.notifications.isEmpty {
                 Text("알림이 없습니다.")
-                    .font(.headline)
+                    .font(.title3)
                     .foregroundColor(.secondary)
             }
             VStack(alignment: .leading) {
@@ -34,11 +34,10 @@ public struct NotificationCommonView: View {
                 }
                 Spacer()
             }
+            .frame(maxWidth: .infinity)
             .padding()
         }
-        
         .toolbar(.hidden, for: .tabBar)
-       
         .navigationTitle("알림")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -52,6 +51,7 @@ public struct NotificationCommonView: View {
         }
         .task {
             await viewModel.fetchNotifications()
+            print("notification fetched")
         }
     }
 }
@@ -61,7 +61,10 @@ public struct NoticficationCellView: View {
     let message: String
     let isRead: Bool
    public var body: some View {
-        
+       HStack {
+           notificationCell
+       }
+       
     }
     private var notificationCell: some View {
         VStack(alignment: .leading,spacing: 16) {
@@ -71,9 +74,12 @@ public struct NoticficationCellView: View {
                 .font(.caption)
         }
         .frame(maxWidth: .infinity)
-        .background(isRead ? .white : Color.gray.opacity(0.2))
     }
     
     
     
 }
+//
+//#Preview {
+//    NoticficationCellView(title: "Hello", message: "World", isRead: true)
+//}

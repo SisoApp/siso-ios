@@ -16,7 +16,7 @@ public struct CallMannerView: View {
     // 전달은 홈에서 부터
     var opponentProfile: MatchingProfile
     var delegate: CallCoordinatorDelegate?
-    
+    @EnvironmentObject var callManager: CallManager
     public init(opponentProfile: MatchingProfile, delegate: CallCoordinatorDelegate? = nil) {
         self.opponentProfile = opponentProfile
         self.delegate = delegate
@@ -54,10 +54,10 @@ public struct CallMannerView: View {
                 // 전화 시작
                 Task {
                     // ✅ 1. startCall이 끝날 때까지 여기서 기다립니다.
-                    await CallManager.shared.startCall(to: opponentProfile)
+                    await callManager.startCall(to: opponentProfile)
                     
                     // ✅ 2. startCall이 성공해서 상태가 .connecting으로 바뀌었는지 확인합니다.
-                    if case .connecting = CallManager.shared.callState {
+                    if case .connecting = callManager.callState {
                         // ✅ 3. 상태가 바뀐 것을 확인한 후에야 화면을 전환합니다.
                         delegate?.pushCall(.activeCall)
                     } else {

@@ -6,6 +6,7 @@ import profile
 import matching
 import model
 import call
+import network
 
 @main
 struct SisoIosApp: App {
@@ -21,6 +22,8 @@ struct SisoIosApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     init() {
+        printAllTokens()
+        
         let userProfile: UserProfile = .init(
             nickname: "", age: 0, sex: "", targetSex: "", profileImageUrl: [],
             interests: [], introduce: "", religion: "", smoking: nil, drinking: "",
@@ -43,6 +46,8 @@ struct SisoIosApp: App {
                 locationViewModel: locationViewModel
             )
         )
+        
+       
     }
     
     var body: some Scene {
@@ -54,6 +59,18 @@ struct SisoIosApp: App {
                 .environmentObject(matchingViewModel)
                 .environmentObject(authVM)
                 .environmentObject(locationViewModel)
+                .environmentObject(CallManager.shared)
         }
     }
+}
+
+func printAllTokens() {
+    print("REFRESH TOKEN:")
+    print(KeyChainManager.shared.get(for: "refreshToken"))
+    
+    print("ACCESS TOKEN:")
+    print(KeyChainManager.shared.get(for: "accessToken"))
+    
+    print("FCM TOKEN:")
+    print(KeyChainManager.shared.get(for: "fcmToken"))
 }

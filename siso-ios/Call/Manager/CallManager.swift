@@ -6,9 +6,11 @@ import model
 import network
 
 // CallEndReason은 그대로 사용해도 좋습니다.
+
 public enum CallEndReason {
     case completed, rejected, missed, cancelled
 }
+
 
 public final class CallManager: ObservableObject {
     public static let shared = CallManager()
@@ -17,7 +19,7 @@ public final class CallManager: ObservableObject {
     @Published public private(set) var callState: CallState = .idle
     
     // ✅ 수정: 통화 후 팝업에 더 많은 정보를 전달하기 위해 AfterCallInfo 모델 사용
-    public let incomingCallPublisher = PassthroughSubject<CallInfoDto, Never>()
+    public let incomingCallPublisher = PassthroughSubject<IncomingCallPayload, Never>()
     public let showAfterCallPopupPublisher = PassthroughSubject<AfterCallInfo, Never>() // AfterCallInfo는 아래 정의
     
     private let agoraManager = AgoraManager.shared
@@ -41,7 +43,7 @@ public final class CallManager: ObservableObject {
     
     // MARK: - Incoming Call Handling
     
-    public func handleIncomingCall(with payload: CallInfoDto) {
+    public func handleIncomingCall(with payload: IncomingCallPayload) {
         print("📞 CallManager received incoming call payload: \(payload)")
         incomingCallPublisher.send(payload)
     }
@@ -69,27 +71,59 @@ public final class CallManager: ObservableObject {
     }
     
     // [핵심 2] 수신자: 통화 수락
+    // [핵심 2] 수신자: 통화 수락
     public func acceptCall() async {
-        guard case .receiving(let info) = callState else { return }
+        // 1. 현재 상태가 .receiving인지 확인하고, payload를 가져옵니다.
+        guard case .receiving(let payload) = callState else {
+            print("🔴 통화 수락 실패: 현재 상태가 .receiving이 아닙니다.")
+            return
+        }
+        
         do {
-            let response = try await NetworkManager.shared.acceptCall(callInfo: info)
-            // 서버 응답에서 발신자(상대)의 프로필 정보를 얻음
+            // 2. CallInfoDto 생성을 위해 키체인에서 나의 ID를 가져옵니다.
+            guard let myUserIdString = KeyChainManager.shared.get(for: "myUserId"),
+                  let myUserId = Int(myUserIdString) else {
+                print("🔴 통화 수락 실패: 나의 User ID를 키체인에서 가져올 수 없습니다.")
+                await MainActor.run { self.callState = .idle }
+                return
+            }
+            
+            // 3. ⭐️ 요청하신 변환 로직 ⭐️
+            //    API 요청 및 다음 상태에 사용할 CallInfoDto 객체를 생성합니다.
+            let callInfoToAccept = CallInfoDto(
+                id: payload.callId,
+                channelName: payload.agoraChannel,
+                token: payload.agoraToken,
+                callerId: payload.callerId,
+                receiverId: myUserId
+            )
+            
+            // 4. 생성한 DTO로 서버에 통화 수락 API를 호출합니다.
+            let response = try await NetworkManager.shared.acceptCall(callInfo: payload)
+            
+            // 5. 서버 응답에서 상대방(발신자)의 프로필 정보를 만듭니다.
             let opponentProfile = MatchingProfile(from: response.callerProfile, userId: response.callerId)
             
+            // 6. UI를 업데이트하고 상태를 .inCall로 변경합니다.
             await MainActor.run {
-                // ✅ 'profile'과 'info'를 모두 담아서 .inCall 상태로 변경!
-                self.callState = .inCall(profile: opponentProfile, info: info)
+                // ✅ 'profile'과 방금 만든 'callInfoToAccept' DTO를 전달합니다.
+                self.callState = .inCall(profile: opponentProfile, info: callInfoToAccept)
             }
+            
+            // 7. Agora 채널에 참여합니다.
             agoraManager.initalizeAndJoinChannel(channelName: response.channelName, token: response.token)
+            
         } catch {
+            print("🔴 통화 수락 중 오류 발생: \(error.localizedDescription)")
             await MainActor.run { self.callState = .idle }
         }
     }
     
     
     // 수신자 전용 (Push 알림 또는 소켓 이벤트 수신 시)
-    public func receiveCall(info: CallInfoDto) {
-        print("📞 [CallManager] ➡️ receiveCall from callerId: \(info.callerId).")
+    @MainActor
+    public func receiveCall(payload: IncomingCallPayload) {
+        print("📞 [CallManager] ➡️ receiveCall from callerId: \(payload.callerId).")
         DispatchQueue.main.async {
             guard self.callState == .idle else {
                 print("📞 [CallManager] 🔴 Call ignored because another call is already in progress.")
@@ -97,7 +131,7 @@ public final class CallManager: ObservableObject {
                 return
             }
             print("📞 [CallManager] ✅ Changing state to .receiving.")
-            self.callState = .receiving(info: info)
+            self.callState = .receiving(payload: payload)
         }
     }
     
@@ -105,7 +139,7 @@ public final class CallManager: ObservableObject {
     
     // 수신자 전용 (사용자가 '거절' 버튼 클릭)
     public func denyCall() async {
-        guard case .receiving(let info) = callState else {
+        guard case .receiving(let payload) = callState else {
             print("📞 [CallManager] 🔴 denyCall failed. Not in .receiving state.")
             return
         }
@@ -118,7 +152,7 @@ public final class CallManager: ObservableObject {
         // 서버에 거절 사실 알림 (실패해도 UI에 영향 없음)
         Task.detached {
             do {
-                _ = try await NetworkManager.shared.denyCall(callInfo: info)
+                _ = try await NetworkManager.shared.denyCall(callInfo: payload)
                 print("📞 [CallManager] ✅ Call denied on server.")
             } catch {
                 print("🔴 [CallManager] denyCall on server failed: \(error.localizedDescription)")
@@ -155,8 +189,13 @@ public final class CallManager: ObservableObject {
         //    여기서는 '결정 보류'의 의미로 false를 보내는 것으로 가정.
         let infoToLog: CallInfoDto?
         switch currentState {
-        case .inCall(_, let info), .connecting(_, let info), .receiving(let info):
+        case .inCall(_, let info), .connecting(_, let info):
             infoToLog = info
+            
+        case .receiving(let payload):
+            let myUserId = Int(KeyChainManager.shared.get(for: "myUserId") ?? "0")!
+            let callinfodto = CallInfoDto(from: payload, receiverId: myUserId)
+            infoToLog = callinfodto
         default:
             infoToLog = nil
         }

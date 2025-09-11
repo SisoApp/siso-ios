@@ -43,10 +43,11 @@ public enum CallState: Equatable {
     case connecting(profile: MatchingProfile, info: CallInfoDto)
     
     // ✅ 수신 중: 처음엔 통신 정보(info)만 가짐
-    case receiving(info: CallInfoDto)
+    case receiving(payload: IncomingCallPayload)
     
     // ✅ 통화 중: 상대방 프로필(profile)과 통신 정보(info)를 모두 가짐
     case inCall(profile: MatchingProfile, info: CallInfoDto)
+    
     
     // ✅ 평가 대기: 통화가 끝난 후 평가를 위해 프로필과 통신 정보를 가짐
     case assessment(profile: MatchingProfile, info: CallInfoDto)
@@ -63,7 +64,7 @@ public enum CallState: Equatable {
             
             // 'receiving' 상태 비교: 통화 ID가 같아야 함
         case (.receiving(let lhsInfo), .receiving(let rhsInfo)):
-            return lhsInfo.id == rhsInfo.id
+            return lhsInfo.callId == rhsInfo.callId
             
             // 'inCall' 상태 비교: 프로필 ID와 통화 ID가 모두 같아야 함
         case (.inCall(let lhsProfile, let lhsInfo), .inCall(let rhsProfile, let rhsInfo)):

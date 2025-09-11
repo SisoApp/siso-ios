@@ -26,6 +26,7 @@ public enum NetworkError: Error, LocalizedError {
     case missingAccessToken
     case serverError(message: String)
     case afError(AFError)
+    case decodingError(Error) // ✅ 디코딩 에러를 담을 케이스 추가
     case unexpectedEmptyData
     
     public var errorDescription: String? {
@@ -42,6 +43,8 @@ public enum NetworkError: Error, LocalizedError {
             return afError.localizedDescription
         case .unexpectedEmptyData:
                    return "서버로부터 예상치 못한 빈 데이터를 받았습니다."
+        case .decodingError(let error):
+            return "데이터를解析하는 데 실패했습니다."
         }
     }
 }

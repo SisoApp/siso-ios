@@ -75,7 +75,7 @@ public class Coordinator: ObservableObject {
             .sink { [weak self] callInfo in
                 print("📞 Coordinator received incoming call. Changing state to .receiving.")
                 // CallManager의 상태를 직접 변경하거나, CallManager의 메서드를 호출
-                self?.callManager.receiveCall(info: callInfo)
+                self?.callManager.receiveCall(payload: callInfo)
             }
             .store(in: &cancellables)
     }

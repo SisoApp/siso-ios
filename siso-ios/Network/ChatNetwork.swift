@@ -7,8 +7,8 @@
 
 import Foundation
 import Alamofire
-import SwiftStomp
 import model
+import SwiftStomp
 
 public class ChatNetwork {
     private var stomp: SwiftStomp?
