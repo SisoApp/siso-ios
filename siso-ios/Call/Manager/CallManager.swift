@@ -71,7 +71,6 @@ public final class CallManager: ObservableObject {
     }
     
     // [핵심 2] 수신자: 통화 수락
-    // [핵심 2] 수신자: 통화 수락
     public func acceptCall() async {
         // 1. 현재 상태가 .receiving인지 확인하고, payload를 가져옵니다.
         guard case .receiving(let payload) = callState else {
@@ -88,8 +87,7 @@ public final class CallManager: ObservableObject {
                 return
             }
             
-            // 3. ⭐️ 요청하신 변환 로직 ⭐️
-            //    API 요청 및 다음 상태에 사용할 CallInfoDto 객체를 생성합니다.
+            // 3. API 요청에 사용할 CallInfoDto 객체를 생성합니다.
             let callInfoToAccept = CallInfoDto(
                 id: payload.callId,
                 channelName: payload.agoraChannel,
@@ -98,15 +96,18 @@ public final class CallManager: ObservableObject {
                 receiverId: myUserId
             )
             
+            print("➡️ [CallManager] 통화 수락 API 요청 시작: \(callInfoToAccept)")
+            
             // 4. 생성한 DTO로 서버에 통화 수락 API를 호출합니다.
-            let response = try await NetworkManager.shared.acceptCall(callInfo: payload)
+            let response = try await NetworkManager.shared.acceptCall(callInfo: callInfoToAccept)
+            
+            print("✅ [CallManager] 통화 수락 API 응답 성공! 디코딩된 객체: \(response)")
             
             // 5. 서버 응답에서 상대방(발신자)의 프로필 정보를 만듭니다.
             let opponentProfile = MatchingProfile(from: response.callerProfile, userId: response.callerId)
             
             // 6. UI를 업데이트하고 상태를 .inCall로 변경합니다.
             await MainActor.run {
-                // ✅ 'profile'과 방금 만든 'callInfoToAccept' DTO를 전달합니다.
                 self.callState = .inCall(profile: opponentProfile, info: callInfoToAccept)
             }
             
@@ -114,7 +115,50 @@ public final class CallManager: ObservableObject {
             agoraManager.initalizeAndJoinChannel(channelName: response.channelName, token: response.token)
             
         } catch {
-            print("🔴 통화 수락 중 오류 발생: \(error.localizedDescription)")
+            // --- 🔴 여기가 핵심 수정 포인트! 🔴 ---
+            print("🔴 [CallManager] 통화 수락 중 심각한 오류 발생!")
+            
+            // 1. 넘어온 에러가 Decoding 에러인지 확인합니다.
+            if let decodingError = error as? DecodingError {
+                print("   -> 오류 유형: 디코딩 실패 (DecodingError)")
+                
+                // 2. DecodingError의 종류에 따라 상세 정보를 출력합니다.
+                switch decodingError {
+                case .typeMismatch(let type, let context):
+                    print("      - 원인: 타입 불일치 (Type Mismatch)")
+                    print("      - 기대한 타입: \(type)")
+                    print("      - 문제의 경로(Key Path): \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                    print("      - 상세 설명: \(context.debugDescription)")
+                    
+                case .valueNotFound(let type, let context):
+                    print("      - 원인: 값을 찾을 수 없음 (Value Not Found)")
+                    print("      - 찾으려던 타입: \(type)")
+                    print("      - 문제의 경로(Key Path): \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                    print("      - 상세 설명: \(context.debugDescription)")
+
+                case .keyNotFound(let key, let context):
+                    print("      - 원인: 키를 찾을 수 없음 (Key Not Found)")
+                    print("      - 누락된 키: \"\(key.stringValue)\"")
+                    print("      - 문제의 경로(Key Path): \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                    print("      - 상세 설명: \(context.debugDescription)")
+                    
+                case .dataCorrupted(let context):
+                    print("      - 원인: 데이터 손상 (Data Corrupted)")
+                    print("      - 문제의 경로(Key Path): \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                    print("      - 상세 설명: \(context.debugDescription)")
+
+                @unknown default:
+                    print("      - 원인: 알 수 없는 디코딩 오류")
+                    dump(decodingError) // 전체 에러 구조를 출력
+                }
+            } else {
+                // 3. 디코딩 에러가 아니라면, 일반적인 네트워크 에러 등 다른 오류입니다.
+                print("   -> 오류 유형: 일반 오류 (Alamofire, URLSession 등)")
+                print("   -> 전체 에러 설명: \(error)")
+                print("   -> 지역화된 설명: \(error.localizedDescription)")
+            }
+            // ------------------------------------------
+            
             await MainActor.run { self.callState = .idle }
         }
     }

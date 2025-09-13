@@ -100,7 +100,7 @@ public final class NetworkManager {
             headers: headers
         )
             .validate(statusCode: 200..<300)
-            .responseString { response in
+            .responseString(encoding: .utf8) { response in
                         print("📄 [RAW JSON RESPONSE for \(target)]")
                         switch response.result {
                         case .success(let jsonString):
@@ -223,33 +223,61 @@ public final class NetworkManager {
             throw NetworkError.afError(afError)
         }
     }
+    // NetworkManager.swift
+
     /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
-    /// - Parameter callInfo: 수신한 통화 정보 객체 (`IncommingCall` 또는 `CallInfoDto`)
-    /// - Returns: 통화 수락 결과 정보 (`CallResponseDto`)
-    /// - Throws: NetworkError
-    /// [POST] /api/calls/accept - 수신자가 통화를 수락합니다.
-    public func acceptCall(callInfo: IncomingCallPayload) async throws -> CallResponseDto {
+    public func acceptCall(callInfo: CallInfoDto) async throws -> CallResponseDto {
         
-        // 1. Encodable 모델을 [String: Any] 타입의 파라미터로 변환합니다.
+        // ✅ 1. 'acceptCall' API의 응답 구조와 '정확하게' 일치하는 임시 래퍼를 정의합니다.
+        //    이 구조는 {"status": Int, "data": CallResponseDto, ...} 형태의 JSON을 처리합니다.
+        struct TempAcceptCallResponseWrapper: Decodable {
+            let status: Int
+            let data: CallResponseDto // 'data'의 값은 단일 CallResponseDto 객체입니다.
+            let errorMessage: String?
+        }
+
+        // 2. 요청에 필요한 URL, 파라미터, 헤더를 준비합니다.
+        let target = EndPoint.acceptCall
         let parameters = try callInfo.toDictionary()
         
-        // ✅ 2. 제네릭 request 함수를 호출합니다.
-        //    API 명세에 따라, 응답의 'data'는 배열이므로,
-        //    responseType을 `[CallResponseDto].self`로 지정합니다.
-        let responseArray = try await request(
-            target: .acceptCall,
-            parameters: parameters,
-            responseType: [CallResponseDto].self // 👈 여기가 핵심 수정 사항!
-        )
-        
-        // ✅ 3. 디코딩된 배열에서 첫 번째 요소를 안전하게 추출합니다.
-        guard let response = responseArray.first else {
-            // 서버가 data 배열을 비워서 보내는 예외적인 경우에 대한 방어 코드
-            throw NetworkError.serverError(message: "서버로부터 유효한 통화 수락 정보를 받지 못했습니다.")
+        guard let accessToken = KeyChainManager.shared.get(for: "accessToken") else {
+            throw NetworkError.missingAccessToken
         }
-        
-        // ✅ 4. 추출한 단일 CallResponseDto 객체를 반환합니다.
-        return response
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
+
+        // 3. Alamofire로 네트워크 요청을 보냅니다.
+        let dataTask = AF.request(
+            target.baseURL + target.path,
+            method: target.method,
+            parameters: parameters,
+            encoding: JSONEncoding.default,
+            headers: headers
+        )
+            .validate(statusCode: 200..<300)
+            // ✅ 4. 범용 SisoResponse 대신, 위에서 정의한 '임시 래퍼'로 디코딩합니다.
+            .serializingDecodable(TempAcceptCallResponseWrapper.self)
+
+        // 5. 응답을 비동기적으로 기다립니다.
+        let response = await dataTask.response
+
+        // 6. 응답 결과를 처리합니다.
+        switch response.result {
+        case .success(let wrapperResponse):
+            // ✅ 7. 디코딩된 래퍼 객체에서 'data' 프로퍼티만 성공적으로 추출하여 반환합니다.
+            return wrapperResponse.data
+            
+        case .failure(let afError):
+            // 디코딩 실패 또는 네트워크 오류 발생 시, 상세 로그를 남기고 에러를 던집니다.
+            if let data = response.data, let body = String(data: data, encoding: .utf8) {
+                print("--- 🔴 Network Error Body (acceptCall) 🔴 ---\n\(body)\n------------------------------")
+            }
+            print("🔴 Decoding Error (acceptCall): \(afError)")
+            throw NetworkError.afError(afError)
+        }
     }
     
     

@@ -7,6 +7,7 @@ import matching
 import model
 import call
 import network
+import KakaoSDKCommon
 
 @main
 struct SisoIosApp: App {
@@ -23,7 +24,13 @@ struct SisoIosApp: App {
     
     init() {
         printAllTokens()
-        
+        if let bundle = Bundle(identifier: "io.tuist.siso-ios.auth") {
+            if let apiKey = bundle.infoDictionary?["KAKAO_API_KEY"] as? String {
+                KakaoSDK.initSDK(appKey: apiKey)
+            }
+        } else {
+            debugPrint("API Key not found")
+        }
         let userProfile: UserProfile = .init(
             nickname: "", age: 0, sex: "", targetSex: "", profileImageUrl: [],
             interests: [], introduce: "", religion: "", smoking: nil, drinking: "",
