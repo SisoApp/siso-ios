@@ -10,6 +10,7 @@ import network
 
 public struct ReportPopupView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var callManager: CallManager
     @State private var reportComplete: Bool = false
     @State private var otherReportReason: String = ""
     @State private var selectedType: ServerReportType? = nil
@@ -23,44 +24,43 @@ public struct ReportPopupView: View {
     }
     
     public var body: some View {
-        headerView
-        profileImageView(profile: opponentProfile)
-        
-        radioButtons
-        if selectedType == .OTHER {
-            TextEditor(text: $otherReportReason)
-                .frame(width: .infinity, height: 100)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(style: StrokeStyle(lineWidth: 1))
-                        .foregroundStyle(Color.Siso.Gray._30)
-                )
-                .padding()
+        VStack {
+            headerView
+            profileImageView(profile: opponentProfile)
             
-        }
-        
-        Button {
-            // 리포트 제거 후 디스미스 되어야함
-            Task {
+            radioButtons
+            if selectedType == .OTHER {
+                TextEditor(text: $otherReportReason)
+                    .frame(width: .infinity, height: 100)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(style: StrokeStyle(lineWidth: 1))
+                            .foregroundStyle(Color.Siso.Gray._30)
+                    )
+                    .padding()
                 
-                await submitReport()
-                dismiss()
             }
             
-        } label: {
-            Text("신고하기")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.black)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 30)
-                        .foregroundStyle(Color.Siso.Primary._50)
-                )
-                .padding()
+            Button {
+                // 리포트 제거 후 디스미스 되어야함
+                Task {
+                    await submitReport()
+                    dismiss()
+                }
+                
+            } label: {
+                Text("신고하기")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.black)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 30)
+                            .foregroundStyle(Color.Siso.Primary._50)
+                    )
+                    .padding()
+            }
         }
-        
-        
     }
     private var headerView: some View {
         Text("\(opponentProfile.nickname)님을\n아래 사유로 신고합니다.")
@@ -150,8 +150,9 @@ public struct ReportPopupView: View {
             print("✅ 신고 성공: \(response)")
             await MainActor.run {
                 withAnimation {
-                                   reportComplete = true
-                               }
+                    reportComplete = true
+                    callManager.reportSuccessfullyEnded = true
+                    }
             }
         } catch {
             print("🔴 신고 실패: \(error.localizedDescription)")

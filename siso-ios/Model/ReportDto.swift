@@ -47,11 +47,32 @@ public enum ServerReportType: String, Codable, CaseIterable, Identifiable {
     
     // ForEach에서 id로 사용될 값
     public var id: Self { self }
-    
-    // 화면에 표시될 텍스트 (rawValue를 그대로 사용)
+  
     public var displayText: String {
-        return self.rawValue
-    }
-    
+           switch self {
+           case .IMPERSONATION:
+                      return "사칭 의심 (본인아님 / 프로필과 본인이 다름)"
+                  case .INAPPROPRIATE:
+                      return "부적절한 언행 (욕설·음란·폭력)"
+                  case .SPAM:
+                      return "스팸/광고"
+                  case .HARASSMENT:
+                      return "괴롭힘/혐오 발언"
+                  case .ILLEGAL_CONTENT:
+                      return "불법 콘텐츠 (마약·불법광고 등)"
+                  case .PRIVACY:
+                      return "개인정보 유출"
+                  case .OTHER:
+                      return "기타 (직접작성)"
+                      
+                  // --- 이미지에는 없지만 Enum에 존재하는 케이스들 ---
+                  case .SEXUAL_CONTENT:
+                      // '부적절한 언행'의 '음란' 항목을 좀 더 구체화한 표현
+                      return "성적인 콘텐츠 또는 성희롱"
+                  case .VIOLENCE:
+                      // '부적절한 언행'의 '폭력' 항목을 좀 더 구체화한 표현
+                      return "폭력적이거나 위협적인 행위"
+           }
+       }
     
 }

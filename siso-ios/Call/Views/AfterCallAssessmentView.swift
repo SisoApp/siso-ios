@@ -11,12 +11,13 @@ import matching
 
 public struct AfterCallAssessmentView: View {
     var opponentProfile: MatchingProfile
-    var callInfo: CallInfoDto // ✅ callInfo도 함께 받아야 함
-    var delegate: CallCoordinatorDelegate?
+    var callInfo: CallInfoDto 
+    var delegate: CallCoordinatorDelegate
+    
     @EnvironmentObject var callManager: CallManager
     @State var isReported: Bool = false
     
-    public init(opponentProfile: MatchingProfile, callInfo: CallInfoDto, delegate: CallCoordinatorDelegate? = nil) {
+    public init(opponentProfile: MatchingProfile, callInfo: CallInfoDto, delegate: CallCoordinatorDelegate) {
         self.opponentProfile = opponentProfile
         self.callInfo = callInfo
         self.delegate = delegate
@@ -51,16 +52,10 @@ public struct AfterCallAssessmentView: View {
                     HStack {
                         Button {
                             print("User chose NOT to continue relationship.")
-                            // ✅ 1. CallManager에게 최종 결정(false)을 알림
                             Task {
                                 await callManager.decideRelationship(continueRelationship: false)
                             }
-                            // ✅ 2. Coordinator를 통해 홈 화면 등으로 이동
-                            //    decideRelationship이 callState를 .idle로 바꾸면
-                            //    ActiveCallView가 알아서 dismissCallFlow를 호출하므로,
-                            //    여기서는 추가적인 화면 전환(popToRoot 등)만 처리하면 됨.
-                            
-                            delegate?.dismissCallFlow()
+                            delegate.dismissCallFlow()
                         } label: {
                             denyButton
                         }
@@ -80,13 +75,16 @@ public struct AfterCallAssessmentView: View {
                 
                 Button {
                     // 리포트 화면 호출
-                    delegate?.openReportSheet(.report(opponentProfile: opponentProfile))
+                    delegate.openReportSheet(.report(opponentProfile: opponentProfile))
                     
                 } label: {
                     Text("신고하기")
                         .font(.system(size: 18))
                         .foregroundStyle(Color.Siso.Gray._60)
                 }
+            }
+            if callManager.reportSuccessfullyEnded {
+                ReportFeedBackView(delegate: delegate)
             }
         }
     }

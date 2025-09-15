@@ -17,6 +17,7 @@ public final class CallManager: ObservableObject {
     
     // ✅ 수정: 새로운 CallState enum 사용
     @Published public private(set) var callState: CallState = .idle
+    @Published public var reportSuccessfullyEnded: Bool = false
     
     // ✅ 수정: 통화 후 팝업에 더 많은 정보를 전달하기 위해 AfterCallInfo 모델 사용
     public let incomingCallPublisher = PassthroughSubject<IncomingCallPayload, Never>()
@@ -27,15 +28,6 @@ public final class CallManager: ObservableObject {
     
     var delegate: CallCoordinatorDelegate?
     
-    // HIGHLIGHT START: 디버깅 헬퍼 함수 추가
-#if DEBUG
-    /// [DEBUG ONLY] UI 테스트를 위해 외부에서 CallState를 강제로 변경합니다.
-    public func changeStateForDebug(_ newState: CallState) {
-        print("🐞 [Debug] Forcing state change to: \(newState)")
-        self.callState = newState
-    }
-#endif
-    // HIGHLIGHT END
     private init(delegate: CallCoordinatorDelegate? = nil) {
         print("📞 [CallManager] Initialized and subscribing to Agora events.")
         subscribeToAgoraEvents()
@@ -204,9 +196,7 @@ public final class CallManager: ObservableObject {
         }
     }
     
-    // 발신/수신 공통 (사용자가 '종료' 또는 '취소' 버튼 클릭)
-    // CallManager.swift
-    
+
     // [핵심 3] 공통: 통화 종료
     // wasConnected: 실제로 통화가 연결되었었는지 여부
     public func endCall(wasConnected: Bool) async {
