@@ -24,13 +24,15 @@ struct SisoIosApp: App {
     
     init() {
         printAllTokens()
-        if let bundle = Bundle(identifier: "io.tuist.siso-ios.auth") {
-            if let apiKey = bundle.infoDictionary?["KAKAO_API_KEY"] as? String {
-                KakaoSDK.initSDK(appKey: apiKey)
-            }
-        } else {
-            debugPrint("API Key not found")
-        }
+        // ⭐️⭐️⭐️ 이 코드가 init()의 가장 처음에 있는지 확인하세요! ⭐️⭐️⭐️
+               if let kakaoAppKey = Bundle.main.infoDictionary?["KAKAO_NATIVE_APP_KEY"] as? String {
+                   print("✅ Found Kakao App Key in Info.plist: \(kakaoAppKey)")
+                   KakaoSDK.initSDK(appKey: kakaoAppKey)
+                   print("✅ KakaoSDK.initSDK() called successfully.")
+               } else {
+                   // 만약 이 로그가 찍힌다면, 1단계 또는 Tuist 설정이 여전히 잘못된 것입니다.
+                   fatalError("🚨 KAKAO_NATIVE_APP_KEY not found in Info.plist. Check your Tuist setup and xcconfig files.")
+               }
         let userProfile: UserProfile = .init(
             nickname: "", age: 0, sex: "", targetSex: "", profileImageUrl: [],
             interests: [], introduce: "", religion: "", smoking: nil, drinking: "",

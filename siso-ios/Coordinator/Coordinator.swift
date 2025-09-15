@@ -46,7 +46,7 @@ public class Coordinator: ObservableObject {
     @Published public var activeCallInfo: CallInfoDto?
     @Published public var afterCallSheetProfile: CallInfoDto?
     
-    private let callManager = CallManager.shared
+    private let callManager = CallManager.shared // 싱글턴 인스턴스 사용
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - ViewModels & State
@@ -67,6 +67,8 @@ public class Coordinator: ObservableObject {
         self.notificationViewModel = NotificationViewModel()
         // ✅ 4. 수신 전화 Publisher는 계속 사용
         subscribeToIncomingCalls()
+        subscribeToCallStateChanges()
+    
     }
     private func subscribeToIncomingCalls() {
         // 이 Publisher는 앱이 실행 중일 때 오는 전화를 처리하기 위해 필요
@@ -79,6 +81,31 @@ public class Coordinator: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    private func subscribeToCallStateChanges() {
+            callManager.$callState
+                .receive(on: DispatchQueue.main)
+                .dropFirst()
+                .removeDuplicates()
+                .sink { [weak self] state in
+                    guard let self = self else { return }
+                    
+                    print("📞 Coordinator: Detected CallState change to -> \(state)")
+                    
+                    
+                    switch state {
+                    case .connecting, .inCall:
+                            print("📞 Coordinator: Pushing ActiveCallView onto the navigation stack.")
+                            self.push(page: .activeCall)
+                        
+                    case .receiving, .assessment, .idle:
+                        break
+                    }
+                }
+                .store(in: &cancellables)
+        }
+    
+       
+        
     // MARK: - Delegate Method Implementations (여기에 모든 구현을 모읍니다)
     
     // ✨ 2. push, pop 메서드가 매우 간결해집니다.

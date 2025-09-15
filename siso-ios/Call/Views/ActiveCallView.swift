@@ -1,4 +1,3 @@
-// ActiveCallView.swift (새로운 파일을 만드세요)
 
 import SwiftUI
 import model
