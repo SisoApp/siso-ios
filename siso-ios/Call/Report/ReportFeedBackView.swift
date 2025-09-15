@@ -8,11 +8,14 @@
 import SwiftUI
 
 public struct ReportFeedBackView: View {
-    
+    @EnvironmentObject var callmanager: CallManager
+    @Environment(\.dismiss) var dismiss
+    var delegate: CallCoordinatorDelegate
     var onDismiss: () -> Void = {}
     
-    public init(onDismiss: @escaping () -> Void) {
-        self.onDismiss = onDismiss
+    public init(delegate: CallCoordinatorDelegate) {
+        self.delegate = delegate
+        onDismiss = delegate.dismissCallFlow
     }
     
   public  var body: some View {
@@ -30,6 +33,7 @@ public struct ReportFeedBackView: View {
               
               Button {
                   print("close")
+                  callmanager.reportSuccessfullyEnded = false
                   onDismiss()
               } label: {
                   Text("닫기")
@@ -46,8 +50,12 @@ public struct ReportFeedBackView: View {
           
           }
           .frame(width: 330, height: 313)
+          .background {
+              RoundedRectangle(cornerRadius: 15)
+                  .foregroundStyle(.white)
+          }
       }
-      .frame(minWidth: .infinity, minHeight: .infinity)
+      
         
     }
 }

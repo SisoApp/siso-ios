@@ -25,12 +25,14 @@ public class CallViewModel: ObservableObject, Identifiable {
     // MARK: - Properties
     
     public let opponentProfile: CallProfileDto
+    
+    private let callmanager = CallManager.shared
     private let agoraManager = AgoraManager.shared
     private var cancellables = Set<AnyCancellable>()
     
     private var timerSubscription: AnyCancellable?
     private let initialCallDuration: TimeInterval = 480.0 // 초기 통화 시간: 8분 (480초)
-
+    
     // MARK: - Initializer
     
     public init(opponentProfile: CallProfileDto) {
@@ -75,7 +77,7 @@ public class CallViewModel: ObservableObject, Identifiable {
         // self.cancellables에 저장된 모든 구독(timerSubscription 포함)은
         // ViewModel 인스턴스가 메모리에서 해제될 때 자동으로 cancel()되어 정리됩니다.
     }
-
+    
     // MARK: - Private Methods
     
     private func bindAgoraManager() {
@@ -98,7 +100,7 @@ public class CallViewModel: ObservableObject, Identifiable {
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self = self else { return }
-
+                
                 if self.remainingSeconds > 0 {
                     self.remainingSeconds -= 1
                 } else {
@@ -125,12 +127,19 @@ public class CallViewModel: ObservableObject, Identifiable {
         let seconds = secondsInt % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-
+    
     // MARK: - Public Methods for UI Actions
     
     /// UI에서 통화 종료 버튼을 눌렀을 때 호출됩니다.
     public func endCall() async {
+        print("endcall")
         stopTimer()
+        
+        // 먼저 앱 상태를 바꿔서 UI 전환을 시작시킨다.
+        await callmanager.endCall(wasConnected: true)
+        
+        // 그 다음 백그라운드 작업 성격인 채널 퇴장을 처리한다.
+        agoraManager.leaveChannel()
         
     }
 }

@@ -99,25 +99,7 @@ struct MainTabView: View {
                     .environmentObject(callManager)
                     .animation(.spring(), value: callManager.callState) // 애니메이션 추가
             }
-            VStack {
-                Spacer()
-                Button {
-                    // ⭐️ 수정: CallManager.shared 대신 주입받은 callManager 사용
-                    // 현재 상태가 idle일 때만 테스트를 위해 receiving으로 변경
-                    if callManager.callState == .idle {
-                        callManager.receiveCall(payload: IncomingCallPayload.sample)
-                    } else {
-                        // 다시 idle 상태로 돌리는 로직 (테스트용)
-                        callManager.changeStateForDebug(.idle)
-                    }
-                } label: {
-                    Text(callManager.callState == .idle ? "Show Call Banner" : "Hide Call Banner")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-            }
+            
         }
         
     }
