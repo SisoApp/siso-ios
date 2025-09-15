@@ -96,7 +96,7 @@ public struct IncommingCallToast: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .frame(maxWidth: .infinity, maxHeight: 45)
-                        .foregroundStyle(Color.Siso.Green._60)
+                        .foregroundStyle(Color.Siso.Red._60)
                     Image("quitcallicon")
                          .padding()
                 }
@@ -112,7 +112,7 @@ public struct IncommingCallToast: View {
                 ZStack{
                     RoundedRectangle(cornerRadius: 12)
                         .frame(maxWidth: .infinity, maxHeight: 45)
-                        .foregroundStyle(Color.Siso.Red._60)
+                        .foregroundStyle(Color.Siso.Green._60)
                     Image("phoneicon")
                         .padding()
                 }

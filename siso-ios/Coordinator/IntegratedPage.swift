@@ -3,7 +3,7 @@ import model // UserProfileServer를 사용하기 위해 필요
 import chat
 import network
 
-public enum IntegrationPage: Hashable, Identifiable {
+public enum IntegrationPage: Hashable, Identifiable, Codable {
     // Auth
     case login
     case accept

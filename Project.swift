@@ -34,9 +34,13 @@ let sisoApp: Target = .target(
             "CFBundleShortVersionString": appVersion,
             "CFBundleVersion": "20250811",
             "CFBundleDisplayName": appName,
+            "KAKAO_NATIVE_APP_KEY": "$(KAKAO_API_KEY)", 
             "CFBundleURLTypes": [
-                ["CFBundleURLName": "com.kakao.sdk", "CFBundleURLSchemes": ["kakao$(KAKAO_API_KEY)"]]
+                ["CFBundleURLName": "com.kakao.sdk",
+                 "CFBundleURLSchemes": ["kakao$(KAKAO_API_KEY)"]
+                ],
             ],
+            
             "LSApplicationQueriesSchemes": ["kakaokompassauth"],
             "UIAppFonts": .array([.string("JejuMyeongjoOTF.otf")]),
             "NSCameraUsageDescription": "프로필 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
