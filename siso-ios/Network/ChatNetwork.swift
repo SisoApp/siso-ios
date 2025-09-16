@@ -49,7 +49,6 @@ public class ChatNetwork {
         
         if let data = responseData.data {
             let decodedData =  try JSONDecoder().decode(ChatDTO.self, from: data)
-            print("decodedData : \(decodedData)")
             return decodedData.data ?? []
         }
         

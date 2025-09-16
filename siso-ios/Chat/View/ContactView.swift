@@ -48,7 +48,7 @@ extension ChatMainView {
                             recentChatView(
                                 username: chat.otherUserNickName,
                                 recentMessage: chat.lastMessageContent,
-                                time: chat.lastMessageSentAt,
+                                time: chat.lastMessageSentAt ?? "",
                                 hasMessages: chat.unreadMessageCount > 0
                             )
                         }
