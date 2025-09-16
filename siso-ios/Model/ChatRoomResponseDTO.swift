@@ -14,7 +14,7 @@ public struct ChatRoomResponseDTO: Codable, Identifiable {
     public let otherUserProfileImagePath: String
     public let memberCount: Int
     public let lastMessageContent: String
-    public let lastMessageSentAt: String
+    public let lastMessageSentAt: String?
     public let unreadMessageCount: Int
     
     enum CodingKeys: String, CodingKey {
