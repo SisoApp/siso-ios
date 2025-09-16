@@ -419,7 +419,6 @@ public final class NetworkManager {
             headers: headers
         )
             .validate(statusCode: 200..<300)
-            // HIGHLIGHT: 임시 래퍼 사용
             .serializingDecodable(TempCallHistoryResponseWrapper.self)
         
         let response = await dataTask.response

@@ -25,7 +25,6 @@ extension ChatMainView {
                 let calls = try await NetworkManager.shared.getCallHistoryWithReceiverId()
                 let calls2 = try await NetworkManager.shared.getCallHistoryWithCallerId()
                 print("현재 채팅 리스트 : \(recentChats)")
-                print("call : \(calls + calls2)")
             } catch {
                 print("chats fetch error: \(error)")
             }
