@@ -8,7 +8,7 @@ import SwiftUI
 import designSystem
 
 public struct ChatMainView: View {
-    @StateObject var vm: ChatMainView.ViewModel = .init()
+    @StateObject var vm: ChatMainView.ChatViewModel = .init()
     var delegate: ChatCoordinatorDelegate?
     
     public init(delegate: ChatCoordinatorDelegate?) {

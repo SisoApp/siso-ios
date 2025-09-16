@@ -15,6 +15,8 @@ extension ChatMainView {
         @Environment(\.dismiss) private var dismiss
         @State private var isShowingOptions = false
         @State private var message: String = ""
+        
+        private let chatDetailViewModel: ChatDetailViewModel = .init()
         public let chat: ChatRoomResponseDTO
         
         public init(chat: ChatRoomResponseDTO) {
@@ -73,6 +75,13 @@ extension ChatMainView {
                 
                 Button("취소", role: .cancel) { }
             }
+            .task {
+                do {
+                    chatDetailViewModel.messages =  try await chatDetailViewModel.getAllMessages(chatRoomId: chat.id)
+                } catch {
+                    print(error)
+                }
+            }
         }
         
         // TODO: Date 라인 (날짜가 갱신되면 line을 넣어줍니다)
@@ -119,24 +128,22 @@ extension ChatMainView {
                     .padding(.leading)
                     .background(Color.Siso.Gray._20)
                     .clipShape(.rect(cornerRadius: 999))
-                ZStack {
-                    Group {
-                        Circle()
-                            .foregroundStyle(Color.Siso.Primary.main)
-                        Image(systemName: "arrow.up")
+                
+                Button {
+                    print("msg Send tapped")
+                    chatDetailViewModel.sendMessage(chatRoomId: chat.id, content: message)
+                    message = ""
+                } label: {
+                    ZStack {
+                        Group {
+                            Circle()
+                                .foregroundStyle(Color.Siso.Primary.main)
+                            Image(systemName: "arrow.up")
+                        }
+                        .frame(maxWidth: 42, maxHeight: 42)
                     }
-                    .frame(maxWidth: 42, maxHeight: 42)
                 }
             }
         }
     }
 }
-
-//#Preview {
-//    NavigationStack {
-//        ChatMainView.ChatDetailView(
-//            chat: ChatRoomResponseDTO()
-//        )
-//    }
-//}
-

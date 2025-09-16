@@ -10,9 +10,9 @@ import network
 import model
 import call
 
-extension ChatMainView {
+public extension ChatMainView {
     @MainActor
-    class ViewModel: ObservableObject {
+    class ChatViewModel: ObservableObject {
         @Published var selectedList: ContactType = .callList
         @Published var callHistory: [Contact] = []
         @Published var recentChats: [ChatRoomResponseDTO] = []
@@ -29,6 +29,13 @@ extension ChatMainView {
                 print("chats fetch error: \(error)")
             }
         }
+        
+        func sendMessage(chatRoomId: Int, content: String) {
+            networkManager.messageSend(chatRoomId: chatRoomId, content: content)
+        }
+        
+        
+        
     }
 }
 
