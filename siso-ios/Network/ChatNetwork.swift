@@ -71,7 +71,7 @@ public class ChatNetwork {
         stomp = SwiftStomp(
             host: url,
             headers: [
-                "Authorization": accessToken // ✅ 여기 문자열 보간
+                "Authorization": "Bearer \(accessToken)" // ✅ 여기 문자열 보간
             ]
         )
         stomp?.delegate = self
