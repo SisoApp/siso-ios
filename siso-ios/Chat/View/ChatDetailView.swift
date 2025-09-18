@@ -16,7 +16,7 @@ extension ChatMainView {
         @State private var isShowingOptions = false
         @State private var message: String = ""
         
-        private let chatDetailViewModel: ChatDetailViewModel = .init()
+        @StateObject private var chatDetailViewModel: ChatDetailViewModel = .init()
         public let chat: ChatRoomResponseDTO
         
         public init(chat: ChatRoomResponseDTO) {
@@ -26,6 +26,7 @@ extension ChatMainView {
         public var body: some View {
             VStack {
                 dateLine(date: .now)
+                messageListView()
                 permitLine
                 Spacer()
                 bottomChatTextForm()
@@ -81,6 +82,53 @@ extension ChatMainView {
                 } catch {
                     print(error)
                 }
+            }
+        }
+        
+        private func messageListView() -> some View {
+            VStack {
+                ForEach(chatDetailViewModel.messages) { message in
+                    switch chatDetailViewModel.getMessageType(message) {
+                    case .sender:
+                        senderMessageView(message)
+                    case .receiver:
+                        receiverMessageView(message)
+                    }
+                }
+            }
+        }
+        
+        private func senderMessageView(_ message: ChatMessageResponseDTO) -> some View {
+            HStack(alignment: .bottom) {
+                Spacer()
+                Text(message.createdAt.getMessageTime())
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.Siso.Gray._50)
+                Text(message.content)
+                    .font(.system(size: 20))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.Siso.Primary._30)
+                    )
+            }
+        }
+        
+        private func receiverMessageView(_ message: ChatMessageResponseDTO) -> some View {
+            HStack(alignment: .bottom) {
+                Text(message.content)
+                    .font(.system(size: 20))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.Siso.Gray._20)
+                    )
+                Text(message.createdAt.getMessageTime())
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.Siso.Gray._50)
+                Spacer()
             }
         }
         

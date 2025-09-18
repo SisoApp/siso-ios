@@ -105,7 +105,7 @@ extension ChatMainView {
                     }
                 }
                 VStack(alignment: .trailing) {
-                    Text(timeText(time))
+                    Text(time.getChatListTime())
                         .foregroundStyle(Color.Siso.Gray._50)
                         .font(.system(size: 15, weight: .regular))
                         .tracking(-0.15)
@@ -124,33 +124,6 @@ extension ChatMainView {
                     }
                 }
             }
-        }
-        
-        private func timeText(_ time: String) -> String {
-            let formatter: DateFormatter = .init()
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-            formatter.locale = Locale(identifier: "ko_KR")
-            
-            guard let date: Date = formatter.date(from: time) else { return "" }
-            
-            let calendar = Calendar.current
-            let now: Date = .init()
-            
-            // 오늘 날짜일 때 ex) 오전 10:41
-            if calendar.isDate(date, inSameDayAs: now) {
-                formatter.dateFormat = "a h:mm"
-                return formatter.string(from: date)
-            }
-            
-            // 어제일 때 ex) 어제
-            if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
-                calendar.isDate(date, inSameDayAs: yesterday) {
-                return "어제"
-            }
-            
-            // 그 이전은 날짜만 표시 ex) 9월 18일
-            formatter.dateFormat = "M월 d일"
-            return formatter.string(from: date)
         }
     }
 }
