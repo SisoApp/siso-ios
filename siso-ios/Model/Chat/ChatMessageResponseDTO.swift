@@ -20,6 +20,16 @@ public struct ChatMessageResponseDTO: Codable, Identifiable {
         case updatedAt
         case isDeleted = "deleted" // JSON의 "deleted" 키를 "isDeleted" 프로퍼티에 매핑
     }
+    
+    public init(id: Int, chatRoomId: Int, senderId: Int, content: String, createdAt: String, updatedAt: String, isDeleted: Bool) {
+        self.id = id
+        self.chatRoomId = chatRoomId
+        self.senderId = senderId
+        self.content = content
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.isDeleted = isDeleted
+    }
 }
 // MARK: - API 응답의 전체 구조 (SisoResponse)
 // Generic을 사용하여 어떤 타입의 데이터든 담을 수 있도록 설계

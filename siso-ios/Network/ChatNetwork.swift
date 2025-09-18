@@ -207,6 +207,20 @@ extension ChatNetwork: SwiftStompDelegate {
 /// 문자옴
     public func onMessageReceived(swiftStomp : SwiftStomp, message : Any?, messageId : String, destination : String, headers : [String : String]) {
         // 문자가 오면 할 작동 적기 ㅇㅇ
+        guard let messageData = message as? String, let data = messageData.data(using: .utf8) else { return }
+        
+        do {
+            let message = try JSONDecoder().decode(ChatMessageResponseDTO.self, from: data)
+            debugPrint("✅ Received message: \(message.content)")
+            
+            // 메시지 수신 알림 - NotificationCenter
+            NotificationCenter.default.post(
+                name: NSNotification.Name("newMessage"),
+                object: message
+            )
+        } catch {
+            debugPrint("❌ Failed to decode new message: \(error.localizedDescription)")
+        }
     }
 /// 서버로 문자가 도달했음
     public func onReceipt(swiftStomp : SwiftStomp, receiptId : String) {

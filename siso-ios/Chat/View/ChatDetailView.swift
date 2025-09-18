@@ -15,6 +15,7 @@ extension ChatMainView {
         @Environment(\.dismiss) private var dismiss
         @State private var isShowingOptions = false
         @State private var message: String = ""
+        @FocusState private var isFocused: Bool
         
         @StateObject private var chatDetailViewModel: ChatDetailViewModel = .init()
         public let chat: ChatRoomResponseDTO
@@ -32,7 +33,7 @@ extension ChatMainView {
                 bottomChatTextForm()
             }
             .toolbar(.hidden, for: .tabBar)
-            .padding()
+            .padding(.vertical)
             .navigationBarBackButtonHidden()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -76,25 +77,28 @@ extension ChatMainView {
                 
                 Button("취소", role: .cancel) { }
             }
-            .task {
-                do {
-                    chatDetailViewModel.messages =  try await chatDetailViewModel.getAllMessages(chatRoomId: chat.id)
-                } catch {
-                    print(error)
-                }
+            .onAppear {
+                chatDetailViewModel.currentChatRoomId = chat.id
+                chatDetailViewModel.loadInitialMessages()
             }
         }
         
         private func messageListView() -> some View {
-            VStack {
-                ForEach(chatDetailViewModel.messages) { message in
-                    switch chatDetailViewModel.getMessageType(message) {
-                    case .sender:
-                        senderMessageView(message)
-                    case .receiver:
-                        receiverMessageView(message)
+            ScrollView {
+                VStack {
+                    ForEach(chatDetailViewModel.messages) { message in
+                        switch chatDetailViewModel.getMessageType(message) {
+                        case .sender:
+                            senderMessageView(message)
+                        case .receiver:
+                            receiverMessageView(message)
+                        }
                     }
                 }
+                .padding(.horizontal)
+            }
+            .onTapGesture {
+                isFocused = false
             }
         }
         
@@ -172,23 +176,15 @@ extension ChatMainView {
         private func bottomChatTextForm() -> some View {
             HStack {
                 TextField("메세지 보내기", text: $message)
+                    .focused($isFocused)
                     .padding(.vertical)
                     .padding(.leading)
                     .background(Color.Siso.Gray._20)
                     .clipShape(.rect(cornerRadius: 999))
                 
                 Button {
-                    print("msg Send tapped")
                     chatDetailViewModel.sendMessage(chatRoomId: chat.id, content: message)
                     message = ""
-                    
-                    Task {
-                        do {
-                            chatDetailViewModel.messages = try await chatDetailViewModel.getAllMessages(chatRoomId: chat.id)
-                        } catch {
-                            print(error.localizedDescription)
-                        }
-                    }
                 } label: {
                     ZStack {
                         Group {
@@ -200,6 +196,7 @@ extension ChatMainView {
                     }
                 }
             }
+            .padding(.horizontal)
         }
     }
 }
