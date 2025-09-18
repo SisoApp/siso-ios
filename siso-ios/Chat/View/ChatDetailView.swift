@@ -181,6 +181,14 @@ extension ChatMainView {
                     print("msg Send tapped")
                     chatDetailViewModel.sendMessage(chatRoomId: chat.id, content: message)
                     message = ""
+                    
+                    Task {
+                        do {
+                            chatDetailViewModel.messages = try await chatDetailViewModel.getAllMessages(chatRoomId: chat.id)
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
                 } label: {
                     ZStack {
                         Group {
