@@ -60,27 +60,52 @@ public class ChatNetwork {
     public func connectStomp() {
         guard let urlString = socketURL else { return }
         guard let url = URL(string: "\(urlString)/ws-stomp/websocket") else { return }
-        guard let accessToken = keyChain.get(for: "accessToken") else { return }
-        stomp = SwiftStomp(host: url, headers: ["Authorization": "Bearer \(accessToken)"])
+        guard let accessToken = keyChain.get(for: "accessToken") else {
+            print("❌ connectStomp FAILED: AccessToken not found in Keychain.")
+            return
+        }
+        
+        print("✅ connectStomp: Found AccessToken, attempting to connect...")
+        print("   - Token: Bearer \(accessToken)") // ✅ 실제 토큰 확인
+
+        stomp = SwiftStomp(
+            host: url,
+            headers: [
+                "Authorization": accessToken // ✅ 여기 문자열 보간
+            ]
+        )
         stomp?.delegate = self
         stomp?.connect()
     }
     
-    /// ** MARK:   메시지 전송 ( 실시간 )
     public func messageSend(chatRoomId: Int, content: String) {
-        guard let stomp = stomp else { return }
-        
+        // 1. STOMP 연결 상태 확인
+        guard let stomp = stomp, stomp.isConnected else {
+            print("❌ STOMP is not connected. Cannot send message.")
+            return
+        }
+
+        // 2. 메시지 본문(Body) 생성
         let body: [String: Any] = [
             "chatRoomId": chatRoomId,
             "content": content
         ]
-        
-        if let data = try? JSONSerialization.data(withJSONObject: body),
-           let jsonString = String(data: data, encoding: .utf8) {
-            stomp.send(body: jsonString, to: "/app/chat.sendMessage")
-            
-            print("🙈messages send success content: \(jsonString)")
+
+        // 3. JSON 문자열로 변환
+        guard let data = try? JSONSerialization.data(withJSONObject: body),
+              let jsonString = String(data: data, encoding: .utf8) else {
+            print("❌ Failed to serialize message body to JSON string.")
+            return
         }
+        
+        // 4. 메시지 전송 시 content-type 헤더 추가 (★★★★★ 중요 ★★★★★)
+        let headers = ["content-type": "application/json"]
+        stomp.send(body: jsonString, to: "/app/chat.sendMessage", headers: headers)
+
+        print("🙈 Message sent successfully!")
+        print("  - Destination: /app/chat.sendMessage")
+        print("  - Headers: \(headers)")
+        print("  - Body: \(jsonString)")
     }
     
     /// ** MARK:   특정 채팅방의 모든 메시지 조회
