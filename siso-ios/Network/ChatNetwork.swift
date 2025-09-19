@@ -204,10 +204,15 @@ extension ChatNetwork: SwiftStompDelegate {
     public func onDisconnect(swiftStomp : SwiftStomp, disconnectType : StompDisconnectType) {
         print("disconnect!!")
     }
+    
 /// 문자옴
     public func onMessageReceived(swiftStomp : SwiftStomp, message : Any?, messageId : String, destination : String, headers : [String : String]) {
-        // 문자가 오면 할 작동 적기 ㅇㅇ
-        guard let messageData = message as? String, let data = messageData.data(using: .utf8) else { return }
+        debugPrint("✅ STOMP 메시지 수신 성공: \(String(describing: message))")
+        
+        guard let messageData = message as? String, let data = messageData.data(using: .utf8) else {
+            debugPrint("❌ Failed to convert message to Data.")
+            return
+        }
         
         do {
             let message = try JSONDecoder().decode(ChatMessageResponseDTO.self, from: data)

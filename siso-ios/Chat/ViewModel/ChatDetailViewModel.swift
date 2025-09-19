@@ -36,11 +36,11 @@ class ChatDetailViewModel: ObservableObject {
     private var myUserId: Int?
     
     init() {
-        setupUserId()
+        setupMyUserId()
         setupCombineBindings()
     }
     
-    func setupUserId() {
+    func setupMyUserId() {
         guard let myUserIdString = KeyChainManager.shared.get(for: "myUserId"),
               let currentUserId = Int(myUserIdString) else {
             return
@@ -55,24 +55,8 @@ class ChatDetailViewModel: ObservableObject {
                 self?.error = nil
             })
             .flatMap { [weak self] (roomId, content) -> AnyPublisher<Void, Error> in
-                guard let self = self, let myUserId = self.myUserId else { return Empty().eraseToAnyPublisher() }
-                
-                let newMessage: ChatMessageResponseDTO = .init(
-                    id: 0, // 임시 id
-                    chatRoomId: roomId,
-                    senderId: myUserId,
-                    content: content,
-                    createdAt: getCurrentTimeString(), // 현재 시간
-                    updatedAt: getCurrentTimeString(),
-                    isDeleted: false
-                )
-                
-                DispatchQueue.main.async {
-                    self.messages.append(newMessage) // UI에 적용
-                }
-                
                 return Future { promise in // 비동기 작업으로 전환
-                    self.chatNetworkManager.messageSend(chatRoomId: roomId, content: content)
+                    self?.chatNetworkManager.messageSend(chatRoomId: roomId, content: content)
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         promise(.success(()))
@@ -119,6 +103,7 @@ class ChatDetailViewModel: ObservableObject {
                 guard let self = self, let roomId = self.currentChatRoomId, message.chatRoomId == roomId else { return }
                 
                 if !self.messages.contains(where: { $0.id == message.id }) {
+                    print("✅ Socket 수신 완료!")
                     self.messages.append(message)
                 }
             }
