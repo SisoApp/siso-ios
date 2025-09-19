@@ -105,7 +105,7 @@ extension ChatMainView {
                     }
                 }
                 VStack(alignment: .trailing) {
-                    Text(time)
+                    Text(time.getChatListTime())
                         .foregroundStyle(Color.Siso.Gray._50)
                         .font(.system(size: 15, weight: .regular))
                         .tracking(-0.15)
