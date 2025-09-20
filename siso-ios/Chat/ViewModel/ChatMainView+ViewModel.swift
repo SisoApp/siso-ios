@@ -16,7 +16,7 @@ public extension ChatMainView {
         @Published var selectedList: ContactType = .callList
         @Published var callHistory: [Contact] = []
         @Published var recentChats: [ChatRoomResponseDTO] = []
-        let networkManager: ChatNetwork = .init()
+        let networkManager: ChatNetwork = .shared
         
         func fetchAllChat() async {
             do {
