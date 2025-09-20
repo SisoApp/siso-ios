@@ -11,11 +11,14 @@ import model
 import SwiftStomp
 
 public class ChatNetwork {
+    public static let shared: ChatNetwork = .init()
     private var stomp: SwiftStomp?
     private let baseURL: String?
     private let socketURL: String?
     private let keyChain: KeyChainManager = .shared
-    public init() {
+    private var subscribedRoomId: Int? // 현재 구독중인 채팅방 ID
+    
+    private init() {
         baseURL = Bundle.main.infoDictionary?["SERVER_URL"] as? String
         socketURL = Bundle.main.infoDictionary?["SOKET_URL"] as? String
         connectStomp()
@@ -65,9 +68,15 @@ public class ChatNetwork {
             return
         }
         
+        // 소켓 중복 연결 방지
+        if stomp?.isConnected == true {
+            print("✅ STOMP is already connected. Skipping...")
+            return
+        }
+        
         print("✅ connectStomp: Found AccessToken, attempting to connect...")
         print("   - Token: Bearer \(accessToken)") // ✅ 실제 토큰 확인
-
+        
         stomp = SwiftStomp(
             host: url,
             headers: [
@@ -76,6 +85,23 @@ public class ChatNetwork {
         )
         stomp?.delegate = self
         stomp?.connect()
+    }
+    
+    /// 특정 채팅방 구독 메서드
+    public func subscribeToRoom(roomId: Int) {
+        guard let stomp = stomp, stomp.isConnected else {
+            print( "❌ STOMP is not connected. Cannot subscribe to room.")
+            return
+        }
+        
+        if subscribedRoomId == roomId {
+            print("Already subscribed to room \(roomId)")
+            return
+        }
+        
+        stomp.subscribe(to: "/user/queue/chat-room/\(roomId)")
+        subscribedRoomId = roomId
+        print("✅ Subscribe to room \(roomId)")
     }
     
     public func messageSend(chatRoomId: Int, content: String) {
@@ -197,7 +223,7 @@ public class ChatNetwork {
 extension ChatNetwork: SwiftStompDelegate {
     public func onConnect(swiftStomp : SwiftStomp, connectType : StompConnectType) {
         print("✅ STOMP Connected")
-        swiftStomp.subscribe(to: "/user/queue/messages")
+        //swiftStomp.subscribe(to: "/user/queue/")
     }
     
 /// 연결 끊김
