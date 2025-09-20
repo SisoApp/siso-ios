@@ -21,7 +21,7 @@ class ChatDetailViewModel: ObservableObject {
     @Published var error: Error?
     @Published var isConnected: Bool = true
     
-    let chatNetworkManager: ChatNetwork  = .init()
+    let chatNetworkManager: ChatNetwork  = .shared
     
     private var cancellables: Set<AnyCancellable> = .init()
     var currentChatRoomId: Int?
@@ -119,7 +119,8 @@ class ChatDetailViewModel: ObservableObject {
     
     func loadInitialMessages() {
         guard let roomId = currentChatRoomId else { return }
-        manualRefreshSubject.send(roomId)
+        chatNetworkManager.subscribeToRoom(roomId: roomId) // 채팅방 구독
+        manualRefreshSubject.send(roomId) // 기존 메시지 로드
     }
     
     func sendMessage(chatRoomId: Int, content: String) {
