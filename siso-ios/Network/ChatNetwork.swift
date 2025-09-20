@@ -74,6 +74,7 @@ public class ChatNetwork {
                 "Authorization": "Bearer \(accessToken)" // ✅ 여기 문자열 보간
             ]
         )
+        stomp?.enableLogging = true
         stomp?.delegate = self
         stomp?.connect()
     }
@@ -127,8 +128,12 @@ public class ChatNetwork {
             throw URLError(.userAuthenticationRequired)
         }
         
+        let receiptId = UUID().uuidString
         // 3. HTTP 헤더 설정
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)",
+            "receipt": receiptId
+        ]
         
         // ======================== 🚀 요청 정보 로그 ========================
         print("\n/-------------------- 🚀 API Request --------------------/")
@@ -195,10 +200,25 @@ public class ChatNetwork {
 }
 
 extension ChatNetwork: SwiftStompDelegate {
-    public func onConnect(swiftStomp : SwiftStomp, connectType : StompConnectType) {
-        print("✅ STOMP Connected")
-        swiftStomp.subscribe(to: "/user/queue/messages")
-    }
+    public func onConnect(swiftStomp: SwiftStomp, connectType: StompConnectType) {
+            // 사용 중인 버전에 맞게 enum 케이스를 수정합니다.
+            switch connectType {
+            case .toSocketEndpoint:
+                // 물리적 소켓 연결 성공. 아직 STOMP 프로토콜 연결은 아님.
+                print("ℹ️ WebSocket physical connection established. Waiting for STOMP protocol connection...")
+                
+            case .toStomp:
+                // STOMP 'CONNECTED' 프레임 수신 완료. 이제 안전하게 구독 가능.
+                print("✅ STOMP protocol connected successfully. Subscribing now...")
+                
+                // 여기에 구독 로직을 배치합니다.
+                swiftStomp.subscribe(to: "/user/queue/messages")
+                print("   - Subscribed to /user/queue/messages")
+                
+                // 다른 구독이 필요하다면 여기에 추가
+                // swiftStomp.subscribe(to: "/user/queue/read-receipts")
+            }
+        }
     
 /// 연결 끊김
     public func onDisconnect(swiftStomp : SwiftStomp, disconnectType : StompDisconnectType) {
