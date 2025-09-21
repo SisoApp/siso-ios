@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ChatMessageResponseDTO: Codable, Identifiable {
+public struct ChatMessageResponseDTO: Codable, Identifiable, Equatable {
     public let id: Int
     public let chatRoomId: Int
     public let senderId: Int

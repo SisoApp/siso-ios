@@ -19,6 +19,8 @@ extension ChatMainView {
         
         @StateObject private var chatDetailViewModel: ChatDetailViewModel = .init()
         public let chat: ChatRoomResponseDTO
+        private let bottomID = "bottomID"
+        
         
         public init(chat: ChatRoomResponseDTO) {
             self.chat = chat
@@ -78,29 +80,56 @@ extension ChatMainView {
                 Button("취소", role: .cancel) { }
             }
             .onAppear {
+                print("DetailView Apareared")
                 chatDetailViewModel.currentChatRoomId = chat.id
                 chatDetailViewModel.loadInitialMessages()
+               
             }
+            .onDisappear {
+                print("DetailView Disappeared")
+                            chatDetailViewModel.cleanupOnDisappear()
+                        }
         }
         
         private func messageListView() -> some View {
-            ScrollView {
-                VStack {
-                    ForEach(chatDetailViewModel.messages) { message in
-                        switch chatDetailViewModel.getMessageType(message) {
-                        case .sender:
-                            senderMessageView(message)
-                        case .receiver:
-                            receiverMessageView(message)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack {
+                        ForEach(chatDetailViewModel.messages) { message in
+                            switch chatDetailViewModel.getMessageType(message) {
+                            case .sender:
+                                senderMessageView(message)
+                            case .receiver:
+                                receiverMessageView(message)
+                            }
                         }
+                        Spacer().id(bottomID)
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-            }
-            .onTapGesture {
-                isFocused = false
+                
+                .onTapGesture {
+                    isFocused = false
+                }
+                .onAppear {
+                    scrollToBottom(proxy: proxy, animated: false)
+                }
+                .onChange(of: chatDetailViewModel.messages) {
+                    scrollToBottom(proxy: proxy)
+                }
             }
         }
+        // 6. 스크롤을 맨 아래로 이동시키는 함수
+        private func scrollToBottom(proxy: ScrollViewProxy, animated: Bool = true) {
+            if animated {
+                withAnimation {
+                    proxy.scrollTo(bottomID, anchor: .bottom)
+                }
+            } else {
+                proxy.scrollTo(bottomID, anchor: .bottom)
+            }
+        }
+        
         
         private func senderMessageView(_ message: ChatMessageResponseDTO) -> some View {
             HStack(alignment: .bottom) {

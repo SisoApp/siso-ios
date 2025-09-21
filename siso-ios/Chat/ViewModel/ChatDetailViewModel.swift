@@ -40,6 +40,12 @@ class ChatDetailViewModel: ObservableObject {
         setupCombineBindings()
     }
     
+    deinit {
+           print("ChatDetailViewModel deinitialized")
+           // ViewModel이 메모리에서 해제될 때 모든 구독 취소
+           cancellables.forEach { $0.cancel() }
+       }
+    
     func setupMyUserId() {
         guard let myUserIdString = KeyChainManager.shared.get(for: "myUserId"),
               let currentUserId = Int(myUserIdString) else {
@@ -122,9 +128,20 @@ class ChatDetailViewModel: ObservableObject {
         chatNetworkManager.subscribeToRoom(roomId: roomId) // 채팅방 구독
         manualRefreshSubject.send(roomId) // 기존 메시지 로드
     }
+    // MARK: - NEW CODE: 뷰가 사라질 때 호출될 클린업 함수
+       /// 뷰가 사라질 때 소켓 연결을 정리합니다.
+       func cleanupOnDisappear() {
+           guard let roomId = currentChatRoomId else { return }
+           print("Cleaning up chat for room \(roomId)")
+           chatNetworkManager.unsubscribeFromRoom(roomId: roomId)
+           chatNetworkManager.disconnectStomp()
+       }
     
     func sendMessage(chatRoomId: Int, content: String) {
-        sendMessageSubject.send((chatRoomId: chatRoomId, content: content))
+        if !content.isEmpty {
+            sendMessageSubject.send((chatRoomId: chatRoomId, content: content))
+        }
+        
     }
     
     func getAllMessages(chatRoomId: Int) async throws-> [ChatMessageResponseDTO] {
