@@ -35,9 +35,13 @@ class ChatDetailViewModel: ObservableObject {
     // 수동적 메시지 갱신 (수신)
     private let incomingMessageSubject: PassthroughSubject<ChatMessageResponseDTO, Never> = .init()
     // 이전 메세지 로드
-    private let loadPreviousMessagesSubject = PassthroughSubject<Void, Never>()
+    private let loadPreviousMessagesSubject = PassthroughSubject<(chatRoomId: Int, size: Int), Never>()
     
     private var myUserId: Int?
+    
+    private var lastMessageId: Int? {
+        return messages.first?.id
+    }
     
     init() {
         setupMyUserId()
@@ -129,22 +133,21 @@ class ChatDetailViewModel: ObservableObject {
         
         loadPreviousMessagesSubject
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main) // 과도한 호출 방지
-            .filter { [weak self] in
+            .filter { [weak self] roomId, size in
                 // 로딩 중이 아니거나 더 불러올 메시지가 있을 때만 진행
                 guard let self = self else { return false }
+                print(!self.isLoadingMore && self.hasMoreMessages)
                 return !self.isLoadingMore && self.hasMoreMessages
             }
             .handleEvents(receiveOutput: { [weak self] _ in self?.isLoadingMore = true })
-            .flatMap { [weak self] _ -> AnyPublisher<[ChatMessageResponseDTO], Never> in
-                guard let self = self, let roomId = self.currentChatRoomId, let lastId = self.messages.first?.id else {
-                    return Just([]).eraseToAnyPublisher()
-                }
+            .flatMap { [weak self] roomId, size -> AnyPublisher<[ChatMessageResponseDTO], Never> in
+                guard let self = self else { return Just([]).eraseToAnyPublisher() }
                 
                 return Future { promise in
                     Task {
                         do {
-                            let olderMessages = try await self.chatNetworkManager.getMessages(chatRoomId: roomId, lastMessageId: lastId)
-                            promise(.success(olderMessages.reversed())) // 시간순으로 정렬
+                            let olderMessages = try await self.chatNetworkManager.getMessages(chatRoomId: roomId, lastMessageId: self.lastMessageId)
+                            promise(.success(olderMessages)) // 시간순으로 정렬
                         } catch {
                             await MainActor.run { self.error = error }
                             promise(.success([]))
@@ -198,6 +201,10 @@ class ChatDetailViewModel: ObservableObject {
             return try await chatNetworkManager.getMessages(chatRoomId: chatRoomId, lastMessageId: lastMessageId, size: size)
         }
         return []
+    }
+    
+    func getPrevMessagess(chatRoomId: Int, size: Int = 30) {
+        loadPreviousMessagesSubject.send((chatRoomId: chatRoomId, size: size))
     }
     
     func getMessageType(_ message: ChatMessageResponseDTO) -> MessageType {

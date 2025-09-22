@@ -73,16 +73,16 @@ extension ChatMainView {
         private func messageListView() -> some View {
             ScrollViewReader { proxy in
                 ScrollView {
-                    // 스크롤 최상단 감지를 위한 GeometryReader
-                    GeometryReader { geometry in
-                        Color.clear.preference(
-                            key: ScrollOffsetPreferenceKey.self,
-                            value: geometry.frame(in: .named("scroll")).minY
-                        )
-                    }
-                    .frame(height: 0)
-                    
                     VStack(alignment: .leading, spacing: 12) {
+                        // 스크롤 최상단 감지를 위한 GeometryReader
+                        GeometryReader { geometry in
+                            Color.clear.preference(
+                                key: ScrollOffsetPreferenceKey.self,
+                                value: geometry.frame(in: .named("scroll")).minY
+                            )
+                        }
+                        .frame(height: 1)
+                        
                         // 이전 메시지 로딩 인디케이터
                         if chatDetailViewModel.isLoadingMore {
                             HStack {
@@ -106,17 +106,9 @@ extension ChatMainView {
                 .coordinateSpace(name: "scroll")
                 .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                     // 사용자가 스크롤을 위로 당겼을 때 (값이 양수가 됨)
-                    if value > 0 {
+                    if value > 30 {
                         guard let roomId = chatDetailViewModel.currentChatRoomId else { return }
-                        Task{
-                            do {
-                                let newMsg = try await chatDetailViewModel.getPrevMessages(chatRoomId: roomId)
-                                chatDetailViewModel.messages.insert(contentsOf: newMsg, at: 0)
-
-                            } catch {
-                                print("Can not Load Prev Messages: \(error)")
-                            }
-                        }
+                        chatDetailViewModel.getPrevMessagess(chatRoomId: roomId)
                     }
                 }
                 .onTapGesture {
@@ -242,9 +234,20 @@ extension ChatMainView {
                 isInitialLoad = false
             } else if newValue.count > oldValue.count && oldValue.first?.id != newValue.first?.id {
                 // 이전 메시지가 로드된 경우: 스크롤 위치 유지를 위해 아무것도 안함
+                if let firstOldMessage = oldValue.first {
+                    scrollToItem(for: firstOldMessage.id, proxy: proxy, animated: false)
+                }
             } else {
                 // 새 메시지가 도착했거나 보낸 경우: 맨 아래로 스크롤
-                scrollToBottom(proxy: proxy, animated: true)
+                scrollToBottom(proxy: proxy)
+            }
+        }
+        
+        private func scrollToItem(for id: Int, proxy: ScrollViewProxy, animated: Bool = true) {
+            if animated {
+                withAnimation { proxy.scrollTo(id, anchor: .top) }
+            } else {
+                proxy.scrollTo(id, anchor: .top)
             }
         }
         
