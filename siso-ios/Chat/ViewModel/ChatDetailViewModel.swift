@@ -20,10 +20,12 @@ class ChatDetailViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: Error?
     @Published var isConnected: Bool = true
+    @Published var isLoadingMore: Bool = false // 이전 메시지 로딩 상태
     
     let chatNetworkManager: ChatNetwork  = .shared
     
     private var cancellables: Set<AnyCancellable> = .init()
+    private var hasMoreMessages: Bool = true
     var currentChatRoomId: Int?
     
     // 메시지 전송
@@ -32,6 +34,8 @@ class ChatDetailViewModel: ObservableObject {
     private let manualRefreshSubject: PassthroughSubject<Int, Never> = .init()
     // 수동적 메시지 갱신 (수신)
     private let incomingMessageSubject: PassthroughSubject<ChatMessageResponseDTO, Never> = .init()
+    // 이전 메세지 로드
+    private let loadPreviousMessagesSubject = PassthroughSubject<Void, Never>()
     
     private var myUserId: Int?
     
@@ -41,10 +45,11 @@ class ChatDetailViewModel: ObservableObject {
     }
     
     deinit {
-           print("ChatDetailViewModel deinitialized")
-           // ViewModel이 메모리에서 해제될 때 모든 구독 취소
-           cancellables.forEach { $0.cancel() }
-       }
+        print("ChatDetailViewModel deinitialized")
+        // ViewModel이 메모리에서 해제될 때 모든 구독 취소
+        cancellables.forEach { $0.cancel() }
+    }
+    
     
     func setupMyUserId() {
         guard let myUserIdString = KeyChainManager.shared.get(for: "myUserId"),
@@ -121,6 +126,45 @@ class ChatDetailViewModel: ObservableObject {
                 self?.incomingMessageSubject.send(message)
             }
             .store(in: &cancellables)
+        
+        loadPreviousMessagesSubject
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main) // 과도한 호출 방지
+            .filter { [weak self] in
+                // 로딩 중이 아니거나 더 불러올 메시지가 있을 때만 진행
+                guard let self = self else { return false }
+                return !self.isLoadingMore && self.hasMoreMessages
+            }
+            .handleEvents(receiveOutput: { [weak self] _ in self?.isLoadingMore = true })
+            .flatMap { [weak self] _ -> AnyPublisher<[ChatMessageResponseDTO], Never> in
+                guard let self = self, let roomId = self.currentChatRoomId, let lastId = self.messages.first?.id else {
+                    return Just([]).eraseToAnyPublisher()
+                }
+                
+                return Future { promise in
+                    Task {
+                        do {
+                            let olderMessages = try await self.chatNetworkManager.getMessages(chatRoomId: roomId, lastMessageId: lastId)
+                            promise(.success(olderMessages.reversed())) // 시간순으로 정렬
+                        } catch {
+                            await MainActor.run { self.error = error }
+                            promise(.success([]))
+                        }
+                    }
+                }
+                .eraseToAnyPublisher()
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] olderMessages in
+                guard let self = self else { return }
+                if olderMessages.isEmpty {
+                    self.hasMoreMessages = false
+                } else {
+                    self.messages.insert(contentsOf: olderMessages, at: 0)
+                }
+                self.isLoadingMore = false
+            }
+            .store(in: &cancellables)
+        
     }
     
     func loadInitialMessages() {
@@ -129,13 +173,13 @@ class ChatDetailViewModel: ObservableObject {
         manualRefreshSubject.send(roomId) // 기존 메시지 로드
     }
     // MARK: - NEW CODE: 뷰가 사라질 때 호출될 클린업 함수
-       /// 뷰가 사라질 때 소켓 연결을 정리합니다.
-       func cleanupOnDisappear() {
-           guard let roomId = currentChatRoomId else { return }
-           print("Cleaning up chat for room \(roomId)")
-           chatNetworkManager.unsubscribeFromRoom(roomId: roomId)
-           chatNetworkManager.disconnectStomp()
-       }
+    /// 뷰가 사라질 때 소켓 연결을 정리합니다.
+    func cleanupOnDisappear() {
+        guard let roomId = currentChatRoomId else { return }
+        print("Cleaning up chat for room \(roomId)")
+        chatNetworkManager.unsubscribeFromRoom(roomId: roomId)
+        chatNetworkManager.disconnectStomp()
+    }
     
     func sendMessage(chatRoomId: Int, content: String) {
         if !content.isEmpty {
@@ -144,8 +188,16 @@ class ChatDetailViewModel: ObservableObject {
         
     }
     
-    func getAllMessages(chatRoomId: Int) async throws-> [ChatMessageResponseDTO] {
+    func getAllMessages(chatRoomId: Int) async throws -> [ChatMessageResponseDTO] {
         return try await chatNetworkManager.getMessages(chatRoomId: chatRoomId)
+    }
+    
+    func getPrevMessages(chatRoomId: Int, lastMessageId: Int? = nil, size: Int = 30) async throws -> [ChatMessageResponseDTO] {
+        
+        if let lastMessageId = self.messages.first?.id {
+            return try await chatNetworkManager.getMessages(chatRoomId: chatRoomId, lastMessageId: lastMessageId, size: size)
+        }
+        return []
     }
     
     func getMessageType(_ message: ChatMessageResponseDTO) -> MessageType {
