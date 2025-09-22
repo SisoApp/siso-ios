@@ -9,6 +9,7 @@ import Foundation
 import Alamofire
 import model
 import SwiftStomp
+import Combine
 
 public class ChatNetwork {
     public static let shared: ChatNetwork = .init()
@@ -18,10 +19,14 @@ public class ChatNetwork {
     private let keyChain: KeyChainManager = .shared
     private var subscribedRoomId: Int? // 현재 구독중인 채팅방 ID
     
+    
+    
+    
     private init() {
         baseURL = Bundle.main.infoDictionary?["SERVER_URL"] as? String
         socketURL = Bundle.main.infoDictionary?["SOKET_URL"] as? String
         connectStomp()
+        
     }
     
     /// ** MARK:   사용자의 채팅방 조회
@@ -37,7 +42,6 @@ public class ChatNetwork {
             print("accessToken 이 없습니다")
             return []
         }
-        print("accessToken : \(accessToken)")
         
         let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
         
@@ -76,21 +80,34 @@ public class ChatNetwork {
         
         print("✅ connectStomp: Found AccessToken, attempting to connect...")
         print("   - Token: Bearer \(accessToken)") // ✅ 실제 토큰 확인
-        
+        let connectHeaders: [String: String] = [
+            "Authorization": "Bearer \(accessToken)",
+            "heart-beat": "20000,20000" //
+        ]
         stomp = SwiftStomp(
             host: url,
-            headers: [
-                "Authorization": "Bearer \(accessToken)" // ✅ 여기 문자열 보간
-            ]
+            headers: connectHeaders
         )
+        
+        // stomp?.enableLogging = true
         stomp?.delegate = self
-        stomp?.connect()
+        stomp?.connect(autoReconnect: true)
     }
     
     /// 특정 채팅방 구독 메서드
     public func subscribeToRoom(roomId: Int) {
+        
+        
         guard let stomp = stomp, stomp.isConnected else {
             print( "❌ STOMP is not connected. Cannot subscribe to room.")
+            // 2. 연결이 안되어 있으면 연결을 시도
+            connectStomp()
+            
+            // 3. 1초 후에 구독을 다시 시도 (연결될 시간을 줌)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                print("🔁 Retrying subscription for room \(roomId)...")
+                self?.subscribeToRoom(roomId: roomId)
+            }
             return
         }
         
@@ -104,19 +121,48 @@ public class ChatNetwork {
         print("✅ Subscribe to room \(roomId)")
     }
     
+    // MARK: - NEW CODE: 소켓 연결 해제
+    /// STOMP WebSocket 연결 해제
+    public func disconnectStomp() {
+        guard let stomp = stomp, stomp.isConnected else {
+            print("ℹ️ STOMP is already disconnected or not initialized.")
+            return
+        }
+        
+        stomp.disconnect()
+        print("✅ STOMP Disconnected successfully.")
+    }
+    
+    // MARK: - NEW CODE: 채팅방 구독 해제
+    /// 특정 채팅방 구독 해제
+    public func unsubscribeFromRoom(roomId: Int) {
+        guard let stomp = stomp, stomp.isConnected else {
+            print( "❌ STOMP is not connected. Cannot unsubscribe.")
+            return
+        }
+        
+        // 구독중인 방이 맞는지 확인 후 구독 해제
+        if subscribedRoomId == roomId {
+            let destination = "/user/queue/chat-room/\(roomId)"
+            stomp.unsubscribe(from: destination)
+            subscribedRoomId = nil // 구독 정보 초기화
+            print("✅ Unsubscribed from room \(roomId)")
+        }
+    }
+    
     public func messageSend(chatRoomId: Int, content: String) {
         // 1. STOMP 연결 상태 확인
         guard let stomp = stomp, stomp.isConnected else {
             print("❌ STOMP is not connected. Cannot send message.")
             return
         }
-
+        
         // 2. 메시지 본문(Body) 생성
         let body: [String: Any] = [
             "chatRoomId": chatRoomId,
             "content": content
         ]
-
+        
         // 3. JSON 문자열로 변환
         guard let data = try? JSONSerialization.data(withJSONObject: body),
               let jsonString = String(data: data, encoding: .utf8) else {
@@ -127,77 +173,76 @@ public class ChatNetwork {
         // 4. 메시지 전송 시 content-type 헤더 추가 (★★★★★ 중요 ★★★★★)
         let headers = ["content-type": "application/json"]
         stomp.send(body: jsonString, to: "/app/chat.sendMessage", headers: headers)
-
+        
         print("🙈 Message sent successfully!")
         print("  - Destination: /app/chat.sendMessage")
         print("  - Headers: \(headers)")
         print("  - Body: \(jsonString)")
     }
     
-    /// ** MARK:   특정 채팅방의 모든 메시지 조회
-    /// - Parameter chatRoomId: 메시지를 조회할 채팅방의 ID
+    // MARK: - 수정된 함수: 페이징 기능이 추가된 메시지 조회 함수
+    /// ** MARK:   특정 채팅방의 모든 메시지 조회 (페이징 지원)
+    /// - Parameters:
+    ///   - chatRoomId: 메시지를 조회할 채팅방의 ID
+    ///   - lastMessageId: 페이징의 기준이 되는 마지막 메시지의 ID. 최초 로드 시에는 `nil`을 전달합니다.
+    ///   - size: 한 번에 가져올 메시지의 개수.
     /// - Returns: 해당 채팅방의 메시지 배열
-    public func getMessages(chatRoomId: Int) async throws -> [ChatMessageResponseDTO] {
-        // 1. URL 구성
+    public func getMessages(chatRoomId: Int, lastMessageId: Int? = nil, size: Int = 30) async throws -> [ChatMessageResponseDTO] {
+        // 1. Base URL 확인
         guard let baseURL = baseURL else {
             throw AFError.invalidURL(url: "Base URL is not found")
         }
         let urlString = "\(baseURL)/api/chats/rooms/\(chatRoomId)/messages"
         
-        guard let url = URL(string: urlString) else {
+        guard var urlComponents = URLComponents(string: urlString) else {
             throw AFError.invalidURL(url: urlString)
         }
         
-        // 2. AccessToken 가져오기
+        // 2. 쿼리 파라미터 구성
+        var queryItems = [URLQueryItem]()
+        // lastMessageId가 nil이 아닐 경우에만 파라미터에 추가
+        if let lastId = lastMessageId {
+            queryItems.append(URLQueryItem(name: "lastMessageId", value: String(lastId)))
+        }
+        queryItems.append(URLQueryItem(name: "size", value: String(size)))
+        urlComponents.queryItems = queryItems
+        
+        guard let url = urlComponents.url else {
+            throw AFError.invalidURL(url: urlString)
+        }
+        
+        print("🚀 Request URL: \(url.absoluteString)") // 디버깅을 위한 URL 출력
+        
+        // 3. AccessToken 가져오기
         guard let accessToken = keyChain.get(for: "accessToken") else {
             throw URLError(.userAuthenticationRequired)
         }
         
-        // 3. HTTP 헤더 설정
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
+        // 4. HTTP 헤더 설정
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
         
-        // ======================== 🚀 요청 정보 로그 ========================
-        print("\n/-------------------- 🚀 API Request --------------------/")
-        print("URL: GET \(url.absoluteString)")
-        print("Headers: \(headers)")
-        print("/---------------------------------------------------------/\n")
-        // ===============================================================
-        
-        // 4. Alamofire를 사용한 비동기 네트워크 요청
+        // 5. Alamofire를 사용한 비동기 네트워크 요청
         let task = AF.request(url, method: .get, headers: headers)
             .validate(statusCode: 200..<300)
         
-        // 5. 응답 데이터를 SisoResponse<[ChatMessageResponseDTO]> 타입으로 디코딩
+        // 6. 응답 데이터를 SisoResponse<[ChatMessageResponseDTO]> 타입으로 디코딩
         let response = await task.serializingDecodable(SisoResponse2<[ChatMessageResponseDTO]>.self).response
-        
-        // ======================== 📥 응답 정보 로그 ========================
-        print("\n/-------------------- 📥 API Response --------------------/")
-        print("Status Code: \(response.response?.statusCode ?? 0)")
         
         // 서버로부터 받은 원본(Raw) 데이터 출력
         if let data = response.data, let rawResponseString = String(data: data, encoding: .utf8) {
-            print("Raw Response Body:\n\(rawResponseString)")
+            //  print("Raw Response Body:\n\(rawResponseString)")
         } else {
             print("Raw Response Body: [No Data]")
         }
-        print("/---------------------------------------------------------/\n")
-        // ===============================================================
         
         switch response.result {
         case .success(let sisoResponse):
             // 응답 데이터가 성공적으로 디코딩되었을 때, data 부분을 반환
+            // 서버는 최신순으로 데이터를 주므로, 클라이언트에서는 시간순으로 재정렬할 수 있습니다.
+            // 여기서는 서버 응답 그대로 반환합니다. 뷰모델에서 필요에 따라 처리합니다.
             let messagesToReturn = sisoResponse.data ?? []
-            
-            // ==================== ✅ 반환값 상세 로그 ====================
-            print("\n/-------------------- ✅ Return Value --------------------/")
-            print("Decoding Succeeded. Preparing to return \(messagesToReturn.count) message(s).")
-            
-            // dump()를 사용하면 구조체의 내용을 더 자세하고 보기 좋게 출력해줍니다.
-            dump(messagesToReturn)
-            
-            print("/---------------------------------------------------------/\n")
-            // ===============================================================
-            
             return messagesToReturn
             
         case .failure(let error):
@@ -208,13 +253,10 @@ public class ChatNetwork {
                 print("Underlying Error: \(underlyingError)")
             }
             
-            // 에러 응답 본문을 확인하여 서버가 보낸 에러 메시지를 파싱할 수도 있습니다.
             if let data = response.data, let errorResponse = String(data: data, encoding: .utf8) {
                 print("Server Error Body: \(errorResponse)")
             }
             print("/---------------------------------------------------------/\n")
-            // ===============================================================
-            
             throw error
         }
     }
@@ -226,12 +268,12 @@ extension ChatNetwork: SwiftStompDelegate {
         //swiftStomp.subscribe(to: "/user/queue/")
     }
     
-/// 연결 끊김
+    /// 연결 끊김
     public func onDisconnect(swiftStomp : SwiftStomp, disconnectType : StompDisconnectType) {
         print("disconnect!!")
     }
     
-/// 문자옴
+    /// 문자옴
     public func onMessageReceived(swiftStomp : SwiftStomp, message : Any?, messageId : String, destination : String, headers : [String : String]) {
         debugPrint("✅ STOMP 메시지 수신 성공: \(String(describing: message))")
         
@@ -253,15 +295,15 @@ extension ChatNetwork: SwiftStompDelegate {
             debugPrint("❌ Failed to decode new message: \(error.localizedDescription)")
         }
     }
-/// 서버로 문자가 도달했음
+    /// 서버로 문자가 도달했음
     public func onReceipt(swiftStomp : SwiftStomp, receiptId : String) {
         print("🧾 Receipt received for id: \(receiptId)")
     }
-
+    
     public func onError(swiftStomp : SwiftStomp, briefDescription : String, fullDescription : String?, receiptId : String?, type : StompErrorType) {
         print("💥 STOMP Error: \(briefDescription)")
-           if let desc = fullDescription {
-               print("  - Details: \(desc)")
-           }
+        if let desc = fullDescription {
+            print("  - Details: \(desc)")
+        }
     }
 }
