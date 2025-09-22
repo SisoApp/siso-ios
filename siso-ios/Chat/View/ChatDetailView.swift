@@ -108,7 +108,7 @@ extension ChatMainView {
                     // 사용자가 스크롤을 위로 당겼을 때 (값이 양수가 됨)
                     if value > 30 {
                         guard let roomId = chatDetailViewModel.currentChatRoomId else { return }
-                        chatDetailViewModel.getPrevMessagess(chatRoomId: roomId)
+                        chatDetailViewModel.getPrevMessages(chatRoomId: roomId)
                     }
                 }
                 .onTapGesture {

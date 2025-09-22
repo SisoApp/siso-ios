@@ -132,11 +132,10 @@ class ChatDetailViewModel: ObservableObject {
             .store(in: &cancellables)
         
         loadPreviousMessagesSubject
-            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main) // 과도한 호출 방지
+            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main) // 과도한 호출 방지
             .filter { [weak self] roomId, size in
                 // 로딩 중이 아니거나 더 불러올 메시지가 있을 때만 진행
                 guard let self = self else { return false }
-                print(!self.isLoadingMore && self.hasMoreMessages)
                 return !self.isLoadingMore && self.hasMoreMessages
             }
             .handleEvents(receiveOutput: { [weak self] _ in self?.isLoadingMore = true })
@@ -195,15 +194,7 @@ class ChatDetailViewModel: ObservableObject {
         return try await chatNetworkManager.getMessages(chatRoomId: chatRoomId)
     }
     
-    func getPrevMessages(chatRoomId: Int, lastMessageId: Int? = nil, size: Int = 30) async throws -> [ChatMessageResponseDTO] {
-        
-        if let lastMessageId = self.messages.first?.id {
-            return try await chatNetworkManager.getMessages(chatRoomId: chatRoomId, lastMessageId: lastMessageId, size: size)
-        }
-        return []
-    }
-    
-    func getPrevMessagess(chatRoomId: Int, size: Int = 30) {
+    func getPrevMessages(chatRoomId: Int, size: Int = 30) {
         loadPreviousMessagesSubject.send((chatRoomId: chatRoomId, size: size))
     }
     
