@@ -19,9 +19,6 @@ public class ChatNetwork {
     private let keyChain: KeyChainManager = .shared
     private var subscribedRoomId: Int? // 현재 구독중인 채팅방 ID
     
-    
-    
-    
     private init() {
         baseURL = Bundle.main.infoDictionary?["SERVER_URL"] as? String
         socketURL = Bundle.main.infoDictionary?["SOKET_URL"] as? String
@@ -66,7 +63,7 @@ public class ChatNetwork {
     /// STOMP WebSocket 연결
     public func connectStomp() {
         guard let urlString = socketURL else { return }
-        guard let url = URL(string: "\(urlString)/ws-stomp/websocket") else { return }
+        guard let url = URL(string: "\(urlString)/ws-stomp") else { return }
         guard let accessToken = keyChain.get(for: "accessToken") else {
             print("❌ connectStomp FAILED: AccessToken not found in Keychain.")
             return
@@ -82,22 +79,19 @@ public class ChatNetwork {
         print("   - Token: Bearer \(accessToken)") // ✅ 실제 토큰 확인
         let connectHeaders: [String: String] = [
             "Authorization": "Bearer \(accessToken)",
-            "heart-beat": "20000,20000" //
         ]
         stomp = SwiftStomp(
             host: url,
             headers: connectHeaders
         )
         
-        // stomp?.enableLogging = true
+        stomp?.enableLogging = true
         stomp?.delegate = self
         stomp?.connect(autoReconnect: true)
     }
     
     /// 특정 채팅방 구독 메서드
     public func subscribeToRoom(roomId: Int) {
-        
-        
         guard let stomp = stomp, stomp.isConnected else {
             print( "❌ STOMP is not connected. Cannot subscribe to room.")
             // 2. 연결이 안되어 있으면 연결을 시도
@@ -265,7 +259,6 @@ public class ChatNetwork {
 extension ChatNetwork: SwiftStompDelegate {
     public func onConnect(swiftStomp : SwiftStomp, connectType : StompConnectType) {
         print("✅ STOMP Connected")
-        //swiftStomp.subscribe(to: "/user/queue/")
     }
     
     /// 연결 끊김
