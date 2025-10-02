@@ -94,7 +94,7 @@ public struct ProfileView: View {
     private func profileImageView() -> some View {
         return ZStack(alignment: .bottomTrailing) {
             Group {
-                if let image = viewModel.images?[0],
+                if let image = viewModel.images?.first,
                    let imageUrl = URL(string: image.presignedUrl) {
                     AsyncImage(url: imageUrl) { image in
                         image
