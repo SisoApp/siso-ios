@@ -15,6 +15,18 @@
 
 <br>
 
+
+## 작동예시
+
+
+https://github.com/user-attachments/assets/6cbf8406-d61a-4165-9e8f-17801dd2afd9
+
+
+
+https://github.com/user-attachments/assets/04e4cb55-d3d1-4da4-ba6c-065112594551
+
+
+
 ## 📚 목차 (Table of Contents)
 
 - [📱 주요 기능](#-주요-기능)
