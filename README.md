@@ -1,12 +1,7 @@
 # 🎙️ 시팅 (Siso) - iOS App
 
 <p align="center">
-
-<img width="1024" height="1024" alt="seeting_LOGO-2" src="https://github.com/user-attachments/assets/577aa8b0-0a90-4582-ab66-10f1bac92d9f" />
-
-
-
-
+<img width="200" height="200" alt="seeting_LOGO-2" src="https://github.com/user-attachments/assets/577aa8b0-0a90-4582-ab66-10f1bac92d9f" />
 <p align="center">
     <img src="https://img.shields.io/badge/iOS-17.0+-black?logo=apple">
     <img src="https://img.shields.io/badge/Swift-5.9-orange.svg">
