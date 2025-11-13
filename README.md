@@ -18,11 +18,12 @@
 
 ## 작동예시
 
-
-| **로그인 기능 구현** | **메인 페이지 UI** |
+<p align="center">
+| **프로필 조회 및 실시간 통화** | **채팅 UI & 작동** |
 | :---: | :---: |
-| 소셜 로그인 및 자체 로그인 기능을 구현한 GIF입니다. | 프로젝트의 메인 페이지 UI와 주요 기능을 보여줍니다. |
-| <img src="https://github.com/user-attachments/assets/6cbf8406-d61a-4165-9e8f-17801dd2afd9" alt="로그인 데모" width="400"/> | <img src="https://github.com/user-attachments/assets/04e4cb55-d3d1-4da4-ba6c-065112594551" alt="메인 UI 데모" width="400"/> |
+| 메인페이지 및 실시간 통화 기능 | 채팅 기능 |
+| <img src="https://github.com/user-attachments/assets/04e4cb55-d3d1-4da4-ba6c-065112594551" alt="MVP" width="400"/> |  <img src="https://github.com/user-attachments/assets/6cbf8406-d61a-4165-9e8f-17801dd2afd9" alt="MVP" width="400"/>|
+</p>
 
 ## 📚 목차 (Table of Contents)
 
