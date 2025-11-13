@@ -1,8 +1,12 @@
 # 🎙️ 시팅 (Siso) - iOS App
 
 <p align="center">
-  [<img src="https://user-images.githubusercontent.com/42947497/188439368-24194165-1250-4849-86a3-2c13084363a7.png" width="200">](https://private-user-images.githubusercontent.com/132365672/513876751-a84da67c-bab8-483d-b87d-ae2df0624848.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjMwMzkyNTIsIm5iZiI6MTc2MzAzODk1MiwicGF0aCI6Ii8xMzIzNjU2NzIvNTEzODc2NzUxLWE4NGRhNjdjLWJhYjgtNDgzZC1iODdkLWFlMmRmMDYyNDg0OC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTEzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTExM1QxMzAyMzJaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yYzM4NDFkMGJiN2M2ZmZiYjUzODEwNDMzMjM2MDk0M2U5YTUyMWI4NzIxNjg3NGFhYjBmNTM5YjBjNGM2ZmIzJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.3hICfJPA1r2oB6cvOInZ4MwKOV3Agj9KIpzh75sqiwE)
-</p>
+
+<img width="1024" height="1024" alt="seeting_LOGO-2" src="https://github.com/user-attachments/assets/577aa8b0-0a90-4582-ab66-10f1bac92d9f" />
+
+
+
+
 <p align="center">
     <img src="https://img.shields.io/badge/iOS-17.0+-black?logo=apple">
     <img src="https://img.shields.io/badge/Swift-5.9-orange.svg">
